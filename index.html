@@ -33,7 +33,34 @@
 
     <button type="button" id="analyze-btn" disabled>Analyze</button>
 
+    <p class="form-error" id="form-error" role="alert" hidden></p>
+
     <p class="privacy-note">We don't save your image or any personal data.</p>
+  </section>
+
+  <section id="result-screen" hidden>
+    <div class="lang-toggle">
+      <button type="button" class="lang-btn active" data-lang="es">ES</button>
+      <button type="button" class="lang-btn" data-lang="en">EN</button>
+      <button type="button" class="lang-btn" data-lang="hi">हि</button>
+    </div>
+
+    <div class="score-display" id="score-display">
+      <span class="score-number" id="score-number">0</span>
+      <span class="score-label" id="score-label"></span>
+    </div>
+
+    <p class="score-explanation" id="score-explanation"></p>
+
+    <div class="crisis-pathway" id="crisis-pathway" hidden>
+      <h3 class="crisis-title">¿Qué puedes hacer?</h3>
+      <ol class="crisis-steps" id="crisis-steps"></ol>
+      <div class="ngo-card" id="ngo-card"></div>
+    </div>
+
+    <p class="privacy-note">We don't save your image or any personal data.</p>
+
+    <button type="button" id="reset-btn">Analyze another image</button>
   </section>
 </main>
 <script src="app.js"></script>

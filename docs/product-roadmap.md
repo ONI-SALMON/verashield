@@ -64,31 +64,31 @@
 
 ---
 
-- [ ] **TASK-007** — Build `api/detect.js` — Hive API integration  
+- [x] **TASK-007** — Build `api/detect.js` — Hive API integration  
   Files: `api/detect.js`  
   Notes: Use Node.js built-in `fetch` (Node 18+ available on Vercel). Parse incoming FormData with Vercel's built-in body parser. Call Hive endpoint: `POST https://api.thehive.ai/api/v2/task/sync/deepfake_detection` with `Authorization: Token ${process.env.HIVE_API_KEY}`. Extract `ai-generated` class score from response as described in PRD Section 4. Map score to bucket (low/medium/high) and label (likely_real/uncertain/likely_fake). Return JSON `{score, score_percent, label, bucket, source: 'hive'}`. Wrap entire function in try/catch — on any error return `{error: true, code: 'DETECTION_FAILED', message: '...'}`.
 
-- [ ] **TASK-008** — Add Azure fallback to `api/detect.js`  
+- [x] **TASK-008** — Add Azure fallback to `api/detect.js`  
   Files: `api/detect.js`  
   Notes: If Hive returns 429 or 5xx, retry with Azure Content Safety API. Azure endpoint pattern: `${process.env.AZURE_ENDPOINT}/contentsafety/image:analyze?api-version=2023-10-01`. Header: `Ocp-Apim-Subscription-Key: ${process.env.AZURE_KEY}`. If Azure also fails, return error JSON per PRD Section 12. Set `source: 'azure'` in response when fallback is used.
 
-- [ ] **TASK-009** — Frontend: file upload logic  
+- [x] **TASK-009** — Frontend: file upload logic  
   Files: `app.js`  
   Notes: Add drag-and-drop listeners to `.upload-zone`. Add `change` listener to hidden `<input type="file">`. Validate file type (accept only image/* MIME types) — show inline error if invalid per FR-001. Validate file size ≤ 10MB — show inline error if too large. On valid file: show filename + size, enable `#analyze-btn`, store File object in module variable `selectedFile`.
 
-- [ ] **TASK-010** — Frontend: POST to /api/detect and handle response  
+- [x] **TASK-010** — Frontend: POST to /api/detect and handle response  
   Files: `app.js`  
   Notes: On `#analyze-btn` click: build FormData with `selectedFile`, `country` (from auto-detect or default 'MX'), `language` (current selected). Show loading state (spinner, disable button). `fetch('/api/detect', {method: 'POST', body: formData})` with 15-second timeout (use AbortController). On success: call `showResult(data)`. On network error or timeout: call `showError('network')`. On API error in JSON: call `showError(data.code)`.
 
-- [ ] **TASK-011** — Build HTML for Screen 2 (result screen)  
+- [x] **TASK-011** — Build HTML for Screen 2 (result screen)  
   Files: `index.html`  
   Notes: Add a `<section id="result-screen" hidden>` below Screen 1 section. Inside: score display `<div class="score-display">` with `<span id="score-number">` and `<span id="score-label">`. Below: `<div class="score-explanation" id="score-explanation">`. Then `<div class="crisis-pathway" id="crisis-pathway">` for steps + NGO card. Then privacy note (repeated). Then "Analyze another image" `<button id="reset-btn">`. Per PRD Section 8 Screen 2 layout exactly.
 
-- [ ] **TASK-012** — Style Screen 2  
+- [x] **TASK-012** — Style Screen 2  
   Files: `styles.css`  
   Notes: Score number: `font-family: var(--font-mono)`, `font-size: clamp(56px, 15vw, 88px)`, `font-weight: 600`. Score color: use `data-bucket` attribute on `.score-display` — CSS `[data-bucket="low"]` → `var(--score-low)`, `[data-bucket="medium"]` → `var(--score-medium)`, `[data-bucket="high"]` → `var(--score-high)`. Score animates from 0 to value using CSS `@property` counter animation or JS `requestAnimationFrame`. Crisis pathway: each step as `<li>` with teal number circle. NGO card: `background: var(--color-surface)`, `border-left: 3px solid var(--color-accent)`, `var(--radius-md)`, padding `var(--space-4)`.
 
-- [ ] **TASK-013** — `showResult()` and `showError()` functions  
+- [x] **TASK-013** — `showResult()` and `showError()` functions  
   Files: `app.js`  
   Notes: `showResult(data)`: hide Screen 1, show Screen 2. Set `#score-number` to `data.score_percent`. Set `data-bucket` on `.score-display`. Set `#score-label` and `#score-explanation` from hardcoded English strings (translation wiring in TASK-017). If `data.bucket !== 'low'`, show `#crisis-pathway` with Mexico placeholder steps. `showError(code)`: hide spinner, show inline error message per PRD Section 12 error table. Re-enable analyze button.
 

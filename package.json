@@ -1,6 +1,7 @@
 {
   "name": "verashield",
   "version": "1.0.0",
+  "type": "module",
   "dependencies": {
     "googleapis": "^178.0.0"
   }
