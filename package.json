@@ -1,0 +1,7 @@
+{
+  "name": "verashield",
+  "version": "1.0.0",
+  "dependencies": {
+    "googleapis": "^178.0.0"
+  }
+}

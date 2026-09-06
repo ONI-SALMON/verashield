@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VeraShield</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<main class="page">
+  <section id="upload-screen">
+    <div class="lang-toggle">
+      <button type="button" class="lang-btn active" data-lang="es">ES</button>
+      <button type="button" class="lang-btn" data-lang="en">EN</button>
+      <button type="button" class="lang-btn" data-lang="hi">हि</button>
+    </div>
+
+    <h1 class="wordmark">VeraShield</h1>
+    <h2 class="hero-title">Is this image real?</h2>
+    <p class="hero-subtitle">Upload a photo or video to find out if it was created by AI.</p>
+
+    <div class="upload-zone" id="upload-zone" tabindex="0">
+      <svg class="upload-icon" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+        <circle cx="12" cy="13" r="4"></circle>
+      </svg>
+      <p class="upload-text">Tap to upload or drag an image here</p>
+      <input type="file" id="file-input" accept="image/*" hidden>
+    </div>
+
+    <button type="button" id="analyze-btn" disabled>Analyze</button>
+
+    <p class="privacy-note">We don't save your image or any personal data.</p>
+  </section>
+</main>
+<script src="app.js"></script>
+</body>
+</html>

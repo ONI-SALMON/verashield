@@ -1,0 +1,122 @@
+{
+  "schema_version": "1.0",
+  "about_you": {
+    "name": "Cas",
+    "expertise": "Web development (HTML/CSS/JS), bilingual (Spanish/English), student innovator",
+    "background": "13–18 year old student from Mexico, competing in Conrad Challenge 2026–2027 (Cyber-Technology & Security). Co-founder with a teammate in India. Motivated by the gap in digital safety resources for Spanish and Hindi-speaking minors."
+  },
+  "your_purpose": {
+    "who_you_help": "Minors aged 13–17 who are victims or potential victims of deepfake image abuse, and the NGOs/schools that support them",
+    "the_problem": "When a teen under 18 discovers they appear in a deepfake, there is nowhere to turn: no free detection tool, no bilingual crisis guidance in Spanish or Hindi, and no age-appropriate legal support. Existing tools (Hive Moderation, Sensity AI) are enterprise-only, English-only, and offer no victim pathway.",
+    "desired_transformation": "A teen who discovers a deepfake of themselves goes from panicked and alone to informed and supported — they know within seconds whether media is fake, and immediately see what legal steps to take in their country and which NGO to call.",
+    "why_you": "Cas is a Mexican teen who IS the target user. Her teammate is an Indian teen who IS the target user in India. Two founders with direct lived access to the affected communities, bilingual fluency in Spanish and Hindi, and zero enterprise overhead."
+  },
+  "your_product": {
+    "name": "VeraShield",
+    "one_liner": "A free, bilingual deepfake detection and crisis response tool built for teen victims — not enterprises.",
+    "how_it_works": "User visits the web app, selects their language (ES/HI/EN) and country (Mexico/India), uploads or links suspected media, receives an AI-generated deepfake probability score via Hive API, then sees a crisis pathway: legal steps, NGO contacts, and reporting guides tailored to their country.",
+    "capabilities": [
+      "Deepfake detection via Hive AI API (probability score 0–1)",
+      "Bilingual UI: Spanish, Hindi, English",
+      "Country-specific crisis pathway cards (Mexico legal steps, India legal steps)",
+      "NGO directory with clickable phone and website for each country",
+      "Anonymous usage logging (timestamp, country, score range) via Google Sheets — no PII",
+      "Fallback detection via Microsoft Azure AI Content Safety if Hive quota exceeded"
+    ],
+    "platform": "Web (mobile-first responsive)",
+    "differentiation": "Only free, bilingual (ES/HI), under-18 focused tool that pairs deepfake detection with a crisis pathway. All existing tools are enterprise-only, English-only, and offer no victim support.",
+    "magic_moment": "User uploads a suspicious image → within 3 seconds sees '87% likely AI-generated' → immediately sees their country's legal steps and an NGO phone number they can call right now."
+  },
+  "your_audience": {
+    "primary_user": {
+      "name": "Teen deepfake victim",
+      "description": "Girl aged 14–17, Mexico or India, Spanish or Hindi speaker, has discovered or suspects she appears in AI-generated fake media. Scared, embarrassed, does not know what to do or who to call. Searches for help on her phone.",
+      "jobs_to_be_done": [
+        "Confirm whether the media is actually AI-generated (not just a rumor)",
+        "Understand what legal options she has in her country",
+        "Find a safe adult or organization to call for help",
+        "Do all of this without exposing her identity or sharing personal data"
+      ],
+      "frustrations": [
+        "Every detection tool requires an enterprise account or payment",
+        "All guidance is in English only",
+        "Legal information is scattered across government websites she doesn't trust",
+        "She doesn't know if reporting will make things worse"
+      ]
+    },
+    "secondary_users": [
+      {
+        "name": "School counselor / NGO staff",
+        "description": "Adult supporting a teen victim — needs a tool they can recommend or use together with the student. Wants to show it is credible and free."
+      },
+      {
+        "name": "Parent of a teen victim",
+        "description": "Discovers their child may be in a deepfake. Not tech-savvy. Needs simple Spanish-language guidance on what to do legally."
+      }
+    ],
+    "current_alternatives": [
+      "Hive Moderation — enterprise API, no UI, English only, costs money",
+      "Sensity AI — $299/month paid plan, English only, no crisis guidance",
+      "Microsoft Azure AI Content Safety — API only, no bilingual UI, no victim pathway",
+      "FotoForensics / Deepware — not deepfake-specific, English only, no crisis pathway",
+      "Google — teens search in panic and find nothing relevant in Spanish or Hindi"
+    ]
+  },
+  "business_intent": {
+    "revenue_model": "Freemium: free for individual teens. NGO institutional license: $50/month. School district license: $500/year. Long-term: grant funding from digital-safety foundations (Knight Foundation, Mozilla Foundation).",
+    "90_day_goal": "MVP live on Vercel, 20+ student survey responses, 1 confirmed NGO partner, Lean Canvas submitted to Conrad Award Force by Oct 29.",
+    "6_month_vision": "Innovation Stage submission complete (Jan 7, 2027): bilingual app with Hindi content, Innovation Video uploaded, Innovation Website live, 50+ real detections logged as proof of traction.",
+    "constraints": [
+      "Zero budget — all infrastructure must use free tiers",
+      "Teammate is mobile-only (India) — no local dev environment",
+      "Conrad Challenge deadline: Jan 7, 2027 (Innovation Stage)",
+      "All Conrad submissions must be in English — app UI stays bilingual",
+      "Must comply with COPPA/GDPR equivalents — no PII collection from minors"
+    ],
+    "go_to_market": "Instagram outreach to teen digital safety communities → school counselor email network (Mexico + India) → NGO partnerships (Red Infancia MX, Cyber Peace Foundation India) → Conrad Challenge platform credibility"
+  },
+  "the_feeling": {
+    "brand_personality": ["Trustworthy", "Clear", "Empowering", "Calm under pressure", "Youth-forward"],
+    "visual_mood": "Deep navy background with teal accent — feels like a safe digital space, not a clinical tool. Warm but authoritative. Not scary, not corporate.",
+    "tone_of_voice": "Direct and calm. Speaks to a scared teenager like a knowledgeable older sibling — not a lawyer, not a chatbot. Uses short sentences. Avoids jargon. Bilingual by default.",
+    "anti_patterns": [
+      "Do NOT feel like a surveillance or government tool",
+      "Do NOT use red/alarm colors as primary UI — only for critical scores",
+      "Do NOT use corporate stock photo aesthetic",
+      "Do NOT be condescending or overly clinical",
+      "Do NOT collect or display any personal data"
+    ],
+    "color_palette": {
+      "primary_bg": "#0B1929",
+      "accent_teal": "#00C9B1",
+      "amber_warning": "#F5A623",
+      "red_critical": "#E84855",
+      "white": "#FFFFFF",
+      "text_body": "#E2E8F0"
+    },
+    "typography": {
+      "display": "Syne (Google Fonts)",
+      "body": "Inter (Google Fonts)",
+      "mono": "JetBrains Mono (Google Fonts)"
+    }
+  },
+  "tech_stack": {
+    "frontend": "Vanilla HTML + CSS + JavaScript (no framework) — maximum simplicity, zero build step, works on any mobile browser",
+    "backend": "Vercel serverless functions (Node.js) — api/detect.js handles Hive API call server-side so API key is never exposed to client",
+    "database": "Google Sheets (via Sheets API v4 + service account) — anonymous logging only: timestamp, country code, score bucket, result label. No PII.",
+    "auth": "None — app is fully public, no user accounts. Minors must not be required to create accounts.",
+    "payments": "None for MVP — freemium model tracked manually until NGO pipeline is established",
+    "hosting": "Vercel free tier — auto-deploy from GitHub main branch",
+    "version_control": "GitHub — public repo. Teammate contributes via india-content branch (mobile GitHub editor)",
+    "external_apis": [
+      "Hive AI deepfake detection (primary) — Bearer token stored in Vercel environment variable HIVE_API_KEY",
+      "Microsoft Azure AI Content Safety (fallback) — AZURE_KEY env var",
+      "Google Sheets API v4 (logging) — service account JSON in GOOGLE_SERVICE_ACCOUNT env var"
+    ]
+  },
+  "tooling": {
+    "coding_agent": "Claude Code (Plaid)",
+    "deployment": "Vercel CLI + GitHub auto-deploy",
+    "package_manager": "npm (minimal — only for Vercel dev server locally)"
+  }
+}
