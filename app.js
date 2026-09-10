@@ -157,10 +157,17 @@ function applyLanguage(lang) {
   langBtns.forEach(btn => btn.classList.toggle('active', btn.dataset.lang === lang));
 
   // re-render result if visible
+    // re-render result if visible
   if (currentResult) {
-    scoreLabel.textContent      = t.labels[currentResult.label]       || '';
-    scoreExplanation.textContent= t.explanations[currentResult.label] || '';
-    if (currentResult.bucket !== 'low') renderCrisisPathway();
+    scoreLabel.textContent       = t.labels[currentResult.label]       || '';
+    scoreExplanation.textContent = t.explanations[currentResult.label] || '';
+    if (currentResult.bucket !== 'low') {
+      renderCrisisPathway();
+    } else {
+      // even when crisis not shown, update crisis title in case it becomes visible
+      const crisisTitleEl = document.querySelector('.crisis-title');
+      if (crisisTitleEl) crisisTitleEl.textContent = t.crisisTitle;
+    }
   }
 
   // update <html lang>
@@ -245,9 +252,10 @@ function animateScore(target) {
 
 // ─── Crisis pathway ──────────────────────────────────────────────────────────
 function renderCrisisPathway() {
-  const t = T[currentLang];
-  document.querySelector('.crisis-title').textContent = t.crisisTitle;
-
+   const t = T[currentLang];
+  const crisisTitleEl = document.querySelector('.crisis-title');
+  if (crisisTitleEl) crisisTitleEl.textContent = t.crisisTitle;
+  
   crisisSteps.innerHTML = '';
   t.crisisSteps.forEach((text) => {
     const li = document.createElement('li');
