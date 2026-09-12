@@ -303,7 +303,7 @@ Extract: `status[0].response.output[0].classes.find(c => c.class === 'ai-generat
 **Description:** Frontend POSTs file to `/api/detect`, receives JSON score.  
 **Acceptance criteria:**
 - Loading spinner shown while waiting
-- Timeout after 15 seconds — show "Taking longer than expected. Please try again."
+- Timeout after 22 seconds (client) / server function budget 20 seconds — show "Taking longer than expected. Please try again."
 - Network error → "Could not connect. Check your internet and try again."
 - API error (Hive quota) → "Detection temporarily unavailable. Try again in a few minutes."
 
@@ -494,7 +494,7 @@ body { background: var(--color-bg); color: var(--color-text); font-family: var(-
 | Hive API 5xx | Try Azure fallback. Log failure silently. |
 | Both APIs fail | Show: "Our detection service is temporarily unavailable. Try again in a few minutes." Do NOT crash. |
 | Google Sheets log fails | Fail silently. Log error to console only. User experience unchanged. |
-| User has no internet | Fetch timeout at 15s → "Could not connect. Please check your connection." |
+| User has no internet | Fetch timeout at 22s → "Could not connect. Please check your connection." |
 | Browser blocks file access | Upload zone shows file picker as fallback (no drag-and-drop required) |
 | Accept-Language header missing | Default to English |
 | hi.json not yet populated | Fall back to en.json strings — no broken UI |

@@ -1,5 +1,9 @@
-const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
-const REQUEST_TIMEOUT_MS = 15000;
+const MAX_FILE_SIZE_BYTES       = 10 * 1024 * 1024; // final cap, matches api/detect.js
+const COMPRESSION_MIN_BYTES     = 800 * 1024;        // below this, skip compression
+const MAX_UPLOAD_DIMENSION_PX   = 1920;              // cap longest side
+const JPEG_QUALITY              = 0.8;
+const CANVAS_COMPRESSIBLE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
+const REQUEST_TIMEOUT_MS        = 22000;             // 2s longer than server's maxDuration (vercel.json)
 
 // ─── DOM refs ───────────────────────────────────────────────────────────────
 const uploadScreen    = document.getElementById('upload-screen');
@@ -25,6 +29,7 @@ const T = {
     heroTitle:       '¿Esta imagen es real?',
     heroSubtitle:    'Sube una foto para saber si fue creada por IA.',
     uploadPrompt:    'Toca para subir o arrastra una imagen aquí',
+    preparingImage:  'Preparando imagen…',
     analyzeBtn:      'Analizar',
     analyzingBtn:    'Analizando...',
     resetBtn:        'Analizar otra imagen',
@@ -61,6 +66,7 @@ const T = {
     heroTitle:       'Is this image real?',
     heroSubtitle:    'Upload a photo to find out if it was created by AI.',
     uploadPrompt:    'Tap to upload or drag an image here',
+    preparingImage:  'Preparing image…',
     analyzeBtn:      'Analyze',
     analyzingBtn:    'Analyzing...',
     resetBtn:        'Analyze another image',
@@ -97,6 +103,7 @@ const T = {
     heroTitle:       'क्या यह तस्वीर असली है?',
     heroSubtitle:    'जानने के लिए फ़ोटो अपलोड करें कि यह AI से बनी है या नहीं।',
     uploadPrompt:    'यहाँ टैप करें या तस्वीर खींचकर डालें',
+    preparingImage:  'इमेज तैयार हो रही है…',
     analyzeBtn:      'जाँचें',
     analyzingBtn:    'जाँच हो रही है...',
     resetBtn:        'दूसरी तस्वीर जाँचें',
@@ -188,9 +195,42 @@ function clearFormError() {
   formError.hidden = true;
 }
 
-function handleFile(file) {
+async function maybeCompressImage(file) {
+  if (!CANVAS_COMPRESSIBLE_TYPES.has(file.type)) return file;       // HEIC/HEIF/GIF/etc: upload as-is
+  if (file.size < COMPRESSION_MIN_BYTES) return file;               // already small: skip for speed
+  if (typeof createImageBitmap !== 'function') return file;         // no browser support: fail open
+
+  try {
+    const bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
+    const scale = Math.min(1, MAX_UPLOAD_DIMENSION_PX / Math.max(bitmap.width, bitmap.height));
+    const targetW = Math.round(bitmap.width * scale);
+    const targetH = Math.round(bitmap.height * scale);
+
+    const canvas = document.createElement('canvas');
+    canvas.width = targetW;
+    canvas.height = targetH;
+    canvas.getContext('2d').drawImage(bitmap, 0, 0, targetW, targetH);
+    bitmap.close?.();
+
+    const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', JPEG_QUALITY));
+    if (!blob || blob.size >= file.size) return file;               // didn't help: keep original
+
+    return new File([blob], file.name.replace(/\.\w+$/, '') + '.jpg', {
+      type: 'image/jpeg',
+      lastModified: Date.now(),
+    });
+  } catch (err) {
+    console.warn('[compress] falling back to original file:', err);
+    return file;                                                    // fail open: never block the flow
+  }
+}
+
+let handleFileToken = 0;
+
+async function handleFile(file) {
   clearFormError();
   const t = T[currentLang];
+  const myToken = ++handleFileToken;
 
   if (!file.type || !file.type.startsWith('image/')) {
     showFormError(t.errors.INVALID_FILE_TYPE);
@@ -203,8 +243,14 @@ function handleFile(file) {
     return;
   }
 
-  selectedFile = file;
-  uploadText.textContent = `${file.name} (${formatFileSize(file.size)})`;
+  analyzeBtn.disabled = true;
+  uploadText.textContent = t.preparingImage;
+
+  const processed = await maybeCompressImage(file);
+  if (myToken !== handleFileToken) return; // a newer file was selected meanwhile; discard this result
+
+  selectedFile = processed;
+  uploadText.textContent = `${processed.name} (${formatFileSize(processed.size)})`;
   analyzeBtn.disabled = false;
 }
 

@@ -78,7 +78,7 @@
 
 - [x] **TASK-010** — Frontend: POST to /api/detect and handle response  
   Files: `app.js`  
-  Notes: On `#analyze-btn` click: build FormData with `selectedFile`, `country` (from auto-detect or default 'MX'), `language` (current selected). Show loading state (spinner, disable button). `fetch('/api/detect', {method: 'POST', body: formData})` with 15-second timeout (use AbortController). On success: call `showResult(data)`. On network error or timeout: call `showError('network')`. On API error in JSON: call `showError(data.code)`.
+  Notes: On `#analyze-btn` click: build FormData with `selectedFile`, `country` (from auto-detect or default 'MX'), `language` (current selected). Show loading state (spinner, disable button). `fetch('/api/detect', {method: 'POST', body: formData})` with 22-second timeout (use AbortController). On success: call `showResult(data)`. On network error or timeout: call `showError('network')`. On API error in JSON: call `showError(data.code)`.
 
 - [x] **TASK-011** — Build HTML for Screen 2 (result screen)  
   Files: `index.html`  
@@ -190,7 +190,7 @@
 
 - [ ] **TASK-025** — Implement all error states  
   Files: `app.js`, `styles.css`  
-  Notes: Per PRD Section 12: file too large → inline error below upload zone. Invalid file type → inline error. Network timeout (15s) → error screen with retry button. API unavailable → error screen with retry button. All error messages use translation keys. Error state resets correctly when user clicks retry.
+  Notes: Per PRD Section 12: file too large → inline error below upload zone. Invalid file type → inline error. Network timeout (22s) → error screen with retry button. API unavailable → error screen with retry button. All error messages use translation keys. Error state resets correctly when user clicks retry.
 
 - [ ] **TASK-026** — Implement score counter animation  
   Files: `app.js`, `styles.css`  

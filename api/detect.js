@@ -5,6 +5,8 @@ export const config = { api: { bodyParser: false } };
 
 const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
 const MOCK_SCORE = 0.82;
+const HIVE_FETCH_TIMEOUT_MS = 12000;
+const AZURE_FETCH_TIMEOUT_MS = 12000;
 
 function scoreToBucket(scorePercent) {
   if (scorePercent < 30) return 'low';
@@ -37,20 +39,29 @@ async function callHive(file) {
   const base64 = Buffer.from(buffer).toString('base64');
   const mimeType = file.type || 'image/jpeg';
 
-  const response = await fetch(
-    'https://api.thehive.ai/api/v3/hive/ai-generated-and-deepfake-content-detection',
-    {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${process.env.HIVE_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        media_metadata: true,
-        input: [{ media_base64: `data:${mimeType};base64,${base64}` }],
-      }),
-    }
-  );
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), HIVE_FETCH_TIMEOUT_MS);
+
+  let response;
+  try {
+    response = await fetch(
+      'https://api.thehive.ai/api/v3/hive/ai-generated-and-deepfake-content-detection',
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${process.env.HIVE_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          media_metadata: true,
+          input: [{ media_base64: `data:${mimeType};base64,${base64}` }],
+        }),
+        signal: controller.signal,
+      }
+    );
+  } finally {
+    clearTimeout(timeoutId);
+  }
 
   if (!response.ok) {
     const errBody = await response.text();
@@ -76,17 +87,26 @@ async function callHive(file) {
 async function callAzure(file) {
   const buffer = Buffer.from(await file.arrayBuffer());
 
-  const response = await fetch(
-    `${process.env.AZURE_ENDPOINT}/contentsafety/image:analyze?api-version=2023-10-01`,
-    {
-      method: 'POST',
-      headers: {
-        'Ocp-Apim-Subscription-Key': process.env.AZURE_KEY,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ image: { content: buffer.toString('base64') } }),
-    }
-  );
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), AZURE_FETCH_TIMEOUT_MS);
+
+  let response;
+  try {
+    response = await fetch(
+      `${process.env.AZURE_ENDPOINT}/contentsafety/image:analyze?api-version=2023-10-01`,
+      {
+        method: 'POST',
+        headers: {
+          'Ocp-Apim-Subscription-Key': process.env.AZURE_KEY,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ image: { content: buffer.toString('base64') } }),
+        signal: controller.signal,
+      }
+    );
+  } finally {
+    clearTimeout(timeoutId);
+  }
 
   if (!response.ok) {
     const error = new Error(`Azure API returned ${response.status}`);
