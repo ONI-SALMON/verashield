@@ -295,6 +295,85 @@ body { background: var(--color-bg); color: var(--color-text); font-family: var(-
   color: var(--color-accent);
 }
 
+/* Victim toggle */
+.victim-toggle {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.victim-toggle-btn {
+  flex: 1;
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--color-accent);
+  background: transparent;
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 13px;
+  cursor: pointer;
+  opacity: 0.6;
+}
+
+.victim-toggle-btn.active {
+  background: var(--color-accent);
+  color: var(--color-bg);
+  opacity: 1;
+}
+
+/* Crisis intro (empathy message) */
+.crisis-intro {
+  font-family: var(--font-body);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--color-accent);
+  line-height: 1.5;
+}
+
+/* Share buttons */
+.whatsapp-btn {
+  display: block;
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  background: #25D366;
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  text-align: center;
+}
+
+.takedown-btn {
+  display: block;
+  width: 100%;
+  padding: var(--space-2) var(--space-4);
+  background: transparent;
+  color: var(--color-accent);
+  border: 1.5px solid var(--color-accent);
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  text-align: center;
+}
+
+/* Legal note */
+.legal-note {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-muted);
+  line-height: 1.5;
+}
+
+.legal-note a {
+  color: var(--color-accent);
+}
+
 /* Reset button */
 #reset-btn {
   width: 100%;

@@ -19,8 +19,13 @@ const scoreNumber     = document.getElementById('score-number');
 const scoreLabel      = document.getElementById('score-label');
 const scoreExplanation= document.getElementById('score-explanation');
 const crisisPathway   = document.getElementById('crisis-pathway');
+const victimToggle    = document.getElementById('victim-toggle');
+const crisisIntro     = document.getElementById('crisis-intro');
+const whatsappBtn     = document.getElementById('whatsapp-btn');
 const crisisSteps     = document.getElementById('crisis-steps');
 const ngoCard         = document.getElementById('ngo-card');
+const legalNote       = document.getElementById('legal-note');
+const takedownBtn     = document.getElementById('takedown-btn');
 const langBtns        = document.querySelectorAll('.lang-btn');
 
 // ─── Translations ────────────────────────────────────────────────────────────
@@ -60,6 +65,21 @@ const T = {
       'Contacta a una organización de apoyo:',
     ],
     ngo: { name: 'Red Infancia MX', phone: '+52-55-XXXX-XXXX', url: 'https://redinfanciamx.org', label: 'redinfanciamx.org' },
+    victimToggle: {
+      me:    'Esto me pasó a mí',
+      other: 'Le pasó a alguien que conozco',
+    },
+    crisisIntro: {
+      me:    'Esto no es tu culpa. Lo que ves tiene solución y no estás solo/a.',
+      other: 'Tu amigo/a necesita ayuda. Lo más importante ahora es que un adulto de confianza lo sepa.',
+    },
+    whatsappBtn: '📱 Pedir ayuda a un adulto de confianza',
+    whatsappMessage: {
+      me:    'Mamá/Papá, necesito tu ayuda. Encontré una imagen mía que puede haber sido creada por IA. Usé una app llamada VeraShield que lo detectó. ¿Podemos hablar?',
+      other: 'Mamá/Papá, mi amigo/a necesita ayuda. Vi una imagen suya que puede haber sido creada por IA. ¿Podemos ayudarle?',
+    },
+    legalNote: 'Esta situación puede estar protegida por la <a href="https://www.gob.mx/conavim/articulos/ley-olimpia" target="_blank" rel="noopener">Ley Olimpia</a>.',
+    takedownBtn: '🔗 Solicitar eliminación de la imagen (NCMEC)',
   },
 
   en: {
@@ -97,6 +117,21 @@ const T = {
       'Contact a support organization:',
     ],
     ngo: { name: 'Cyber Peace Foundation', phone: '', url: 'https://cyberpeacefoundation.org', label: 'cyberpeacefoundation.org' },
+    victimToggle: {
+      me:    'This happened to me',
+      other: 'This happened to someone I know',
+    },
+    crisisIntro: {
+      me:    "This is not your fault. What you're seeing has a solution and you're not alone.",
+      other: 'Your friend needs help. The most important thing now is that a trusted adult knows.',
+    },
+    whatsappBtn: '📱 Ask a trusted adult for help',
+    whatsappMessage: {
+      me:    'Mom/Dad, I need your help. I found an image of me that may have been created by AI. I used an app called VeraShield that detected it. Can we talk?',
+      other: 'Mom/Dad, my friend needs help. I saw an image of them that may have been created by AI. Can we help them?',
+    },
+    legalNote: 'This situation may be covered under the <a href="https://takeitdown.ncmec.org" target="_blank" rel="noopener">TAKE IT DOWN Act</a>.',
+    takedownBtn: '🔗 Request image removal (NCMEC)',
   },
 
   hi: {
@@ -134,6 +169,21 @@ const T = {
       'एक सहायता संगठन से संपर्क करें:',
     ],
     ngo: { name: 'Cyber Peace Foundation', phone: '+91-XXXX-XXXXXX', url: 'https://cyberpeacefoundation.org', label: 'cyberpeacefoundation.org' },
+    victimToggle: {
+      me:    'यह मेरे साथ हुआ',
+      other: 'यह किसी और के साथ हुआ',
+    },
+    crisisIntro: {
+      me:    'यह आपकी गलती नहीं है। इसका समाधान है और आप अकेले नहीं हैं।',
+      other: 'आपके मित्र को मदद चाहिए। अभी सबसे जरूरी है कि कोई विश्वसनीय वयस्क इसे जाने।',
+    },
+    whatsappBtn: '📱 किसी विश्वसनीय वयस्क से मदद माँगें',
+    whatsappMessage: {
+      me:    'मम्मी/पापा, मुझे आपकी मदद चाहिए। मुझे एक तस्वीर मिली जो AI से बनी हो सकती है। मैंने VeraShield ऐप से इसे जाँचा। क्या हम बात कर सकते हैं?',
+      other: 'मम्मी/पापा, मेरे दोस्त को मदद चाहिए। मैंने उनकी एक तस्वीर देखी जो AI से बनी हो सकती है। क्या हम उनकी मदद कर सकते हैं?',
+    },
+    legalNote: 'यह स्थिति <a href="https://wcd.nic.in/act/protection-children-sexual-offences-pocso-act-2012" target="_blank" rel="noopener">POCSO Act</a> के तहत संरक्षित हो सकती है।',
+    takedownBtn: '🔗 तस्वीर हटाने का अनुरोध करें (NCMEC)',
   },
 };
 
@@ -141,6 +191,7 @@ const T = {
 let currentLang = 'es';
 let currentResult = null;
 let selectedFile  = null;
+let victimMode    = 'me';
 
 function applyLanguage(lang) {
   currentLang = lang;
@@ -292,9 +343,23 @@ function animateScore(target) {
 // ─── Crisis pathway ──────────────────────────────────────────────────────────
 function renderCrisisPathway() {
    const t = T[currentLang];
+
+  // victim toggle
+  victimToggle.querySelectorAll('.victim-toggle-btn').forEach((btn) => {
+    btn.textContent = t.victimToggle[btn.dataset.mode];
+    btn.classList.toggle('active', btn.dataset.mode === victimMode);
+  });
+
+  // empathy-first intro
+  crisisIntro.textContent = t.crisisIntro[victimMode];
+
+  // WhatsApp share
+  whatsappBtn.textContent = t.whatsappBtn;
+  whatsappBtn.href = `https://wa.me/?text=${encodeURIComponent(t.whatsappMessage[victimMode])}`;
+
   const crisisTitleEl = document.querySelector('.crisis-title');
   if (crisisTitleEl) crisisTitleEl.textContent = t.crisisTitle;
-  
+
   crisisSteps.innerHTML = '';
   t.crisisSteps.forEach((text) => {
     const li = document.createElement('li');
@@ -327,7 +392,20 @@ function renderCrisisPathway() {
   webLink.textContent = label;
   webEl.appendChild(webLink);
   ngoCard.appendChild(webEl);
+
+  // legal rights note — content is a hardcoded translation string, never user input
+  legalNote.innerHTML = t.legalNote;
+
+  // TakeItDown removal request
+  takedownBtn.textContent = t.takedownBtn;
 }
+
+victimToggle.addEventListener('click', (e) => {
+  const btn = e.target.closest('.victim-toggle-btn');
+  if (!btn) return;
+  victimMode = btn.dataset.mode;
+  renderCrisisPathway();
+});
 
 // ─── Show result ─────────────────────────────────────────────────────────────
 function showResult(data) {
