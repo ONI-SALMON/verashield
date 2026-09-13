@@ -66,8 +66,8 @@ const T = {
     ],
     ngo: { name: 'Red Infancia MX', phone: '+52-55-XXXX-XXXX', url: 'https://redinfanciamx.org', label: 'redinfanciamx.org' },
     victimToggle: {
-      me:    'Esto me pasó a mí',
-      other: 'Le pasó a alguien que conozco',
+      me:    '🧍 Esto me pasó a mí',
+      other: '👥 Le pasó a alguien que conozco',
     },
     crisisIntro: {
       me:    'Esto no es tu culpa. Lo que ves tiene solución y no estás solo/a.',
@@ -118,8 +118,8 @@ const T = {
     ],
     ngo: { name: 'Cyber Peace Foundation', phone: '', url: 'https://cyberpeacefoundation.org', label: 'cyberpeacefoundation.org' },
     victimToggle: {
-      me:    'This happened to me',
-      other: 'This happened to someone I know',
+      me:    '🧍 This happened to me',
+      other: '👥 This happened to someone I know',
     },
     crisisIntro: {
       me:    "This is not your fault. What you're seeing has a solution and you're not alone.",
@@ -170,8 +170,8 @@ const T = {
     ],
     ngo: { name: 'Cyber Peace Foundation', phone: '+91-XXXX-XXXXXX', url: 'https://cyberpeacefoundation.org', label: 'cyberpeacefoundation.org' },
     victimToggle: {
-      me:    'यह मेरे साथ हुआ',
-      other: 'यह किसी और के साथ हुआ',
+      me:    '🧍 यह मेरे साथ हुआ',
+      other: '👥 यह किसी और के साथ हुआ',
     },
     crisisIntro: {
       me:    'यह आपकी गलती नहीं है। इसका समाधान है और आप अकेले नहीं हैं।',
