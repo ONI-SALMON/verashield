@@ -228,6 +228,32 @@ body { background: var(--color-bg); color: var(--color-text); font-family: var(-
   text-align: center;
 }
 
+/* Country selector */
+.country-selector {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.country-btn {
+  flex: 1;
+  padding: var(--space-3);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-text);
+  font-family: var(--font-body);
+  cursor: pointer;
+  font-size: 15px;
+  transition: all 0.2s;
+}
+
+.country-btn.active {
+  border-color: var(--color-accent);
+  background: rgba(0, 201, 177, 0.08);
+  font-weight: 600;
+}
+
 /* Crisis pathway */
 .crisis-pathway {
   display: flex;
@@ -294,6 +320,20 @@ body { background: var(--color-bg); color: var(--color-text); font-family: var(-
 
 .ngo-card a {
   color: var(--color-accent);
+}
+
+.ngo-card .ngo-title {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.ngo-card .ngo-entry + .ngo-entry {
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border);
 }
 
 /* Victim toggle */

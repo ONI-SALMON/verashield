@@ -19,6 +19,7 @@ const scoreNumber     = document.getElementById('score-number');
 const scoreLabel      = document.getElementById('score-label');
 const scoreExplanation= document.getElementById('score-explanation');
 const crisisPathway   = document.getElementById('crisis-pathway');
+const countrySelector = document.getElementById('country-selector');
 const victimToggle    = document.getElementById('victim-toggle');
 const crisisIntro     = document.getElementById('crisis-intro');
 const whatsappBtn     = document.getElementById('whatsapp-btn');
@@ -80,6 +81,17 @@ const T = {
     },
     legalNote: 'Esta situación puede estar protegida por la <a href="https://www.gob.mx/conavim/articulos/ley-olimpia" target="_blank" rel="noopener">Ley Olimpia</a>.',
     takedownBtn: '🔗 Solicitar eliminación de la imagen (NCMEC)',
+    crisisIntro_mx: 'Esto no es tu culpa. En México existen leyes y organizaciones que pueden ayudarte a resolver esta situación — no estás solo/a.',
+    crisisIntro_in: 'Esto no es tu culpa. En India existen leyes y organizaciones que pueden ayudarte a resolver esta situación — no estás solo/a.',
+    legalNote_mx: 'En México, la Ley Olimpia criminaliza la difusión de imágenes íntimas sin consentimiento.',
+    legalNote_in: 'En India, la Sección 66E de la Ley de TI protege a las víctimas de la difusión no consensuada de imágenes.',
+    ngoTitle_mx: 'Organizaciones que pueden ayudarte (México)',
+    ngoTitle_in: 'Organizaciones que pueden ayudarte (India)',
+    ngosIndia: [
+      { name: 'Cyber Peace Foundation', phone: '+91-9830055XXX', url: 'https://cyberpeace.org', label: 'cyberpeace.org' },
+      { name: 'iCall (TISS)', phone: '', url: 'https://icallhelpline.org', label: 'icallhelpline.org' },
+      { name: 'Childline India', phone: '1098', url: '', label: '' },
+    ],
   },
 
   en: {
@@ -132,6 +144,17 @@ const T = {
     },
     legalNote: 'This situation may be covered under the <a href="https://takeitdown.ncmec.org" target="_blank" rel="noopener">TAKE IT DOWN Act</a>.',
     takedownBtn: '🔗 Request image removal (NCMEC)',
+    crisisIntro_mx: "This is not your fault. In Mexico, there are laws and organizations that can help you resolve this — you're not alone.",
+    crisisIntro_in: "This is not your fault. In India, there are laws and organizations that can help you resolve this — you're not alone.",
+    legalNote_mx: 'In Mexico, the Olimpia Law criminalizes the distribution of intimate images without consent.',
+    legalNote_in: 'In India, IT Act Section 66E protects victims of non-consensual image sharing.',
+    ngoTitle_mx: 'Organizations that can help you (Mexico)',
+    ngoTitle_in: 'Organizations that can help you (India)',
+    ngosIndia: [
+      { name: 'Cyber Peace Foundation', phone: '+91-9830055XXX', url: 'https://cyberpeace.org', label: 'cyberpeace.org' },
+      { name: 'iCall (TISS)', phone: '', url: 'https://icallhelpline.org', label: 'icallhelpline.org' },
+      { name: 'Childline India', phone: '1098', url: '', label: '' },
+    ],
   },
 
   hi: {
@@ -184,6 +207,17 @@ const T = {
     },
     legalNote: 'यह स्थिति <a href="https://wcd.nic.in/act/protection-children-sexual-offences-pocso-act-2012" target="_blank" rel="noopener">POCSO Act</a> के तहत संरक्षित हो सकती है।',
     takedownBtn: '🔗 तस्वीर हटाने का अनुरोध करें (NCMEC)',
+    crisisIntro_mx: 'यह आपकी गलती नहीं है। मेक्सिको में ऐसे कानून और संगठन हैं जो इस स्थिति में आपकी मदद कर सकते हैं — आप अकेले नहीं हैं।',
+    crisisIntro_in: 'यह आपकी गलती नहीं है। भारत में ऐसे कानून और संगठन हैं जो इस स्थिति में आपकी मदद कर सकते हैं — आप अकेले नहीं हैं।',
+    legalNote_mx: 'मेक्सिको में, ओलंपिया कानून सहमति के बिना अंतरंग तस्वीरें साझा करने को अपराध मानता है।',
+    legalNote_in: 'भारत में, आईटी अधिनियम की धारा 66E सहमति के बिना तस्वीरें साझा किए जाने के पीड़ितों की रक्षा करती है।',
+    ngoTitle_mx: 'संगठन जो आपकी मदद कर सकते हैं (मेक्सिको)',
+    ngoTitle_in: 'संगठन जो आपकी मदद कर सकते हैं (भारत)',
+    ngosIndia: [
+      { name: 'Cyber Peace Foundation', phone: '+91-9830055XXX', url: 'https://cyberpeace.org', label: 'cyberpeace.org' },
+      { name: 'iCall (TISS)', phone: '', url: 'https://icallhelpline.org', label: 'icallhelpline.org' },
+      { name: 'Childline India', phone: '1098', url: '', label: '' },
+    ],
   },
 };
 
@@ -192,6 +226,7 @@ let currentLang = 'es';
 let currentResult = null;
 let selectedFile  = null;
 let victimMode    = 'me';
+let currentCountry = 'mx';
 
 function applyLanguage(lang) {
   currentLang = lang;
@@ -350,8 +385,8 @@ function renderCrisisPathway() {
     btn.classList.toggle('active', btn.dataset.mode === victimMode);
   });
 
-  // empathy-first intro
-  crisisIntro.textContent = t.crisisIntro[victimMode];
+  // empathy-first intro — country-specific
+  crisisIntro.textContent = currentCountry === 'in' ? t.crisisIntro_in : t.crisisIntro_mx;
 
   // WhatsApp share
   whatsappBtn.textContent = t.whatsappBtn;
@@ -368,33 +403,52 @@ function renderCrisisPathway() {
   });
 
   ngoCard.innerHTML = '';
-  const { name, phone, url, label } = t.ngo;
 
-  const nameEl = document.createElement('p');
-  nameEl.className = 'ngo-name';
-  nameEl.textContent = name;
-  ngoCard.appendChild(nameEl);
+  const ngoTitleEl = document.createElement('p');
+  ngoTitleEl.className = 'ngo-title';
+  ngoTitleEl.textContent = currentCountry === 'in' ? t.ngoTitle_in : t.ngoTitle_mx;
+  ngoCard.appendChild(ngoTitleEl);
 
-  if (phone) {
-    const phoneEl = document.createElement('p');
-    const phoneLink = document.createElement('a');
-    phoneLink.href = `tel:${phone.replace(/\D/g, '')}`;
-    phoneLink.textContent = phone;
-    phoneEl.appendChild(phoneLink);
-    ngoCard.appendChild(phoneEl);
+  function appendNgoEntry(container, { name, phone, url, label }) {
+    const entry = document.createElement('div');
+    entry.className = 'ngo-entry';
+
+    const nameEl = document.createElement('p');
+    nameEl.className = 'ngo-name';
+    nameEl.textContent = name;
+    entry.appendChild(nameEl);
+
+    if (phone) {
+      const phoneEl = document.createElement('p');
+      const phoneLink = document.createElement('a');
+      phoneLink.href = `tel:${phone.replace(/\D/g, '')}`;
+      phoneLink.textContent = phone;
+      phoneEl.appendChild(phoneLink);
+      entry.appendChild(phoneEl);
+    }
+
+    if (url) {
+      const webEl = document.createElement('p');
+      const webLink = document.createElement('a');
+      webLink.href = url;
+      webLink.target = '_blank';
+      webLink.rel = 'noopener';
+      webLink.textContent = label;
+      webEl.appendChild(webLink);
+      entry.appendChild(webEl);
+    }
+
+    container.appendChild(entry);
   }
 
-  const webEl = document.createElement('p');
-  const webLink = document.createElement('a');
-  webLink.href = url;
-  webLink.target = '_blank';
-  webLink.rel = 'noopener';
-  webLink.textContent = label;
-  webEl.appendChild(webLink);
-  ngoCard.appendChild(webEl);
+  if (currentCountry === 'in') {
+    t.ngosIndia.forEach((ngo) => appendNgoEntry(ngoCard, ngo));
+  } else {
+    appendNgoEntry(ngoCard, t.ngo);
+  }
 
   // legal rights note — content is a hardcoded translation string, never user input
-  legalNote.innerHTML = t.legalNote;
+  legalNote.innerHTML = currentCountry === 'in' ? t.legalNote_in : t.legalNote_mx;
 
   // TakeItDown removal request
   takedownBtn.textContent = t.takedownBtn;
@@ -405,6 +459,15 @@ victimToggle.addEventListener('click', (e) => {
   if (!btn) return;
   victimMode = btn.dataset.mode;
   renderCrisisPathway();
+});
+
+document.querySelectorAll('.country-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    currentCountry = btn.dataset.country;
+    document.querySelectorAll('.country-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderCrisisPathway();
+  });
 });
 
 // ─── Show result ─────────────────────────────────────────────────────────────
@@ -425,8 +488,10 @@ function showResult(data) {
   if (data.bucket !== 'low') {
     renderCrisisPathway();
     crisisPathway.hidden = false;
+    countrySelector.hidden = false;
   } else {
     crisisPathway.hidden = true;
+    countrySelector.hidden = true;
   }
 }
 
