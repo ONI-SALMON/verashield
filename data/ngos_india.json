@@ -1,1 +1,42 @@
-[]
+[
+  {
+    "name": "Cyber Peace Foundation",
+    "phone": null,
+    "website": "https://cyberpeace.org",
+    "description": "India's leading NGO for digital safety and cybercrime awareness. Works with schools, governments, and youth on digital rights and online protection.",
+    "helpline": null,
+    "email": "info@cyberpeacefoundation.org"
+  },
+  {
+    "name": "iCall – TISS",
+    "phone": "9152987821",
+    "website": "https://icallhelpline.org",
+    "description": "Free telephone and email counseling service run by the Tata Institute of Social Sciences (TISS). Provides mental health support for young people experiencing trauma, including digital abuse.",
+    "helpline": "9152987821",
+    "email": null
+  },
+  {
+    "name": "Childline India",
+    "phone": "1098",
+    "website": "https://www.childlineindia.org",
+    "description": "India's national helpline for children in distress, available 24/7. Free, confidential support for anyone under 18 experiencing abuse, including online and image-based violence.",
+    "helpline": "1098",
+    "email": null
+  },
+  {
+    "name": "National Cyber Crime Reporting Portal",
+    "phone": "1930",
+    "website": "https://cybercrime.gov.in",
+    "description": "Official Government of India portal for reporting cybercrime. Accepts anonymous reports. Dedicated Women and Child helpline. Available 24/7.",
+    "helpline": "1930",
+    "email": null
+  },
+  {
+    "name": "Pratham",
+    "phone": null,
+    "website": "https://www.pratham.org",
+    "description": "One of India's largest education NGOs. Works with adolescents across rural and urban India on digital literacy and safety education.",
+    "helpline": null,
+    "email": "info@pratham.org"
+  }
+]
