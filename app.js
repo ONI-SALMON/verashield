@@ -28,12 +28,18 @@ const ngoCard         = document.getElementById('ngo-card');
 const legalNote       = document.getElementById('legal-note');
 const takedownBtn     = document.getElementById('takedown-btn');
 const langBtns        = document.querySelectorAll('.lang-btn');
+const directCrisisBtn    = document.getElementById('direct-crisis-btn');
+const directCrisisHeading= document.getElementById('direct-crisis-heading');
+const noDetectionNote    = document.getElementById('no-detection-note');
+const noDetectionText    = document.getElementById('no-detection-text');
+const noDetectionLink    = document.getElementById('no-detection-link');
+const backToUploadBtn    = document.getElementById('back-to-upload-btn');
 
 // ─── Translations ────────────────────────────────────────────────────────────
 const T = {
   es: {
     heroTitle:       '¿Esta imagen es real?',
-    heroSubtitle:    'Sube una foto para saber si fue creada por IA.',
+    heroSubtitle:    'Herramienta de respuesta a abuso de imagen para adolescentes.',
     uploadPrompt:    'Toca para subir o arrastra una imagen aquí',
     preparingImage:  'Preparando imagen…',
     analyzeBtn:      'Analizar',
@@ -83,10 +89,13 @@ const T = {
     takedownBtn: '🔗 Solicitar eliminación de la imagen (NCMEC)',
     crisisIntro_mx: 'Esto no es tu culpa. En México existen leyes y organizaciones que pueden ayudarte a resolver esta situación — no estás solo/a.',
     crisisIntro_in: 'Esto no es tu culpa. En India existen leyes y organizaciones que pueden ayudarte a resolver esta situación — no estás solo/a.',
+    crisisIntro_us: 'Esto no es tu culpa. En Estados Unidos existen leyes y organizaciones que pueden ayudarte a resolver esta situación — no estás solo/a.',
     legalNote_mx: 'En México, la Ley Olimpia criminaliza la difusión de imágenes íntimas sin consentimiento.',
     legalNote_in: 'En India, la Sección 66E de la Ley de TI protege a las víctimas de la difusión no consensuada de imágenes.',
+    legalNote_us: 'En Estados Unidos, compartir imágenes íntimas sin consentimiento es ilegal en 48 estados. Las imágenes sexuales generadas por IA de personas reales (deepfakes) están cada vez más cubiertas por leyes estatales y por la DEFIANCE Act (2024) a nivel federal.',
     ngoTitle_mx: 'Organizaciones que pueden ayudarte (México)',
     ngoTitle_in: 'Organizaciones que pueden ayudarte (India)',
+    ngoTitle_us: 'Organizaciones que pueden ayudarte (Estados Unidos)',
     ngosIndia: [
       { name: 'Cyber Peace Foundation', phone: '+91-9830055XXX', url: 'https://cyberpeace.org', label: 'cyberpeace.org' },
       { name: 'iCall (TISS)', phone: '', url: 'https://icallhelpline.org', label: 'icallhelpline.org' },
@@ -96,7 +105,7 @@ const T = {
 
   en: {
     heroTitle:       'Is this image real?',
-    heroSubtitle:    'Upload a photo to find out if it was created by AI.',
+    heroSubtitle:    'Image abuse response tool for teens aged 13–17.',
     uploadPrompt:    'Tap to upload or drag an image here',
     preparingImage:  'Preparing image…',
     analyzeBtn:      'Analyze',
@@ -146,10 +155,13 @@ const T = {
     takedownBtn: '🔗 Request image removal (NCMEC)',
     crisisIntro_mx: "This is not your fault. In Mexico, there are laws and organizations that can help you resolve this — you're not alone.",
     crisisIntro_in: "This is not your fault. In India, there are laws and organizations that can help you resolve this — you're not alone.",
+    crisisIntro_us: "This is not your fault. In the United States, there are laws and organizations that can help you resolve this — you're not alone.",
     legalNote_mx: 'In Mexico, the Olimpia Law criminalizes the distribution of intimate images without consent.',
     legalNote_in: 'In India, IT Act Section 66E protects victims of non-consensual image sharing.',
+    legalNote_us: 'In the United States, sharing intimate images without consent is illegal in 48 states. AI-generated sexual images of real people (deepfakes) are increasingly covered under state law and the DEFIANCE Act (2024) at the federal level.',
     ngoTitle_mx: 'Organizations that can help you (Mexico)',
     ngoTitle_in: 'Organizations that can help you (India)',
+    ngoTitle_us: 'Organizations that can help you (United States)',
     ngosIndia: [
       { name: 'Cyber Peace Foundation', phone: '+91-9830055XXX', url: 'https://cyberpeace.org', label: 'cyberpeace.org' },
       { name: 'iCall (TISS)', phone: '', url: 'https://icallhelpline.org', label: 'icallhelpline.org' },
@@ -159,7 +171,7 @@ const T = {
 
   hi: {
     heroTitle:       'क्या यह तस्वीर असली है?',
-    heroSubtitle:    'जानने के लिए फ़ोटो अपलोड करें कि यह AI से बनी है या नहीं।',
+    heroSubtitle:    '13–17 वर्ष के किशोरों के लिए छवि दुर्व्यवहार प्रतिक्रिया उपकरण।',
     uploadPrompt:    'यहाँ टैप करें या तस्वीर खींचकर डालें',
     preparingImage:  'इमेज तैयार हो रही है…',
     analyzeBtn:      'जाँचें',
@@ -209,10 +221,13 @@ const T = {
     takedownBtn: '🔗 तस्वीर हटाने का अनुरोध करें (NCMEC)',
     crisisIntro_mx: 'यह आपकी गलती नहीं है। मेक्सिको में ऐसे कानून और संगठन हैं जो इस स्थिति में आपकी मदद कर सकते हैं — आप अकेले नहीं हैं।',
     crisisIntro_in: 'यह आपकी गलती नहीं है। भारत में ऐसे कानून और संगठन हैं जो इस स्थिति में आपकी मदद कर सकते हैं — आप अकेले नहीं हैं।',
+    crisisIntro_us: 'यह आपकी गलती नहीं है। संयुक्त राज्य अमेरिका में ऐसे कानून और संगठन हैं जो इस स्थिति में आपकी मदद कर सकते हैं — आप अकेले नहीं हैं।',
     legalNote_mx: 'मेक्सिको में, ओलंपिया कानून सहमति के बिना अंतरंग तस्वीरें साझा करने को अपराध मानता है।',
     legalNote_in: 'भारत में, आईटी अधिनियम की धारा 66E सहमति के बिना तस्वीरें साझा किए जाने के पीड़ितों की रक्षा करती है।',
+    legalNote_us: null, // no Hindi translation available for US federal/state law text
     ngoTitle_mx: 'संगठन जो आपकी मदद कर सकते हैं (मेक्सिको)',
     ngoTitle_in: 'संगठन जो आपकी मदद कर सकते हैं (भारत)',
+    ngoTitle_us: 'संगठन जो आपकी मदद कर सकते हैं (संयुक्त राज्य अमेरिका)',
     ngosIndia: [
       { name: 'Cyber Peace Foundation', phone: '+91-9830055XXX', url: 'https://cyberpeace.org', label: 'cyberpeace.org' },
       { name: 'iCall (TISS)', phone: '', url: 'https://icallhelpline.org', label: 'icallhelpline.org' },
@@ -221,16 +236,142 @@ const T = {
   },
 };
 
+// ─── Direct crisis path (real photo, no AI analysis needed) ─────────────────
+const DIRECT_CRISIS_STRINGS = {
+  en: {
+    directCrisisBtn: "My image was shared without my consent (real photo)",
+    directCrisisHeading: "Your Rights & Support Resources",
+    directCrisisIntro:
+      "You don't need AI analysis to get support. " +
+      "Even if your image is real — not a deepfake — " +
+      "you have rights and there are people who can help you right now.",
+    noDetectionNote:
+      "If a real photo of you was shared without your consent, " +
+      "you still have the right to report it.",
+    noDetectionLink: "See your resources →",
+    backToUpload: "← Analyze an image instead",
+  },
+  es: {
+    directCrisisBtn: "Mi imagen real fue compartida sin mi consentimiento",
+    directCrisisHeading: "Tus Derechos y Recursos de Apoyo",
+    directCrisisIntro:
+      "No necesitas análisis de IA para obtener apoyo. " +
+      "Aunque tu imagen sea real — no un deepfake — " +
+      "tienes derechos y hay personas que pueden ayudarte ahora mismo.",
+    noDetectionNote:
+      "Si una foto real tuya fue compartida sin tu consentimiento, " +
+      "sigues teniendo el derecho de denunciarlo.",
+    noDetectionLink: "Ver tus recursos →",
+    backToUpload: "← Analizar una imagen en su lugar",
+  },
+  hi: {
+    directCrisisBtn: "मेरी असली फ़ोटो बिना अनुमति के साझा की गई",
+    directCrisisHeading: "आपके अधिकार और सहायता संसाधन",
+    directCrisisIntro:
+      "सहायता पाने के लिए AI विश्लेषण की ज़रूरत नहीं है। " +
+      "चाहे आपकी फ़ोटो असली हो — deepfake नहीं — " +
+      "आपके अधिकार हैं और ऐसे लोग हैं जो अभी आपकी मदद कर सकते हैं।",
+    noDetectionNote:
+      "अगर आपकी असली फ़ोटो बिना सहमति के साझा की गई है, " +
+      "तो आपको रिपोर्ट करने का पूरा अधिकार है।",
+    noDetectionLink: "अपने संसाधन देखें →",
+    backToUpload: "← इसके बजाय एक छवि का विश्लेषण करें",
+  },
+};
+
+// Country-keyed resources — decoupled from UI language (a Spanish speaker
+// can be in the US, an English speaker can be in India, etc).
+const CRISIS_RESOURCES = {
+  us: {
+    country: "United States",
+    flag: "🇺🇸",
+    resources: [
+      {
+        name: "Crisis Text Line",
+        description: "Free 24/7 crisis support via text",
+        contact: "Text HOME to 741741",
+        url: "https://www.crisistextline.org",
+        type: "hotline",
+      },
+      {
+        name: "RAINN — National Sexual Assault Hotline",
+        description:
+          "Confidential support for survivors of image-based sexual abuse",
+        contact: "1-800-656-HOPE (4673)",
+        url: "https://www.rainn.org",
+        type: "hotline",
+      },
+      {
+        name: "Cyber Civil Rights Initiative",
+        description:
+          "Specialized support for victims of non-consensual intimate images",
+        contact: "cybercivilrights.org/get-help",
+        url: "https://cybercivilrights.org/get-help/",
+        type: "ngo",
+      },
+      {
+        name: "StopNCII.org",
+        description:
+          "Free tool to prevent non-consensual intimate images from spreading online",
+        contact: "stopncii.org",
+        url: "https://stopncii.org",
+        type: "tool",
+      },
+      {
+        name: "FBI — Internet Crime Complaint Center (IC3)",
+        description: "Official channel to report cybercrimes involving minors",
+        contact: "ic3.gov",
+        url: "https://www.ic3.gov",
+        type: "legal",
+      },
+      {
+        name: "NCMEC CyberTipline",
+        description:
+          "Report child sexual exploitation material, including deepfakes",
+        contact: "1-800-843-5678",
+        url: "https://www.missingkids.org/gethelpnow/cybertipline",
+        type: "legal",
+      },
+    ],
+  },
+};
+
+// Preferred country for the crisis pathway, based on UI language and browser
+// locale. Only used until the user manually picks a country themselves.
+function getDefaultCountry(lang, browserLocale) {
+  if (lang === "hi") return "in";
+  if (lang === "es") return "mx";
+  if (lang === "en") {
+    if (browserLocale && browserLocale.startsWith("en-US")) return "us";
+    if (browserLocale && browserLocale.startsWith("en-IN")) return "in";
+    return "us";
+  }
+  return "us";
+}
+
 // ─── Language state ──────────────────────────────────────────────────────────
 let currentLang = 'es';
 let currentResult = null;
 let selectedFile  = null;
 let victimMode    = 'me';
 let currentCountry = 'mx';
+let countryManuallySet = false;
+let directCrisisActive = false;
+
+function syncCountryButtons() {
+  document.querySelectorAll('.country-btn').forEach(b => b.classList.toggle('active', b.dataset.country === currentCountry));
+}
+
+function renderNoDetectionNote() {
+  const dc = DIRECT_CRISIS_STRINGS[currentLang];
+  noDetectionText.textContent = dc.noDetectionNote;
+  noDetectionLink.textContent = dc.noDetectionLink;
+}
 
 function applyLanguage(lang) {
   currentLang = lang;
-  const t = T[lang];
+  const t  = T[lang];
+  const dc = DIRECT_CRISIS_STRINGS[lang];
 
   // static text
   document.querySelectorAll('.hero-title').forEach(el => el.textContent = t.heroTitle);
@@ -244,17 +385,28 @@ function applyLanguage(lang) {
   if (!analyzeBtn.classList.contains('loading')) {
     analyzeBtn.textContent = t.analyzeBtn;
   }
-  resetBtn.textContent = t.resetBtn;
+  resetBtn.textContent        = t.resetBtn;
+  directCrisisBtn.textContent = dc.directCrisisBtn;
+  backToUploadBtn.textContent = dc.backToUpload;
+  directCrisisHeading.textContent = dc.directCrisisHeading;
 
   // toggle active state on ALL lang buttons (both screens)
   langBtns.forEach(btn => btn.classList.toggle('active', btn.dataset.lang === lang));
+
+  // auto-detect country from language + browser locale, unless the user
+  // already picked one manually via the country selector
+  if (!countryManuallySet) {
+    currentCountry = getDefaultCountry(lang, navigator.language);
+    syncCountryButtons();
+  }
 
   // re-render result if visible
   if (currentResult) {
     scoreLabel.textContent       = t.labels[currentResult.label]       || '';
     scoreExplanation.textContent = t.explanations[currentResult.label] || '';
-    renderCrisisPathway();
   }
+  if (!noDetectionNote.hidden) renderNoDetectionNote();
+  if (!crisisPathway.hidden)   renderCrisisPathway();
 
   // update <html lang>
   document.documentElement.lang = lang;
@@ -376,8 +528,80 @@ function animateScore(target) {
 }
 
 // ─── Crisis pathway ──────────────────────────────────────────────────────────
+function appendNgoEntry(container, { name, phone, url, label }) {
+  const entry = document.createElement('div');
+  entry.className = 'ngo-entry';
+
+  const nameEl = document.createElement('p');
+  nameEl.className = 'ngo-name';
+  nameEl.textContent = name;
+  entry.appendChild(nameEl);
+
+  if (phone) {
+    const phoneEl = document.createElement('p');
+    const phoneLink = document.createElement('a');
+    phoneLink.href = `tel:${phone.replace(/\D/g, '')}`;
+    phoneLink.textContent = phone;
+    phoneEl.appendChild(phoneLink);
+    entry.appendChild(phoneEl);
+  }
+
+  if (url) {
+    const webEl = document.createElement('p');
+    const webLink = document.createElement('a');
+    webLink.href = url;
+    webLink.target = '_blank';
+    webLink.rel = 'noopener';
+    webLink.textContent = label;
+    webEl.appendChild(webLink);
+    entry.appendChild(webEl);
+  }
+
+  container.appendChild(entry);
+}
+
+// CRISIS_RESOURCES entries carry a description + free-text contact instead
+// of a dialable phone number, so they get their own renderer.
+function appendResourceEntry(container, { name, description, contact, url }) {
+  const entry = document.createElement('div');
+  entry.className = 'ngo-entry';
+
+  const nameEl = document.createElement('p');
+  nameEl.className = 'ngo-name';
+  nameEl.textContent = name;
+  entry.appendChild(nameEl);
+
+  if (description) {
+    const descEl = document.createElement('p');
+    descEl.className = 'ngo-description';
+    descEl.textContent = description;
+    entry.appendChild(descEl);
+  }
+
+  if (contact) {
+    const contactEl = document.createElement('p');
+    contactEl.className = 'ngo-contact';
+    contactEl.textContent = contact;
+    entry.appendChild(contactEl);
+  }
+
+  if (url) {
+    const webEl = document.createElement('p');
+    const webLink = document.createElement('a');
+    webLink.href = url;
+    webLink.target = '_blank';
+    webLink.rel = 'noopener';
+    webLink.textContent = new URL(url).hostname.replace(/^www\./, '');
+    webEl.appendChild(webLink);
+    entry.appendChild(webEl);
+  }
+
+  container.appendChild(entry);
+}
+
 function renderCrisisPathway() {
-   const t = T[currentLang];
+   const t  = T[currentLang];
+   const dc = DIRECT_CRISIS_STRINGS[currentLang];
 
   // victim toggle
   victimToggle.querySelectorAll('.victim-toggle-btn').forEach((btn) => {
@@ -385,12 +609,28 @@ function renderCrisisPathway() {
     btn.classList.toggle('active', btn.dataset.mode === victimMode);
   });
 
-  // empathy-first intro — country-specific
-  crisisIntro.textContent = currentCountry === 'in' ? t.crisisIntro_in : t.crisisIntro_mx;
+  // heading — only shown for the direct crisis path (no AI analysis run)
+  directCrisisHeading.hidden = !directCrisisActive;
+  if (directCrisisActive) directCrisisHeading.textContent = dc.directCrisisHeading;
 
-  // WhatsApp share
-  whatsappBtn.textContent = t.whatsappBtn;
-  whatsappBtn.href = `https://wa.me/?text=${encodeURIComponent(t.whatsappMessage[victimMode])}`;
+  // empathy-first intro — country-specific, or direct-crisis copy
+  if (directCrisisActive) {
+    crisisIntro.textContent = dc.directCrisisIntro;
+  } else if (currentCountry === 'us') {
+    crisisIntro.textContent = t.crisisIntro_us;
+  } else if (currentCountry === 'in') {
+    crisisIntro.textContent = t.crisisIntro_in;
+  } else {
+    crisisIntro.textContent = t.crisisIntro_mx;
+  }
+
+  // WhatsApp share — its canned message references AI detection, so it
+  // doesn't fit the "this is a real photo" direct-crisis path
+  whatsappBtn.hidden = directCrisisActive;
+  if (!directCrisisActive) {
+    whatsappBtn.textContent = t.whatsappBtn;
+    whatsappBtn.href = `https://wa.me/?text=${encodeURIComponent(t.whatsappMessage[victimMode])}`;
+  }
 
   const crisisTitleEl = document.querySelector('.crisis-title');
   if (crisisTitleEl) crisisTitleEl.textContent = t.crisisTitle;
@@ -406,49 +646,25 @@ function renderCrisisPathway() {
 
   const ngoTitleEl = document.createElement('p');
   ngoTitleEl.className = 'ngo-title';
-  ngoTitleEl.textContent = currentCountry === 'in' ? t.ngoTitle_in : t.ngoTitle_mx;
+  ngoTitleEl.textContent = currentCountry === 'us' ? t.ngoTitle_us
+    : currentCountry === 'in' ? t.ngoTitle_in
+    : t.ngoTitle_mx;
   ngoCard.appendChild(ngoTitleEl);
 
-  function appendNgoEntry(container, { name, phone, url, label }) {
-    const entry = document.createElement('div');
-    entry.className = 'ngo-entry';
-
-    const nameEl = document.createElement('p');
-    nameEl.className = 'ngo-name';
-    nameEl.textContent = name;
-    entry.appendChild(nameEl);
-
-    if (phone) {
-      const phoneEl = document.createElement('p');
-      const phoneLink = document.createElement('a');
-      phoneLink.href = `tel:${phone.replace(/\D/g, '')}`;
-      phoneLink.textContent = phone;
-      phoneEl.appendChild(phoneLink);
-      entry.appendChild(phoneEl);
-    }
-
-    if (url) {
-      const webEl = document.createElement('p');
-      const webLink = document.createElement('a');
-      webLink.href = url;
-      webLink.target = '_blank';
-      webLink.rel = 'noopener';
-      webLink.textContent = label;
-      webEl.appendChild(webLink);
-      entry.appendChild(webEl);
-    }
-
-    container.appendChild(entry);
-  }
-
-  if (currentCountry === 'in') {
+  if (currentCountry === 'us') {
+    CRISIS_RESOURCES.us.resources.forEach((resource) => appendResourceEntry(ngoCard, resource));
+  } else if (currentCountry === 'in') {
     t.ngosIndia.forEach((ngo) => appendNgoEntry(ngoCard, ngo));
   } else {
     appendNgoEntry(ngoCard, t.ngo);
   }
 
   // legal rights note — content is a hardcoded translation string, never user input
-  legalNote.innerHTML = currentCountry === 'in' ? t.legalNote_in : t.legalNote_mx;
+  const legalNoteText = currentCountry === 'us' ? t.legalNote_us
+    : currentCountry === 'in' ? t.legalNote_in
+    : t.legalNote_mx;
+  legalNote.hidden = !legalNoteText;
+  legalNote.innerHTML = legalNoteText || '';
 
   // TakeItDown removal request
   takedownBtn.textContent = t.takedownBtn;
@@ -464,8 +680,8 @@ victimToggle.addEventListener('click', (e) => {
 document.querySelectorAll('.country-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     currentCountry = btn.dataset.country;
-    document.querySelectorAll('.country-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
+    countryManuallySet = true;
+    syncCountryButtons();
     renderCrisisPathway();
   });
 });
@@ -473,10 +689,15 @@ document.querySelectorAll('.country-btn').forEach(btn => {
 // ─── Show result ─────────────────────────────────────────────────────────────
 function showResult(data) {
   currentResult = data;
+  directCrisisActive = false;
   const t = T[currentLang];
 
   uploadScreen.hidden = true;
   resultScreen.hidden = false;
+  scoreDisplay.hidden = false;
+  scoreExplanation.hidden = false;
+  resetBtn.hidden = false;
+  backToUploadBtn.hidden = true;
 
   scoreDisplay.dataset.bucket = data.bucket;
   scoreNumber.textContent = '0';
@@ -489,11 +710,42 @@ function showResult(data) {
     renderCrisisPathway();
     crisisPathway.hidden = false;
     countrySelector.hidden = false;
+    noDetectionNote.hidden = true;
   } else {
     crisisPathway.hidden = true;
     countrySelector.hidden = true;
+    renderNoDetectionNote();
+    noDetectionNote.hidden = false;
   }
 }
+
+// ─── Direct crisis path ──────────────────────────────────────────────────────
+// Entered either from the upload screen (no analysis run at all) or from the
+// "no manipulation detected" note (a result already exists). Both cases just
+// need the crisis pathway visible with direct-crisis framing instead of the
+// AI-triage framing.
+function revealCrisisResources() {
+  directCrisisActive = true;
+  countrySelector.hidden = false;
+  crisisPathway.hidden = false;
+  noDetectionNote.hidden = true;
+  renderCrisisPathway();
+}
+
+function showDirectCrisisPath() {
+  currentResult = null;
+  uploadScreen.hidden = true;
+  resultScreen.hidden = false;
+  scoreDisplay.hidden = true;
+  scoreExplanation.hidden = true;
+  resetBtn.hidden = true;
+  backToUploadBtn.hidden = false;
+  revealCrisisResources();
+}
+
+directCrisisBtn.addEventListener('click', showDirectCrisisPath);
+noDetectionLink.addEventListener('click', revealCrisisResources);
+backToUploadBtn.addEventListener('click', () => window.location.reload());
 
 // ─── Error handler ───────────────────────────────────────────────────────────
 function showError(code) {

@@ -4,9 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>VeraShield</title>
+<meta name="description" content="VeraShield helps teens aged 13–17 respond to image-based abuse — whether AI-generated or real. Free tool with crisis resources in Mexico, India, and more.">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -36,6 +38,8 @@
     <p class="form-error" id="form-error" role="alert" hidden></p>
 
     <p class="privacy-note"></p>
+
+    <button type="button" id="direct-crisis-btn" class="link-btn"></button>
   </section>
 
   <section id="result-screen" hidden>
@@ -52,12 +56,19 @@
 
     <p class="score-explanation" id="score-explanation"></p>
 
+    <p class="no-detection-note" id="no-detection-note" hidden>
+      <span id="no-detection-text"></span>
+      <button type="button" id="no-detection-link" class="link-btn"></button>
+    </p>
+
     <div class="country-selector" id="country-selector" hidden>
-      <button type="button" class="country-btn active" data-country="mx">🇲🇽 México</button>
-      <button type="button" class="country-btn" data-country="in">🇮🇳 India</button>
+      <button type="button" class="country-btn active" data-country="mx">México</button>
+      <button type="button" class="country-btn" data-country="in">India</button>
+      <button type="button" class="country-btn" data-country="us">United States</button>
     </div>
 
     <div class="crisis-pathway" id="crisis-pathway" hidden>
+      <h2 class="direct-crisis-heading" id="direct-crisis-heading" hidden></h2>
       <div class="victim-toggle" id="victim-toggle">
         <button type="button" class="victim-toggle-btn" data-mode="me"></button>
         <button type="button" class="victim-toggle-btn" data-mode="other"></button>
@@ -74,6 +85,7 @@
     <p class="privacy-note"></p>
 
     <button type="button" id="reset-btn"></button>
+    <button type="button" id="back-to-upload-btn" class="link-btn" hidden></button>
   </section>
 </main>
 <script src="app.js"></script>

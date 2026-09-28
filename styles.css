@@ -1,24 +1,25 @@
 :root {
   /* Colors */
-  --color-bg:       #0B1929;
-  --color-surface:  #132238;
-  --color-accent:   #00C9B1;
-  --color-amber:    #F5A623;
-  --color-red:      #E84855;
-  --color-text:     #E2E8F0;
-  --color-muted:    #94A3B8;
+  --color-bg:       #0B1220;
+  --color-surface:  #131B2C;
+  --color-accent:   #16C2BE;
+  --color-accent-rgb: 22, 194, 190;
+  --color-text:     #E7EAF3;
+  --color-muted:    #8B96B3;
   --color-white:    #FFFFFF;
-  --color-border:   #1E3352;
+  --color-border:   #26314A;
 
-  /* Score bucket colors */
-  --score-low:      var(--color-accent);
+  /* Semaphore / status colors */
+  --color-green:  #22C55E;
+  --color-amber:  #FBBF24;
+  --color-red:    #F87171;
+
+  --score-low:      var(--color-green);
   --score-medium:   var(--color-amber);
   --score-high:     var(--color-red);
 
   /* Typography */
-  --font-display:   'Syne', sans-serif;
-  --font-body:      'Inter', sans-serif;
-  --font-mono:      'JetBrains Mono', monospace;
+  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
 
   /* Spacing */
   --space-1: 4px;  --space-2: 8px;   --space-3: 12px;
@@ -26,9 +27,9 @@
   --space-12: 48px; --space-16: 64px;
 
   /* Radii */
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 20px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
 
   /* Layout */
   --max-width: 640px;
@@ -38,6 +39,15 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: var(--color-bg); color: var(--color-text); font-family: var(--font-body); min-height: 100vh; }
 [hidden] { display: none !important; }
+
+/* Focus visibility for all interactive elements */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+label:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
 
 /* Layout */
 .page {
@@ -66,7 +76,7 @@ body { background: var(--color-bg); color: var(--color-text); font-family: var(-
   color: var(--color-muted);
   font-family: var(--font-body);
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
   padding: var(--space-1) var(--space-2);
   cursor: pointer;
 }
@@ -82,17 +92,17 @@ body { background: var(--color-bg); color: var(--color-text); font-family: var(-
 
 /* Wordmark + hero */
 .wordmark {
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-weight: 700;
-  font-size: 28px;
-  color: var(--color-white);
+  font-size: 24px;
+  color: var(--color-text);
 }
 
 .hero-title {
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: 36px;
-  color: var(--color-white);
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 28px;
+  color: var(--color-text);
 }
 
 .hero-subtitle {
@@ -118,6 +128,7 @@ body { background: var(--color-bg); color: var(--color-text); font-family: var(-
   padding: var(--space-6);
   text-align: center;
   cursor: pointer;
+  background: var(--color-surface);
 }
 
 .upload-zone:focus-visible {
@@ -127,7 +138,7 @@ body { background: var(--color-bg); color: var(--color-text); font-family: var(-
 
 .upload-zone.dragover {
   border-color: var(--color-accent);
-  background: var(--color-surface);
+  background: rgba(var(--color-accent-rgb), 0.06);
 }
 
 .upload-icon {
@@ -142,13 +153,13 @@ body { background: var(--color-bg); color: var(--color-text); font-family: var(-
 /* Analyze button */
 #analyze-btn {
   width: 100%;
-  height: 52px;
+  height: 48px;
   background: var(--color-accent);
-  color: var(--color-bg);
+  color: var(--color-white);
   border: none;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   font-family: var(--font-body);
-  font-weight: 600;
+  font-weight: 700;
   font-size: 16px;
   cursor: pointer;
 }
@@ -170,10 +181,57 @@ body { background: var(--color-bg); color: var(--color-text); font-family: var(-
   text-align: center;
 }
 
+/* Link-style buttons (secondary actions) */
+.link-btn {
+  background: transparent;
+  border: none;
+  color: var(--color-accent);
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 14px;
+  text-decoration: underline;
+  cursor: pointer;
+  text-align: center;
+}
+
+/* "My real photo was shared" secondary CTA */
+#direct-crisis-btn {
+  width: 100%;
+}
+
+/* No-manipulation-detected note */
+.no-detection-note {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--color-muted);
+  text-align: center;
+  line-height: 1.5;
+}
+
+/* Direct-crisis-path heading */
+.direct-crisis-heading {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 20px;
+  color: var(--color-text);
+}
+
+/* Resource entry description/contact (CRISIS_RESOURCES entries) */
+.ngo-card .ngo-description {
+  font-size: 13px;
+  color: var(--color-muted);
+}
+
+.ngo-card .ngo-contact {
+  font-size: 14px;
+  color: var(--color-text);
+}
+
 /* Inline form error */
 .form-error {
   font-family: var(--font-body);
   font-size: 14px;
+  font-weight: 500;
   color: var(--color-red);
   text-align: center;
 }
@@ -185,40 +243,47 @@ body { background: var(--color-bg); color: var(--color-text); font-family: var(-
   gap: var(--space-6);
 }
 
+/* Result card (semaphore) */
 .score-display {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--space-2);
   text-align: center;
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-left: 4px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-6);
 }
 
 .score-number {
-  font-family: var(--font-mono);
-  font-size: clamp(56px, 15vw, 88px);
-  font-weight: 600;
+  font-family: var(--font-body);
+  font-variant-numeric: tabular-nums;
+  font-size: clamp(48px, 15vw, 72px);
+  font-weight: 700;
   line-height: 1;
+  color: var(--color-text);
 }
 
 .score-label {
   font-family: var(--font-body);
-  font-weight: 600;
+  font-weight: 700;
   font-size: 18px;
+  color: var(--color-text);
 }
 
-.score-display[data-bucket="low"] .score-number,
-.score-display[data-bucket="low"] .score-label {
-  color: var(--score-low);
+.score-display[data-bucket="low"] {
+  border-left-color: var(--score-low);
 }
 
-.score-display[data-bucket="medium"] .score-number,
-.score-display[data-bucket="medium"] .score-label {
-  color: var(--score-medium);
+.score-display[data-bucket="medium"] {
+  border-left-color: var(--score-medium);
 }
 
-.score-display[data-bucket="high"] .score-number,
-.score-display[data-bucket="high"] .score-label {
-  color: var(--score-high);
+.score-display[data-bucket="high"] {
+  border-left-color: var(--score-high);
 }
 
 .score-explanation {
@@ -238,20 +303,21 @@ body { background: var(--color-bg); color: var(--color-text); font-family: var(-
 .country-btn {
   flex: 1;
   padding: var(--space-3);
-  border: 2px solid var(--color-border);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  background: transparent;
+  background: var(--color-surface);
   color: var(--color-text);
   font-family: var(--font-body);
   cursor: pointer;
   font-size: 15px;
-  transition: all 0.2s;
+  font-weight: 500;
 }
 
 .country-btn.active {
   border-color: var(--color-accent);
-  background: rgba(0, 201, 177, 0.08);
-  font-weight: 600;
+  background: rgba(var(--color-accent-rgb), 0.08);
+  font-weight: 700;
+  color: var(--color-accent);
 }
 
 /* Crisis pathway */
@@ -265,9 +331,9 @@ body { background: var(--color-bg); color: var(--color-text); font-family: var(-
 
 .crisis-title {
   font-family: var(--font-body);
-  font-weight: 600;
+  font-weight: 700;
   font-size: 16px;
-  color: var(--color-accent);
+  color: var(--color-text);
 }
 
 .crisis-steps {
@@ -285,7 +351,7 @@ body { background: var(--color-bg); color: var(--color-text); font-family: var(-
   gap: var(--space-3);
   font-family: var(--font-body);
   font-size: 15px;
-  color: var(--color-white);
+  color: var(--color-text);
 }
 
 .crisis-steps li::before {
@@ -295,9 +361,9 @@ body { background: var(--color-bg); color: var(--color-text); font-family: var(-
   height: 24px;
   border-radius: 50%;
   background: var(--color-accent);
-  color: var(--color-bg);
+  color: var(--color-white);
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -305,7 +371,8 @@ body { background: var(--color-bg); color: var(--color-text); font-family: var(-
 
 .ngo-card {
   background: var(--color-surface);
-  border-left: 3px solid var(--color-accent);
+  border: 1px solid var(--color-border);
+  border-left: 4px solid var(--color-accent);
   border-radius: var(--radius-md);
   padding: var(--space-4);
   display: flex;
@@ -315,7 +382,7 @@ body { background: var(--color-bg); color: var(--color-text); font-family: var(-
 
 .ngo-card .ngo-name {
   font-weight: 700;
-  color: var(--color-white);
+  color: var(--color-text);
 }
 
 .ngo-card a {
@@ -323,7 +390,7 @@ body { background: var(--color-bg); color: var(--color-text); font-family: var(-
 }
 
 .ngo-card .ngo-title {
-  font-weight: 600;
+  font-weight: 700;
   font-size: 13px;
   color: var(--color-muted);
   text-transform: uppercase;
@@ -347,26 +414,25 @@ body { background: var(--color-bg); color: var(--color-text); font-family: var(-
   padding: var(--space-2);
   border-radius: var(--radius-sm);
   border: 1.5px solid var(--color-accent);
-  background: transparent;
-  color: var(--color-text);
+  background: var(--color-surface);
+  color: var(--color-accent);
   font-family: var(--font-body);
+  font-weight: 500;
   font-size: 13px;
   cursor: pointer;
-  opacity: 0.6;
 }
 
 .victim-toggle-btn.active {
   background: var(--color-accent);
-  color: var(--color-bg);
-  opacity: 1;
+  color: var(--color-white);
 }
 
 /* Crisis intro (empathy message) */
 .crisis-intro {
   font-family: var(--font-body);
   font-size: 17px;
-  font-weight: 600;
-  color: var(--color-accent);
+  font-weight: 700;
+  color: var(--color-text);
   line-height: 1.5;
 }
 
@@ -375,13 +441,13 @@ body { background: var(--color-bg); color: var(--color-text); font-family: var(-
   display: block;
   width: 100%;
   padding: var(--space-3) var(--space-4);
-  background: #25D366;
-  color: #fff;
+  background: var(--color-accent);
+  color: var(--color-white);
   border: none;
   border-radius: var(--radius-md);
   font-family: var(--font-body);
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   text-decoration: none;
   text-align: center;
@@ -391,7 +457,7 @@ body { background: var(--color-bg); color: var(--color-text); font-family: var(-
   display: block;
   width: 100%;
   padding: var(--space-2) var(--space-4);
-  background: transparent;
+  background: var(--color-surface);
   color: var(--color-accent);
   border: 1.5px solid var(--color-accent);
   border-radius: var(--radius-md);
@@ -418,13 +484,13 @@ body { background: var(--color-bg); color: var(--color-text); font-family: var(-
 /* Reset button */
 #reset-btn {
   width: 100%;
-  height: 52px;
-  background: transparent;
-  color: var(--color-accent);
+  height: 48px;
+  background: var(--color-surface);
+  color: var(--color-text);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   font-family: var(--font-body);
-  font-weight: 600;
+  font-weight: 500;
   font-size: 16px;
   cursor: pointer;
 }
