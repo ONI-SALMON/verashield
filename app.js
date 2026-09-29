@@ -71,7 +71,6 @@ const T = {
       'No compartas el contenido — reportarlo a quienes necesitan verlo es suficiente.',
       'Contacta a una organización de apoyo:',
     ],
-    ngo: { name: 'Red Infancia MX', phone: '+52-55-XXXX-XXXX', url: 'https://redinfanciamx.org', label: 'redinfanciamx.org' },
     victimToggle: {
       me:    '🧍 Esto me pasó a mí',
       other: '👥 Le pasó a alguien que conozco',
@@ -90,16 +89,41 @@ const T = {
     crisisIntro_mx: 'Esto no es tu culpa. En México existen leyes y organizaciones que pueden ayudarte a resolver esta situación — no estás solo/a.',
     crisisIntro_in: 'Esto no es tu culpa. En India existen leyes y organizaciones que pueden ayudarte a resolver esta situación — no estás solo/a.',
     crisisIntro_us: 'Esto no es tu culpa. En Estados Unidos existen leyes y organizaciones que pueden ayudarte a resolver esta situación — no estás solo/a.',
-    legalNote_mx: 'En México, la Ley Olimpia criminaliza la difusión de imágenes íntimas sin consentimiento.',
     legalNote_in: 'En India, la Sección 66E de la Ley de TI protege a las víctimas de la difusión no consensuada de imágenes.',
-    legalNote_us: 'En Estados Unidos, compartir imágenes íntimas sin consentimiento es ilegal en 48 estados. Las imágenes sexuales generadas por IA de personas reales (deepfakes) están cada vez más cubiertas por leyes estatales y por la DEFIANCE Act (2024) a nivel federal.',
     ngoTitle_mx: 'Organizaciones que pueden ayudarte (México)',
     ngoTitle_in: 'Organizaciones que pueden ayudarte (India)',
     ngoTitle_us: 'Organizaciones que pueden ayudarte (Estados Unidos)',
     ngosIndia: [
-      { name: 'Cyber Peace Foundation', phone: '+91-9830055XXX', url: 'https://cyberpeace.org', label: 'cyberpeace.org' },
-      { name: 'iCall (TISS)', phone: '', url: 'https://icallhelpline.org', label: 'icallhelpline.org' },
-      { name: 'Childline India', phone: '1098', url: '', label: '' },
+      {
+        name: 'iCall (TISS)',
+        description: 'Apoyo psicológico gratuito para jóvenes — llamada o chat',
+        phone: '9152987821',
+        url: 'https://icallhelpline.org',
+      },
+      {
+        name: 'Vandrevala Foundation',
+        description: 'Línea de crisis de salud mental 24/7 — llamada y WhatsApp',
+        phone: '1860-2662-345',
+        url: 'https://www.vandrevalafoundation.com',
+      },
+      {
+        name: 'Childline India',
+        description: 'Línea de emergencia gratuita para niños y adolescentes en riesgo',
+        phone: '1098',
+        url: 'https://www.childlineindia.org',
+      },
+      {
+        name: 'Cyber Crime Portal',
+        description: 'Portal oficial del gobierno para reportar delitos digitales en India',
+        phone: null,
+        url: 'https://cybercrime.gov.in',
+      },
+      {
+        name: 'CyberPeace Foundation',
+        description: 'ONG especializada en seguridad digital y abuso de imagen en menores',
+        phone: null,
+        url: 'https://cyberpeace.org',
+      },
     ],
   },
 
@@ -137,7 +161,6 @@ const T = {
       'Do not share the content — reporting it to the right people is enough.',
       'Contact a support organization:',
     ],
-    ngo: { name: 'Cyber Peace Foundation', phone: '', url: 'https://cyberpeacefoundation.org', label: 'cyberpeacefoundation.org' },
     victimToggle: {
       me:    '🧍 This happened to me',
       other: '👥 This happened to someone I know',
@@ -156,16 +179,41 @@ const T = {
     crisisIntro_mx: "This is not your fault. In Mexico, there are laws and organizations that can help you resolve this — you're not alone.",
     crisisIntro_in: "This is not your fault. In India, there are laws and organizations that can help you resolve this — you're not alone.",
     crisisIntro_us: "This is not your fault. In the United States, there are laws and organizations that can help you resolve this — you're not alone.",
-    legalNote_mx: 'In Mexico, the Olimpia Law criminalizes the distribution of intimate images without consent.',
     legalNote_in: 'In India, IT Act Section 66E protects victims of non-consensual image sharing.',
-    legalNote_us: 'In the United States, sharing intimate images without consent is illegal in 48 states. AI-generated sexual images of real people (deepfakes) are increasingly covered under state law and the DEFIANCE Act (2024) at the federal level.',
     ngoTitle_mx: 'Organizations that can help you (Mexico)',
     ngoTitle_in: 'Organizations that can help you (India)',
     ngoTitle_us: 'Organizations that can help you (United States)',
     ngosIndia: [
-      { name: 'Cyber Peace Foundation', phone: '+91-9830055XXX', url: 'https://cyberpeace.org', label: 'cyberpeace.org' },
-      { name: 'iCall (TISS)', phone: '', url: 'https://icallhelpline.org', label: 'icallhelpline.org' },
-      { name: 'Childline India', phone: '1098', url: '', label: '' },
+      {
+        name: 'iCall (TISS)',
+        description: 'Free psychological support for young people — call or chat',
+        phone: '9152987821',
+        url: 'https://icallhelpline.org',
+      },
+      {
+        name: 'Vandrevala Foundation',
+        description: '24/7 mental health crisis helpline — call and WhatsApp',
+        phone: '1860-2662-345',
+        url: 'https://www.vandrevalafoundation.com',
+      },
+      {
+        name: 'Childline India',
+        description: 'Free emergency helpline for children and teens at risk',
+        phone: '1098',
+        url: 'https://www.childlineindia.org',
+      },
+      {
+        name: 'Cyber Crime Portal',
+        description: 'Official government portal to report cybercrimes in India',
+        phone: null,
+        url: 'https://cybercrime.gov.in',
+      },
+      {
+        name: 'CyberPeace Foundation',
+        description: 'NGO specializing in digital safety and image abuse for minors',
+        phone: null,
+        url: 'https://cyberpeace.org',
+      },
     ],
   },
 
@@ -203,7 +251,6 @@ const T = {
       'सामग्री साझा न करें — सही लोगों को रिपोर्ट करना पर्याप्त है।',
       'एक सहायता संगठन से संपर्क करें:',
     ],
-    ngo: { name: 'Cyber Peace Foundation', phone: '+91-XXXX-XXXXXX', url: 'https://cyberpeacefoundation.org', label: 'cyberpeacefoundation.org' },
     victimToggle: {
       me:    '🧍 यह मेरे साथ हुआ',
       other: '👥 यह किसी और के साथ हुआ',
@@ -222,16 +269,41 @@ const T = {
     crisisIntro_mx: 'यह आपकी गलती नहीं है। मेक्सिको में ऐसे कानून और संगठन हैं जो इस स्थिति में आपकी मदद कर सकते हैं — आप अकेले नहीं हैं।',
     crisisIntro_in: 'यह आपकी गलती नहीं है। भारत में ऐसे कानून और संगठन हैं जो इस स्थिति में आपकी मदद कर सकते हैं — आप अकेले नहीं हैं।',
     crisisIntro_us: 'यह आपकी गलती नहीं है। संयुक्त राज्य अमेरिका में ऐसे कानून और संगठन हैं जो इस स्थिति में आपकी मदद कर सकते हैं — आप अकेले नहीं हैं।',
-    legalNote_mx: 'मेक्सिको में, ओलंपिया कानून सहमति के बिना अंतरंग तस्वीरें साझा करने को अपराध मानता है।',
     legalNote_in: 'भारत में, आईटी अधिनियम की धारा 66E सहमति के बिना तस्वीरें साझा किए जाने के पीड़ितों की रक्षा करती है।',
-    legalNote_us: null, // no Hindi translation available for US federal/state law text
     ngoTitle_mx: 'संगठन जो आपकी मदद कर सकते हैं (मेक्सिको)',
     ngoTitle_in: 'संगठन जो आपकी मदद कर सकते हैं (भारत)',
     ngoTitle_us: 'संगठन जो आपकी मदद कर सकते हैं (संयुक्त राज्य अमेरिका)',
     ngosIndia: [
-      { name: 'Cyber Peace Foundation', phone: '+91-9830055XXX', url: 'https://cyberpeace.org', label: 'cyberpeace.org' },
-      { name: 'iCall (TISS)', phone: '', url: 'https://icallhelpline.org', label: 'icallhelpline.org' },
-      { name: 'Childline India', phone: '1098', url: '', label: '' },
+      {
+        name: 'iCall (TISS)',
+        description: 'युवाओं के लिए निःशुल्क मनोवैज्ञानिक सहायता — कॉल या चैट',
+        phone: '9152987821',
+        url: 'https://icallhelpline.org',
+      },
+      {
+        name: 'Vandrevala Foundation',
+        description: '24/7 मानसिक स्वास्थ्य संकट हेल्पलाइन — कॉल और व्हाट्सएप',
+        phone: '1860-2662-345',
+        url: 'https://www.vandrevalafoundation.com',
+      },
+      {
+        name: 'Childline India',
+        description: 'जोखिम में बच्चों और किशोरों के लिए निःशुल्क आपातकालीन हेल्पलाइन',
+        phone: '1098',
+        url: 'https://www.childlineindia.org',
+      },
+      {
+        name: 'Cyber Crime Portal',
+        description: 'भारत में साइबर अपराध रिपोर्ट करने का आधिकारिक सरकारी पोर्टल',
+        phone: null,
+        url: 'https://cybercrime.gov.in',
+      },
+      {
+        name: 'CyberPeace Foundation',
+        description: 'डिजिटल सुरक्षा और बाल छवि दुरुपयोग में विशेषज्ञ NGO',
+        phone: null,
+        url: 'https://cyberpeace.org',
+      },
     ],
   },
 };
@@ -333,6 +405,53 @@ const CRISIS_RESOURCES = {
         type: "legal",
       },
     ],
+    legalNote:
+      "In the United States, sharing intimate images without consent is illegal " +
+      "in 48 states. AI-generated sexual images of real people (deepfakes) are " +
+      "increasingly covered under state law and the DEFIANCE Act (2024) at the " +
+      "federal level.",
+  },
+  mx: {
+    country: "México",
+    flag: "🇲🇽",
+    resources: [
+      {
+        name: "Línea de la Vida",
+        description: "Apoyo psicológico gratuito 24/7 — crisis, estrés, violencia",
+        contact: "800 911 2000",
+        url: "https://www.gob.mx/conasama/articulos/linea-de-la-vida-800-911-2000",
+        type: "hotline",
+      },
+      {
+        name: "CNDH — Comisión Nacional de los Derechos Humanos",
+        description: "Denuncia violaciones a derechos humanos, incluyendo violencia digital",
+        contact: "800 715 2000",
+        url: "https://www.cndh.org.mx/programas/contacto-1",
+        type: "legal",
+      },
+      {
+        name: "Te Protejo México",
+        description:
+          "Plataforma anónima y gratuita para reportar contenido sexual de menores, " +
+          "grooming, sextorsión y ciberacoso. Parte de la red INHOPE.",
+        contact: "contactanos@teprotejomexico.org",
+        url: "https://teprotejomexico.org/",
+        type: "report",
+      },
+      {
+        name: "REDIM — Red por los Derechos de la Infancia en México",
+        description: "Organización de referencia en derechos de niñas, niños y adolescentes",
+        contact: null,
+        url: "https://derechosinfancia.org.mx/v1/",
+        type: "ngo",
+      },
+    ],
+    legalNote:
+      "En México, la Ley Olimpia penaliza la difusión no consentida de " +
+      "imágenes íntimas entre adultos. Para menores de edad, aplica la Ley " +
+      "General de los Derechos de Niñas, Niños y Adolescentes (LGDNNA) y " +
+      "el Código Penal Federal. Tienes derecho a denunciar aunque la imagen " +
+      "sea real y no un deepfake.",
   },
 };
 
@@ -528,7 +647,7 @@ function animateScore(target) {
 }
 
 // ─── Crisis pathway ──────────────────────────────────────────────────────────
-function appendNgoEntry(container, { name, phone, url, label }) {
+function appendNgoEntry(container, { name, description, phone, url }) {
   const entry = document.createElement('div');
   entry.className = 'ngo-entry';
 
@@ -536,6 +655,13 @@ function appendNgoEntry(container, { name, phone, url, label }) {
   nameEl.className = 'ngo-name';
   nameEl.textContent = name;
   entry.appendChild(nameEl);
+
+  if (description) {
+    const descEl = document.createElement('p');
+    descEl.className = 'ngo-description';
+    descEl.textContent = description;
+    entry.appendChild(descEl);
+  }
 
   if (phone) {
     const phoneEl = document.createElement('p');
@@ -552,7 +678,7 @@ function appendNgoEntry(container, { name, phone, url, label }) {
     webLink.href = url;
     webLink.target = '_blank';
     webLink.rel = 'noopener';
-    webLink.textContent = label;
+    webLink.textContent = new URL(url).hostname.replace(/^www\./, '');
     webEl.appendChild(webLink);
     entry.appendChild(webEl);
   }
@@ -656,13 +782,15 @@ function renderCrisisPathway() {
   } else if (currentCountry === 'in') {
     t.ngosIndia.forEach((ngo) => appendNgoEntry(ngoCard, ngo));
   } else {
-    appendNgoEntry(ngoCard, t.ngo);
+    CRISIS_RESOURCES.mx.resources.forEach((resource) => appendResourceEntry(ngoCard, resource));
   }
 
-  // legal rights note — content is a hardcoded translation string, never user input
-  const legalNoteText = currentCountry === 'us' ? t.legalNote_us
+  // legal rights note — content is a hardcoded string, never user input.
+  // MX note is decoupled from UI language (like CRISIS_RESOURCES.mx.resources)
+  // since it's country-specific legal fact, not a UI string.
+  const legalNoteText = currentCountry === 'us' ? CRISIS_RESOURCES.us.legalNote
     : currentCountry === 'in' ? t.legalNote_in
-    : t.legalNote_mx;
+    : CRISIS_RESOURCES.mx.legalNote;
   legalNote.hidden = !legalNoteText;
   legalNote.innerHTML = legalNoteText || '';
 
