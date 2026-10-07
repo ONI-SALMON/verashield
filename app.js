@@ -34,6 +34,7 @@ const noDetectionNote    = document.getElementById('no-detection-note');
 const noDetectionText    = document.getElementById('no-detection-text');
 const noDetectionLink    = document.getElementById('no-detection-link');
 const backToUploadBtn    = document.getElementById('back-to-upload-btn');
+const downloadPdfBtn     = document.getElementById('download-pdf-btn');
 
 // ─── Translations ────────────────────────────────────────────────────────────
 const T = {
@@ -46,6 +47,7 @@ const T = {
     analyzingBtn:    'Analizando...',
     resetBtn:        'Analizar otra imagen',
     privacyNote:     'No guardamos tu imagen ni ningún dato personal.',
+    disclaimer:      'Recuerda: ante cualquier situación, tu primer paso siempre es hablar con un adulto de confianza o una autoridad. Esta herramienta es un apoyo, no un sustituto.',
     crisisTitle:     '¿Qué puedes hacer?',
     labels: {
       likely_real:   'Probablemente real',
@@ -136,6 +138,7 @@ const T = {
     analyzingBtn:    'Analyzing...',
     resetBtn:        'Analyze another image',
     privacyNote:     "We don't save your image or any personal data.",
+    disclaimer:      'Remember: in any situation, your first step is always to talk to a trusted adult or authority. This tool is a support, not a substitute.',
     crisisTitle:     'What can you do?',
     labels: {
       likely_real:   'Probably real',
@@ -226,6 +229,7 @@ const T = {
     analyzingBtn:    'जाँच हो रही है...',
     resetBtn:        'दूसरी तस्वीर जाँचें',
     privacyNote:     'हम आपकी तस्वीर या कोई भी व्यक्तिगत डेटा सेव नहीं करते।',
+    disclaimer:      'याद रखें: किसी भी स्थिति में, आपका पहला कदम हमेशा किसी विश्वसनीय वयस्क या अधिकारी से बात करना है। यह टूल एक सहायता है, विकल्प नहीं।',
     crisisTitle:     'आप क्या कर सकते हैं?',
     labels: {
       likely_real:   'संभवतः असली',
@@ -350,6 +354,270 @@ const DIRECT_CRISIS_STRINGS = {
     backToUpload: "← इसके बजाय एक छवि का विश्लेषण करें",
   },
 };
+
+// ─── PDF evidence report strings ─────────────────────────────────────────────
+const PDF_STRINGS = {
+  es: {
+    btn:          'Descargar reporte PDF',
+    locale:       'es-MX',
+    analyzedOn:   'Fecha y hora del análisis',
+    resultTitle:  'Resultado del análisis',
+    probability:  'Probabilidad de manipulación',
+    meaningTitle: 'Qué significa este resultado',
+    meaning: {
+      low:    'Una probabilidad baja indica que no encontramos señales claras de manipulación por IA. Aun así, ningún detector es perfecto: si algo te preocupa, confía en tu criterio y busca apoyo.',
+      medium: 'Una probabilidad media significa que hay algunas señales de posible manipulación, pero no podemos estar seguros. Trátalo con cuidado y no lo compartas mientras buscas ayuda.',
+      high:   'Una probabilidad alta indica que la imagen probablemente fue creada o alterada con IA. Esto no es tu culpa, y hay pasos concretos que puedes tomar para frenar su difusión.',
+    },
+    stepsTitle: 'Pasos recomendados',
+    steps: [
+      'Documenta: guarda capturas de pantalla con la URL, el nombre de usuario y la fecha visibles. No reenvíes ni compartas la imagen.',
+      'Reporta a la plataforma: usa la opción de reporte de la red social o app donde aparece la imagen y pide que la eliminen.',
+      'Busca apoyo: habla con un adulto de confianza y contacta a una organización o autoridad de tu país.',
+    ],
+    disclaimer: 'Este reporte es una herramienta de apoyo generada automáticamente. No constituye evidencia legal por sí solo. Consulta a un adulto de confianza o autoridad.',
+    footer:     'verashield.app | Conrad Challenge 2026–2027',
+  },
+  en: {
+    btn:          'Download PDF report',
+    locale:       'en-US',
+    analyzedOn:   'Analysis date and time',
+    resultTitle:  'Analysis result',
+    probability:  'Probability of manipulation',
+    meaningTitle: 'What this result means',
+    meaning: {
+      low:    'A low probability means we found no clear signs of AI manipulation. Still, no detector is perfect: if something worries you, trust your instincts and seek support.',
+      medium: 'A medium probability means there are some signs of possible manipulation, but we cannot be sure. Handle it with care and do not share it while you look for help.',
+      high:   'A high probability means the image was likely created or altered with AI. This is not your fault, and there are concrete steps you can take to stop it from spreading.',
+    },
+    stepsTitle: 'Recommended steps',
+    steps: [
+      'Document: save screenshots with the URL, username and date visible. Do not forward or share the image.',
+      'Report to the platform: use the report option on the social network or app where the image appears and ask for its removal.',
+      'Seek support: talk to a trusted adult and contact an organization or authority in your country.',
+    ],
+    disclaimer: 'This report is an automatically generated support tool. It does not constitute legal evidence on its own. Consult a trusted adult or authority.',
+    footer:     'verashield.app | Conrad Challenge 2026–2027',
+  },
+  hi: {
+    btn:          'PDF रिपोर्ट डाउनलोड करें',
+    locale:       'hi-IN',
+    analyzedOn:   'जाँच की तारीख और समय',
+    resultTitle:  'जाँच का परिणाम',
+    probability:  'छेड़छाड़ की संभावना',
+    meaningTitle: 'इस परिणाम का क्या मतलब है',
+    meaning: {
+      low:    'कम संभावना का मतलब है कि हमें AI द्वारा छेड़छाड़ के स्पष्ट संकेत नहीं मिले। फिर भी कोई भी डिटेक्टर पूरी तरह सही नहीं होता: अगर कुछ चिंता की बात है, तो अपनी समझ पर भरोसा करें और सहायता लें।',
+      medium: 'मध्यम संभावना का मतलब है कि छेड़छाड़ के कुछ संकेत हैं, लेकिन हम निश्चित नहीं हैं। सावधानी रखें और मदद ढूँढते समय इसे साझा न करें।',
+      high:   'अधिक संभावना का मतलब है कि तस्वीर संभवतः AI से बनाई या बदली गई है। यह आपकी गलती नहीं है, और इसे फैलने से रोकने के लिए आप ठोस कदम उठा सकते हैं।',
+    },
+    stepsTitle: 'सुझाए गए कदम',
+    steps: [
+      'दस्तावेज़ बनाएँ: URL, यूज़रनेम और तारीख दिखाते हुए स्क्रीनशॉट सेव करें। तस्वीर को फॉरवर्ड या साझा न करें।',
+      'प्लेटफ़ॉर्म को रिपोर्ट करें: जिस सोशल नेटवर्क या ऐप पर तस्वीर है, वहाँ रिपोर्ट विकल्प का उपयोग करें और उसे हटाने का अनुरोध करें।',
+      'सहायता लें: किसी विश्वसनीय वयस्क से बात करें और अपने देश के किसी संगठन या अधिकारी से संपर्क करें।',
+    ],
+    disclaimer: 'यह रिपोर्ट स्वचालित रूप से बनाया गया एक सहायता उपकरण है। यह अपने आप में कानूनी सबूत नहीं है। किसी विश्वसनीय वयस्क या अधिकारी से सलाह लें।',
+    footer:     'verashield.app | Conrad Challenge 2026–2027',
+  },
+};
+
+// ─── Action resources: copy-only email templates ────────────────────────────
+// Text is only ever copied to the user's clipboard — nothing is sent or stored.
+const ACTION_STRINGS = {
+  es: {
+    title:      'Cómo reportar',
+    disclaimer: 'Estos textos son sugerencias. Puedes modificarlos antes de enviarlos. Siempre consulta con un adulto antes de contactar a cualquier institución.',
+    copy:       'Copiar al portapapeles',
+    copied:     '¡Copiado!',
+    fallback:   'Selecciona y copia este texto',
+  },
+  en: {
+    title:      'How to report',
+    disclaimer: 'These are suggested templates. Edit them before sending. Always consult a trusted adult before contacting any institution.',
+    copy:       'Copy to clipboard',
+    copied:     'Copied!',
+    fallback:   'Select and copy this text',
+  },
+  hi: {
+    title:      'रिपोर्ट कैसे करें',
+    disclaimer: 'ये केवल सुझाए गए टेम्पलेट हैं। भेजने से पहले इन्हें बदल लें। किसी भी संस्था से संपर्क करने से पहले हमेशा किसी विश्वसनीय वयस्क से सलाह लें।',
+    copy:       'क्लिपबोर्ड पर कॉपी करें',
+    copied:     'कॉपी हो गया!',
+    fallback:   'इस टेक्स्ट को चुनें और कॉपी करें',
+  },
+};
+
+const EMAIL_TEMPLATES = {
+  es: [
+    {
+      title: '📧 Plataforma (Instagram, TikTok, etc.)',
+      text:
+        'Asunto: Solicitud urgente de eliminación de contenido\n\n' +
+        'Hola equipo de seguridad:\n\n' +
+        'Me llamo [NOMBRE] y soy menor de edad. El [FECHA] descubrí que se publicó contenido que me muestra sin mi consentimiento, y que puede haber sido creado o alterado con inteligencia artificial.\n\n' +
+        'Descripción: [DESCRIPCIÓN]\n\n' +
+        'Solicito que lo eliminen de inmediato, ya que viola sus normas contra el abuso de imágenes y el acoso. También les pido que me confirmen cuando se haya retirado.\n\n' +
+        'Gracias,\n[NOMBRE]',
+    },
+    {
+      title: '📧 Adulto de confianza',
+      text:
+        'Asunto: Necesito tu ayuda\n\n' +
+        'Hola [NOMBRE]:\n\n' +
+        'Necesito hablar contigo de algo importante. El [FECHA] me enteré de que hay una imagen mía que se compartió sin mi permiso y que podría estar hecha con IA.\n\n' +
+        '[DESCRIPCIÓN]\n\n' +
+        'No es mi culpa, pero me siento preocupado/a y no sé qué hacer. ¿Podemos hablar hoy y decidir juntos cómo reportarlo?\n\n' +
+        'Gracias por escucharme.',
+    },
+    {
+      title: '📧 Escuela (dirección)',
+      text:
+        'Asunto: Aviso de un incidente que afecta a un estudiante\n\n' +
+        'Estimada dirección:\n\n' +
+        'Les escribo para informarles de manera informal sobre una situación ocurrida el [FECHA]. [NOMBRE] fue afectado/a por la difusión de una imagen sin su consentimiento, posiblemente creada o alterada con inteligencia artificial.\n\n' +
+        'Resumen: [DESCRIPCIÓN]\n\n' +
+        'Les pido que tomen las medidas necesarias para proteger al estudiante y que me indiquen cómo podemos colaborar. Agradezco su discreción.\n\n' +
+        'Atentamente,\n[NOMBRE]',
+    },
+  ],
+  en: [
+    {
+      title: '📧 Platform (Instagram, TikTok, etc.)',
+      text:
+        'Subject: Urgent content removal request\n\n' +
+        'Hello Safety Team,\n\n' +
+        'My name is [NAME] and I am a minor. On [DATE] I discovered content that shows me without my consent and may have been created or altered using artificial intelligence.\n\n' +
+        'Description: [DESCRIPTION]\n\n' +
+        'I am requesting its immediate removal, as it violates your policies against image abuse and harassment. Please confirm once it has been taken down.\n\n' +
+        'Thank you,\n[NAME]',
+    },
+    {
+      title: '📧 Trusted adult',
+      text:
+        'Subject: I need your help\n\n' +
+        'Hi [NAME],\n\n' +
+        'I need to talk to you about something important. On [DATE] I found out that an image of me was shared without my permission and it might be made with AI.\n\n' +
+        '[DESCRIPTION]\n\n' +
+        "It's not my fault, but I'm worried and I don't know what to do. Can we talk today and decide together how to report it?\n\n" +
+        'Thank you for listening.',
+    },
+    {
+      title: '📧 School (principal’s office)',
+      text:
+        'Subject: Notice of an incident affecting a student\n\n' +
+        'Dear Principal,\n\n' +
+        'I am writing to informally let you know about a situation that happened on [DATE]. [NAME] was affected by an image being shared without consent, possibly created or altered using artificial intelligence.\n\n' +
+        'Summary: [DESCRIPTION]\n\n' +
+        'I ask that you take the necessary steps to protect the student and let me know how we can work together. I appreciate your discretion.\n\n' +
+        'Sincerely,\n[NAME]',
+    },
+  ],
+  hi: [
+    {
+      title: '📧 प्लेटफ़ॉर्म (Instagram, TikTok आदि)',
+      text:
+        'विषय: सामग्री हटाने का अत्यावश्यक अनुरोध\n\n' +
+        'नमस्ते सुरक्षा टीम,\n\n' +
+        'मेरा नाम [नाम] है और मैं नाबालिग हूँ। [तारीख] को मुझे पता चला कि मेरी अनुमति के बिना मेरी एक तस्वीर पोस्ट की गई है, जो कृत्रिम बुद्धिमत्ता (AI) से बनाई या बदली गई हो सकती है।\n\n' +
+        'विवरण: [विवरण]\n\n' +
+        'मैं इसे तुरंत हटाने का अनुरोध करता/करती हूँ, क्योंकि यह छवि दुरुपयोग और उत्पीड़न के विरुद्ध आपकी नीतियों का उल्लंघन है। कृपया हटाए जाने पर मुझे सूचित करें।\n\n' +
+        'धन्यवाद,\n[नाम]',
+    },
+    {
+      title: '📧 विश्वसनीय वयस्क',
+      text:
+        'विषय: मुझे आपकी मदद चाहिए\n\n' +
+        'नमस्ते [नाम],\n\n' +
+        'मुझे आपसे एक ज़रूरी बात करनी है। [तारीख] को मुझे पता चला कि मेरी एक तस्वीर बिना मेरी अनुमति के साझा की गई है और वह AI से बनी हो सकती है।\n\n' +
+        '[विवरण]\n\n' +
+        'इसमें मेरी कोई गलती नहीं है, लेकिन मैं चिंतित हूँ और समझ नहीं आ रहा कि क्या करूँ। क्या हम आज बात कर सकते हैं और मिलकर तय कर सकते हैं कि इसकी रिपोर्ट कैसे करें?\n\n' +
+        'मेरी बात सुनने के लिए धन्यवाद।',
+    },
+    {
+      title: '📧 स्कूल (प्रधानाचार्य कार्यालय)',
+      text:
+        'विषय: एक छात्र को प्रभावित करने वाली घटना की सूचना\n\n' +
+        'आदरणीय प्रधानाचार्य जी,\n\n' +
+        'मैं आपको [तारीख] को हुई एक घटना के बारे में अनौपचारिक रूप से सूचित करने के लिए लिख रहा/रही हूँ। [नाम] की एक तस्वीर बिना सहमति के साझा की गई, जो संभवतः AI से बनाई या बदली गई है।\n\n' +
+        'सारांश: [विवरण]\n\n' +
+        'कृपया छात्र की सुरक्षा के लिए आवश्यक कदम उठाएँ और बताएँ कि हम मिलकर कैसे काम कर सकते हैं। आपकी गोपनीयता के लिए धन्यवाद।\n\n' +
+        'सादर,\n[नाम]',
+    },
+  ],
+};
+
+const COPIED_FEEDBACK_MS = 2000;
+
+// Resolves false when the Clipboard API is missing or the write is rejected
+// (e.g. insecure context), so the caller can show a selectable textarea.
+async function copyText(text) {
+  if (!navigator.clipboard || typeof navigator.clipboard.writeText !== 'function') return false;
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch (err) {
+    return false;
+  }
+}
+
+function showCopyFallback(card, text, label) {
+  let area = card.querySelector('.template-fallback');
+  if (!area) {
+    area = document.createElement('textarea');
+    area.className = 'template-fallback';
+    area.readOnly = true;
+    area.setAttribute('aria-label', label);
+    card.appendChild(area);
+  }
+  area.value = text;
+  area.focus();
+  area.select();
+}
+
+function renderActionResources() {
+  const as = ACTION_STRINGS[currentLang];
+  document.getElementById('action-resources-title').textContent = as.title;
+  document.getElementById('action-disclaimer').textContent = as.disclaimer;
+
+  const list = document.getElementById('template-list');
+  list.innerHTML = '';
+
+  EMAIL_TEMPLATES[currentLang].forEach((tpl) => {
+    const card = document.createElement('article');
+    card.className = 'template-card';
+
+    const title = document.createElement('h4');
+    title.className = 'template-title';
+    title.textContent = tpl.title;
+    card.appendChild(title);
+
+    const body = document.createElement('pre');
+    body.className = 'template-body';
+    body.textContent = tpl.text;
+    card.appendChild(body);
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'copy-btn';
+    btn.textContent = as.copy;
+    let resetTimer = null;
+    btn.addEventListener('click', async () => {
+      const ok = await copyText(tpl.text);
+      if (!ok) { showCopyFallback(card, tpl.text, as.fallback); return; }
+      btn.textContent = as.copied;
+      btn.classList.add('copied');
+      clearTimeout(resetTimer);
+      resetTimer = setTimeout(() => {
+        btn.textContent = as.copy;
+        btn.classList.remove('copied');
+      }, COPIED_FEEDBACK_MS);
+    });
+    card.appendChild(btn);
+
+    list.appendChild(card);
+  });
+}
 
 // Country-keyed resources — decoupled from UI language (a Spanish speaker
 // can be in the US, an English speaker can be in India, etc).
@@ -476,6 +744,7 @@ let victimMode    = 'me';
 let currentCountry = 'mx';
 let countryManuallySet = false;
 let directCrisisActive = false;
+let analyzedAt = null;
 
 function syncCountryButtons() {
   document.querySelectorAll('.country-btn').forEach(b => b.classList.toggle('active', b.dataset.country === currentCountry));
@@ -499,6 +768,7 @@ function applyLanguage(lang) {
     if (!selectedFile) el.textContent = t.uploadPrompt;
   });
   document.querySelectorAll('.privacy-note').forEach(el => el.textContent = t.privacyNote);
+  document.querySelectorAll('.disclaimer-text').forEach(el => el.textContent = t.disclaimer);
 
   // buttons
   if (!analyzeBtn.classList.contains('loading')) {
@@ -508,6 +778,7 @@ function applyLanguage(lang) {
   directCrisisBtn.textContent = dc.directCrisisBtn;
   backToUploadBtn.textContent = dc.backToUpload;
   directCrisisHeading.textContent = dc.directCrisisHeading;
+  downloadPdfBtn.textContent  = PDF_STRINGS[lang].btn;
 
   // toggle active state on ALL lang buttons (both screens)
   langBtns.forEach(btn => btn.classList.toggle('active', btn.dataset.lang === lang));
@@ -526,6 +797,8 @@ function applyLanguage(lang) {
   }
   if (!noDetectionNote.hidden) renderNoDetectionNote();
   if (!crisisPathway.hidden)   renderCrisisPathway();
+
+  updateSchoolLetterVisibility();
 
   // update <html lang>
   document.documentElement.lang = lang;
@@ -796,6 +1069,9 @@ function renderCrisisPathway() {
 
   // TakeItDown removal request
   takedownBtn.textContent = t.takedownBtn;
+
+  renderActionResources();
+  updateSchoolLetterVisibility();
 }
 
 victimToggle.addEventListener('click', (e) => {
@@ -814,11 +1090,172 @@ document.querySelectorAll('.country-btn').forEach(btn => {
   });
 });
 
+// ─── PDF evidence report (100% client-side, nothing leaves the browser) ─────
+const PDF_PAGE_W_MM = 210;
+const PDF_PAGE_H_MM = 297;
+const PDF_MARGIN_MM = 20;
+const PDF_PT_TO_MM  = 0.3528;
+const PDF_LINE_H    = 1.45;
+const PDF_BOTTOM_RESERVED_MM = 18; // room for footer
+const PDF_CANVAS_PX_PER_MM   = 8;
+const PDF_COLORS = {
+  ink:    [17, 24, 39],
+  muted:  [91, 100, 120],
+  accent: [14, 150, 146],
+  bucket: { low: [22, 163, 74], medium: [217, 119, 6], high: [220, 38, 38] },
+};
+
+// Helvetica (jsPDF's built-in font) has no Devanagari glyphs, so Hindi text is
+// rasterized with the browser's own fonts and embedded as an image instead.
+const PDF_CANVAS_FONT = '"Noto Sans Devanagari","Nirmala UI","Mangal","Inter",sans-serif';
+let pdfMeasureCtx = null;
+
+function pdfCanvasFont(size, bold) {
+  return `${bold ? '700' : '400'} ${size * PDF_PT_TO_MM * PDF_CANVAS_PX_PER_MM}px ${PDF_CANVAS_FONT}`;
+}
+
+function pdfWrapCanvas(ctx, str, maxPx) {
+  const lines = [];
+  let line = '';
+  str.split(/\s+/).forEach((word) => {
+    const test = line ? `${line} ${word}` : word;
+    if (line && ctx.measureText(test).width > maxPx) { lines.push(line); line = word; }
+    else line = test;
+  });
+  if (line) lines.push(line);
+  return lines;
+}
+
+// Returns a writer that flows text down the page(s) and adds pages as needed.
+function createPdfWriter(doc, lang) {
+  const useCanvas = lang === 'hi';
+  const contentW  = PDF_PAGE_W_MM - 2 * PDF_MARGIN_MM;
+  const pageLimit = PDF_PAGE_H_MM - PDF_BOTTOM_RESERVED_MM;
+  let y = PDF_MARGIN_MM;
+  doc.setLineHeightFactor(PDF_LINE_H);
+
+  function layout(str, size, bold, width) {
+    const lineH = size * PDF_PT_TO_MM * PDF_LINE_H;
+    if (useCanvas) {
+      pdfMeasureCtx = pdfMeasureCtx || document.createElement('canvas').getContext('2d');
+      pdfMeasureCtx.font = pdfCanvasFont(size, bold);
+      const lines = pdfWrapCanvas(pdfMeasureCtx, str, width * PDF_CANVAS_PX_PER_MM);
+      return { lines, h: lines.length * lineH, lineH };
+    }
+    doc.setFont('helvetica', bold ? 'bold' : 'normal');
+    doc.setFontSize(size);
+    const lines = doc.splitTextToSize(str, width);
+    return { lines, h: lines.length * lineH, lineH };
+  }
+
+  function draw({ lines, h, lineH }, str, x, top, { size, bold, color, align }, width) {
+    if (useCanvas) {
+      const canvas = document.createElement('canvas');
+      canvas.width  = Math.ceil(width * PDF_CANVAS_PX_PER_MM);
+      canvas.height = Math.ceil(h * PDF_CANVAS_PX_PER_MM);
+      const ctx = canvas.getContext('2d');
+      ctx.font = pdfCanvasFont(size, bold);
+      ctx.fillStyle = `rgb(${color.join(',')})`;
+      ctx.textBaseline = 'top';
+      ctx.textAlign = align;
+      const px = align === 'right' ? canvas.width : align === 'center' ? canvas.width / 2 : 0;
+      lines.forEach((l, i) => ctx.fillText(l, px, i * lineH * PDF_CANVAS_PX_PER_MM));
+      doc.addImage(canvas.toDataURL('image/png'), 'PNG', x, top, width, h);
+    } else {
+      doc.setFont('helvetica', bold ? 'bold' : 'normal');
+      doc.setFontSize(size);
+      doc.setTextColor(...color);
+      const tx = align === 'right' ? x + width : align === 'center' ? x + width / 2 : x;
+      doc.text(lines, tx, top, { baseline: 'top', align });
+    }
+  }
+
+  return {
+    contentW,
+    pageLimit,
+    get y() { return y; },
+    space(mm) { y += mm; },
+    rule(color = PDF_COLORS.accent, weight = 0.6) {
+      doc.setDrawColor(...color);
+      doc.setLineWidth(weight);
+      doc.line(PDF_MARGIN_MM, y, PDF_PAGE_W_MM - PDF_MARGIN_MM, y);
+      y += 3;
+    },
+    text(str, { size = 11, bold = false, color = PDF_COLORS.ink, align = 'left', gap = 3 } = {}) {
+      const box = layout(str, size, bold, contentW);
+      if (y + box.h > pageLimit) { doc.addPage(); y = PDF_MARGIN_MM; }
+      draw(box, str, PDF_MARGIN_MM, y, { size, bold, color, align }, contentW);
+      y += box.h + gap;
+    },
+    // fixed position, no flow (used for the footer on every page)
+    textAt(str, top, opts) {
+      const box = layout(str, opts.size, opts.bold, contentW);
+      draw(box, str, PDF_MARGIN_MM, top, opts, contentW);
+    },
+  };
+}
+
+function generateEvidencePdf() {
+  if (!currentResult || !window.jspdf?.jsPDF) return;
+  const lang = currentLang;
+  const t    = T[lang];
+  const p    = PDF_STRINGS[lang];
+  const when = analyzedAt || new Date();
+  const bucket = PDF_COLORS.bucket[currentResult.bucket] ? currentResult.bucket : 'medium';
+
+  const doc = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4' });
+  const w = createPdfWriter(doc, lang);
+
+  // 1. Header: textual logo + analysis date/time
+  w.text('VeraShield', { size: 26, bold: true, color: PDF_COLORS.accent, gap: 1 });
+  w.text(`${p.analyzedOn}: ${when.toLocaleString(p.locale, { dateStyle: 'long', timeStyle: 'short' })}`,
+    { size: 10, color: PDF_COLORS.muted, gap: 2 });
+  w.rule();
+  w.space(4);
+
+  // 2. Result: manipulation probability + plain-language interpretation
+  w.text(p.resultTitle, { size: 15, bold: true, gap: 3 });
+  w.text(p.probability, { size: 10, color: PDF_COLORS.muted, gap: 1 });
+  w.text(`${Math.round(currentResult.score_percent)}%`, { size: 38, bold: true, color: PDF_COLORS.bucket[bucket], gap: 2 });
+  w.text(t.labels[currentResult.label] || '', { size: 13, bold: true, gap: 2 });
+  w.text(t.explanations[currentResult.label] || '', { size: 11, gap: 6 });
+
+  // 3. What this result means (by bucket)
+  w.text(p.meaningTitle, { size: 15, bold: true, gap: 3 });
+  w.text(p.meaning[bucket], { size: 11, gap: 6 });
+
+  // 4. Recommended steps
+  w.text(p.stepsTitle, { size: 15, bold: true, gap: 3 });
+  p.steps.forEach((step, i) => w.text(`${i + 1}. ${step}`, { size: 11, gap: 3 }));
+  w.space(4);
+
+  // 5. Legal disclaimer
+  w.rule(PDF_COLORS.muted, 0.2);
+  w.text(p.disclaimer, { size: 9.5, color: PDF_COLORS.muted });
+
+  // 6. Footer on every page
+  const pages = doc.getNumberOfPages();
+  for (let i = 1; i <= pages; i++) {
+    doc.setPage(i);
+    doc.setDrawColor(...PDF_COLORS.muted);
+    doc.setLineWidth(0.2);
+    doc.line(PDF_MARGIN_MM, PDF_PAGE_H_MM - 14, PDF_PAGE_W_MM - PDF_MARGIN_MM, PDF_PAGE_H_MM - 14);
+    w.textAt(p.footer, PDF_PAGE_H_MM - 11, { size: 9, bold: false, color: PDF_COLORS.muted, align: 'center' });
+  }
+
+  doc.save(`verashield-reporte-${Date.now()}.pdf`);
+}
+
+downloadPdfBtn.addEventListener('click', generateEvidencePdf);
+
 // ─── Show result ─────────────────────────────────────────────────────────────
 function showResult(data) {
   currentResult = data;
+  analyzedAt = new Date();
   directCrisisActive = false;
   const t = T[currentLang];
+
+  downloadPdfBtn.hidden = !window.jspdf?.jsPDF; // hide if the CDN script failed to load
 
   uploadScreen.hidden = true;
   resultScreen.hidden = false;
@@ -862,6 +1299,7 @@ function revealCrisisResources() {
 
 function showDirectCrisisPath() {
   currentResult = null;
+  downloadPdfBtn.hidden = true;
   uploadScreen.hidden = true;
   resultScreen.hidden = false;
   scoreDisplay.hidden = true;
@@ -874,6 +1312,196 @@ function showDirectCrisisPath() {
 directCrisisBtn.addEventListener('click', showDirectCrisisPath);
 noDetectionLink.addEventListener('click', revealCrisisResources);
 backToUploadBtn.addEventListener('click', () => window.location.reload());
+
+// ─── School letter (MX / ES only) ────────────────────────────────────────────
+// 100% client-side: form values never leave the browser. Reuses the jsPDF
+// build already loaded in index.html.
+
+// Entidades con Ley Olimpia adoptada (reformas al código penal estatal).
+// NOTE: lista pendiente de verificación contra fuente oficial; se asumen los
+// 32 estados. Para quitar uno, borrarlo de este Set: la carta citará
+// entonces solo el marco federal.
+const LEY_OLIMPIA_STATES = new Set([
+  'Aguascalientes', 'Baja California', 'Baja California Sur', 'Campeche',
+  'Chiapas', 'Chihuahua', 'Ciudad de México', 'Coahuila', 'Colima', 'Durango',
+  'Estado de México', 'Guanajuato', 'Guerrero', 'Hidalgo', 'Jalisco',
+  'Michoacán', 'Morelos', 'Nayarit', 'Nuevo León', 'Oaxaca', 'Puebla',
+  'Querétaro', 'Quintana Roo', 'San Luis Potosí', 'Sinaloa', 'Sonora',
+  'Tabasco', 'Tamaulipas', 'Tlaxcala', 'Veracruz', 'Yucatán', 'Zacatecas',
+]);
+
+const MESES_ES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio',
+  'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+
+const schoolLetterLink    = document.getElementById('school-letter-link');
+const schoolLetterSection = document.getElementById('school-letter');
+const schoolLetterDetails = document.getElementById('school-letter-details');
+const schoolLetterForm    = document.getElementById('school-letter-form');
+const slDescription       = document.getElementById('sl-description');
+const slCounter           = document.getElementById('sl-counter');
+const slError             = document.getElementById('sl-error');
+
+function updateSchoolLetterVisibility() {
+  const show = currentLang === 'es' || currentCountry === 'mx';
+  schoolLetterSection.hidden = !show;
+  schoolLetterLink.hidden = currentLang !== 'es';
+}
+
+function formatDateEs(date) {
+  return `${date.getDate()} de ${MESES_ES[date.getMonth()]} de ${date.getFullYear()}`;
+}
+
+function isoToDateEs(iso) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || '');
+  if (!m) return '';
+  return formatDateEs(new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])));
+}
+
+function todayStamp(d) {
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+function generateSchoolLetter() {
+  slError.hidden = true;
+  const jsPDFCtor = window.jspdf && window.jspdf.jsPDF;
+  if (!jsPDFCtor) {
+    slError.textContent = 'No se pudo cargar el generador de PDF. Revisa tu conexión e inténtalo de nuevo.';
+    slError.hidden = false;
+    return;
+  }
+
+  const val = (id) => document.getElementById(id).value.trim();
+  const blank = (v, n = 18) => v || '_'.repeat(n);
+  const student  = val('sl-student');
+  const grade    = val('sl-grade');
+  const school   = val('sl-school');
+  const guardian = val('sl-guardian');
+  const state    = val('sl-state');
+  const incident = isoToDateEs(val('sl-date'));
+  const desc     = val('sl-description').slice(0, 300);
+  const now      = new Date();
+
+  const doc = new jsPDFCtor({ unit: 'mm', format: 'a4' });
+  const L = 25, W = 160, LH = 5.6, PAGE_BOTTOM = 270;
+  let y = 28;
+
+  const ensure = (h) => { if (y + h > PAGE_BOTTOM) { doc.addPage(); y = 28; } };
+  const para = (text, opts = {}) => {
+    doc.setFont('helvetica', opts.bold ? 'bold' : 'normal');
+    doc.setFontSize(opts.size || 11);
+    const width = opts.width || W;
+    const lines = doc.splitTextToSize(text, width);
+    ensure(lines.length * LH);
+    doc.text(lines, opts.x || L, y, { align: opts.align || 'left' });
+    y += lines.length * LH + (opts.gap === undefined ? 3 : opts.gap);
+  };
+
+  // 1. Encabezado
+  para(`${state || '____________'}, a ${formatDateEs(now)}`,
+    { x: L + W, align: 'right', gap: 8 });
+
+  // 2. Destinatario
+  para(`C. Director(a) de ${school || '______________________________'}`, { bold: true, gap: 0 });
+  para('Presente', { bold: true, gap: 8 });
+
+  // 3. Asunto
+  para('Asunto: Solicitud de intervención — incidente de contenido digital no consensuado',
+    { bold: true, gap: 8 });
+
+  // 4. Cuerpo
+  para(`Por medio de la presente, yo, ${blank(guardian, 28)}, en mi carácter de tutor(a) legal ` +
+    `del/de la alumno/a ${blank(student, 28)}, quien cursa ${blank(grade, 14)} en esa institución, ` +
+    `me dirijo a usted para hacer de su conocimiento un incidente de difusión o manipulación de ` +
+    `contenido digital (imágenes o video) sin consentimiento, ocurrido ` +
+    `${incident ? `el ${incident}` : 'en fecha ____________________'}, que afecta al/a la alumno/a.`);
+  if (desc) {
+    para(`Descripción de los hechos: ${desc}`);
+  } else {
+    para('Descripción de los hechos: ' + '_'.repeat(40), { gap: 1 });
+    para('_'.repeat(75));
+  }
+
+  // 5. Ley Olimpia
+  const federal = 'Ley General de Acceso de las Mujeres a una Vida Libre de Violencia y Código Penal Federal';
+  const olimpia = state && LEY_OLIMPIA_STATES.has(state)
+    ? `Hago de su conocimiento que la difusión de contenido íntimo o sexual sin consentimiento ` +
+      `constituye una conducta sancionada por la denominada «Ley Olimpia», tanto en el ámbito ` +
+      `federal (${federal}) como en la legislación penal de ${state}. Al tratarse de una persona ` +
+      `menor de edad, debe prevalecer además el interés superior de la niñez, conforme a la Ley ` +
+      `General de los Derechos de Niñas, Niños y Adolescentes.`
+    : `Hago de su conocimiento que la difusión de contenido íntimo o sexual sin consentimiento ` +
+      `constituye una conducta sancionada por la denominada «Ley Olimpia» en el ámbito federal ` +
+      `(${federal}). Al tratarse de una persona menor de edad, debe prevalecer además el interés ` +
+      `superior de la niñez, conforme a la Ley General de los Derechos de Niñas, Niños y Adolescentes.`;
+  para(olimpia);
+
+  // 6. Solicitudes
+  para('Por lo anterior, solicito respetuosamente a esa dirección:', { gap: 2 });
+  [
+    '1. Que se realice una investigación interna para esclarecer los hechos y deslindar responsabilidades.',
+    '2. Que se implementen medidas de protección inmediatas para el/la alumno/a, que garanticen su seguridad e integridad y eviten la revictimización.',
+    '3. Que se levante el acta correspondiente y se me entregue copia de la misma, así como del folio de seguimiento.',
+  ].forEach((item) => para(item, { x: L + 4, width: W - 4, gap: 1.5 }));
+  y += 2;
+  para('Sin otro particular, agradezco su atención y quedo en espera de su pronta respuesta.', { gap: 10 });
+
+  // 7. Firma
+  ensure(50);
+  para('Atentamente', { gap: 16 });
+  doc.line(L, y, L + 80, y);
+  y += 5;
+  para(blank(guardian, 28), { bold: true, gap: 0 });
+  para('Tutor(a) legal — firma', { size: 9, gap: 8 });
+
+  // 8. Sello de la escuela
+  ensure(28);
+  doc.setDrawColor(120);
+  doc.rect(L, y, W, 24);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9);
+  doc.text('Para uso de la escuela', L + 3, y + 6);
+  doc.setFont('helvetica', 'normal');
+  doc.text('Recibido por: ____________________   Fecha: ______________   Folio: ______________', L + 3, y + 17);
+
+  // 9-10. Pie (en cada página)
+  const pages = doc.getNumberOfPages();
+  for (let i = 1; i <= pages; i++) {
+    doc.setPage(i);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(90);
+    const disc = doc.splitTextToSize(
+      'Esta carta es para reporte escolar. Para denuncia penal, el tutor debe acompañar al menor al Ministerio Público.', W);
+    doc.text(disc, L, 280);
+    doc.text('Generado con VeraShield · verashield.app', L, 280 + disc.length * 3.6 + 1);
+    doc.setTextColor(0);
+  }
+
+  doc.save(`carta-escuela-verashield-${todayStamp(now)}.pdf`);
+}
+
+schoolLetterForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  generateSchoolLetter();
+});
+
+document.getElementById('sl-clear').addEventListener('click', () => {
+  schoolLetterForm.reset();
+  slCounter.textContent = '0 / 300';
+  slError.hidden = true;
+});
+
+slDescription.addEventListener('input', () => {
+  slCounter.textContent = `${slDescription.value.length} / 300`;
+});
+
+// Entry point from the upload screen (independent of any analysis result)
+schoolLetterLink.addEventListener('click', () => {
+  showDirectCrisisPath();
+  schoolLetterDetails.open = true;
+  schoolLetterSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
 
 // ─── Error handler ───────────────────────────────────────────────────────────
 function showError(code) {

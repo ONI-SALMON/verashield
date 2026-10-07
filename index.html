@@ -24,6 +24,15 @@
     <h2 class="hero-title"></h2>
     <p class="hero-subtitle"></p>
 
+    <aside class="disclaimer-banner" role="note">
+      <svg class="disclaimer-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="16" x2="12" y2="12"></line>
+        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+      </svg>
+      <p class="disclaimer-text"></p>
+    </aside>
+
     <label class="upload-zone" id="upload-zone" for="file-input" tabindex="0">
       <svg class="upload-icon" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
         <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
@@ -40,6 +49,7 @@
     <p class="privacy-note"></p>
 
     <button type="button" id="direct-crisis-btn" class="link-btn"></button>
+    <button type="button" id="school-letter-link" class="link-btn" hidden>Generar carta para mi escuela</button>
   </section>
 
   <section id="result-screen" hidden>
@@ -49,12 +59,23 @@
       <button type="button" class="lang-btn" data-lang="hi">हि</button>
     </div>
 
+    <aside class="disclaimer-banner" role="note">
+      <svg class="disclaimer-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="16" x2="12" y2="12"></line>
+        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+      </svg>
+      <p class="disclaimer-text"></p>
+    </aside>
+
     <div class="score-display" id="score-display">
       <span class="score-number" id="score-number">0</span>
       <span class="score-label" id="score-label"></span>
     </div>
 
     <p class="score-explanation" id="score-explanation"></p>
+
+    <button type="button" id="download-pdf-btn" hidden></button>
 
     <p class="no-detection-note" id="no-detection-note" hidden>
       <span id="no-detection-text"></span>
@@ -80,6 +101,75 @@
       <div class="ngo-card" id="ngo-card"></div>
       <p class="legal-note" id="legal-note"></p>
       <a class="takedown-btn" id="takedown-btn" href="https://takeitdown.ncmec.org" target="_blank" rel="noopener"></a>
+
+      <section class="action-resources" id="action-resources" aria-labelledby="action-resources-title">
+        <h3 class="crisis-title" id="action-resources-title"></h3>
+        <p class="action-disclaimer" id="action-disclaimer" role="note"></p>
+        <div class="template-list" id="template-list"></div>
+      </section>
+
+      <section class="school-letter" id="school-letter" aria-labelledby="school-letter-title" hidden>
+        <details id="school-letter-details">
+          <summary id="school-letter-title">Generar carta para mi escuela</summary>
+          <p class="school-letter-intro">Llena los datos que quieras (todos son opcionales) y descarga una carta formal para la dirección de tu escuela. Se genera en tu dispositivo: nada se envía ni se guarda.</p>
+          <form class="school-letter-form" id="school-letter-form" autocomplete="off" novalidate>
+            <label class="sl-field"><span>Nombre del alumno/a</span>
+              <input type="text" id="sl-student" maxlength="100" placeholder="Ej. María Pérez López"></label>
+            <label class="sl-field"><span>Grado y grupo</span>
+              <input type="text" id="sl-grade" maxlength="40" placeholder="Ej. 2.º B de secundaria"></label>
+            <label class="sl-field"><span>Nombre de la escuela</span>
+              <input type="text" id="sl-school" maxlength="120" placeholder="Ej. Secundaria Técnica No. 25"></label>
+            <label class="sl-field"><span>Fecha del incidente</span>
+              <input type="date" id="sl-date"></label>
+            <label class="sl-field"><span>Descripción breve del incidente</span>
+              <textarea id="sl-description" maxlength="300" rows="4" placeholder="Describe brevemente qué pasó, sin datos que no quieras compartir con la escuela."></textarea>
+              <small class="sl-counter" id="sl-counter">0 / 300</small></label>
+            <label class="sl-field"><span>Nombre del tutor o tutora legal</span>
+              <input type="text" id="sl-guardian" maxlength="100" placeholder="Ej. Ana López Ramírez"></label>
+            <label class="sl-field"><span>Estado</span>
+              <select id="sl-state">
+            <option value="">Selecciona tu estado</option>
+            <option value="Aguascalientes">Aguascalientes</option>
+            <option value="Baja California">Baja California</option>
+            <option value="Baja California Sur">Baja California Sur</option>
+            <option value="Campeche">Campeche</option>
+            <option value="Chiapas">Chiapas</option>
+            <option value="Chihuahua">Chihuahua</option>
+            <option value="Ciudad de México">Ciudad de México</option>
+            <option value="Coahuila">Coahuila</option>
+            <option value="Colima">Colima</option>
+            <option value="Durango">Durango</option>
+            <option value="Estado de México">Estado de México</option>
+            <option value="Guanajuato">Guanajuato</option>
+            <option value="Guerrero">Guerrero</option>
+            <option value="Hidalgo">Hidalgo</option>
+            <option value="Jalisco">Jalisco</option>
+            <option value="Michoacán">Michoacán</option>
+            <option value="Morelos">Morelos</option>
+            <option value="Nayarit">Nayarit</option>
+            <option value="Nuevo León">Nuevo León</option>
+            <option value="Oaxaca">Oaxaca</option>
+            <option value="Puebla">Puebla</option>
+            <option value="Querétaro">Querétaro</option>
+            <option value="Quintana Roo">Quintana Roo</option>
+            <option value="San Luis Potosí">San Luis Potosí</option>
+            <option value="Sinaloa">Sinaloa</option>
+            <option value="Sonora">Sonora</option>
+            <option value="Tabasco">Tabasco</option>
+            <option value="Tamaulipas">Tamaulipas</option>
+            <option value="Tlaxcala">Tlaxcala</option>
+            <option value="Veracruz">Veracruz</option>
+            <option value="Yucatán">Yucatán</option>
+            <option value="Zacatecas">Zacatecas</option>
+              </select></label>
+            <p class="form-error" id="sl-error" role="alert" hidden></p>
+            <div class="sl-actions">
+              <button type="submit" class="sl-generate-btn" id="sl-generate">Generar carta</button>
+              <button type="button" class="sl-clear-btn" id="sl-clear">Limpiar formulario</button>
+            </div>
+          </form>
+        </details>
+      </section>
     </div>
 
     <p class="privacy-note"></p>
@@ -88,6 +178,7 @@
     <button type="button" id="back-to-upload-btn" class="link-btn" hidden></button>
   </section>
 </main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" integrity="sha384-JcnsjUPPylna1s1fvi1u12X5qjY5OL56iySh75FdtrwhO/SWXgMjoVqcKyIIWOLk" crossorigin="anonymous"></script>
 <script src="app.js"></script>
 </body>
 </html>
