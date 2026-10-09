@@ -4,178 +4,201 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>VeraShield</title>
-<meta name="description" content="VeraShield helps teens aged 13–17 respond to image-based abuse — whether AI-generated or real. Free tool with crisis resources in Mexico, India, and more.">
+<meta name="description" content="VeraShield helps teens aged 13–17 respond to image-based abuse: whether AI-generated or real. Free tool with crisis resources in Mexico, India, and more.">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<main class="page">
-  <section id="upload-screen">
-    <div class="lang-toggle">
-      <button type="button" class="lang-btn active" data-lang="es">ES</button>
-      <button type="button" class="lang-btn" data-lang="en">EN</button>
-      <button type="button" class="lang-btn" data-lang="hi">हि</button>
+<a class="skip-link" href="#main" data-i18n="skipLink"></a>
+<header class="site-header">
+  <div class="site-header-inner">
+    <a class="brand" href="./" aria-label="VeraShield">
+      <svg class="brand-mark" width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M12 2.5 4.5 5.5v5.8c0 4.5 3.1 8.2 7.5 10.2 4.4-2 7.5-5.7 7.5-10.2V5.5L12 2.5Z" fill="currentColor"/>
+        <path d="m8.8 12.2 2.3 2.3 4.2-4.6" stroke="#0B1220" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span class="wordmark">VeraShield</span>
+    </a>
+    <div class="lang-toggle" role="group" aria-label="Language">
+      <button type="button" class="lang-btn active" data-lang="es" lang="es" aria-pressed="true">Español</button>
+      <button type="button" class="lang-btn" data-lang="en" lang="en" aria-pressed="false">English</button>
+      <button type="button" class="lang-btn" data-lang="hi" lang="hi" aria-pressed="false">हिन्दी</button>
+    </div>
+  </div>
+</header>
+
+<main class="page" id="main">
+  <section id="upload-screen" class="screen" aria-labelledby="hero-title">
+    <div class="intro">
+      <p class="eyebrow" data-i18n="eyebrow"></p>
+      <h1 class="hero-title" id="hero-title" tabindex="-1"></h1>
+      <p class="hero-subtitle"></p>
+      <ul class="trust-list">
+        <li><svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="trust1"></span></li>
+        <li><svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="trust2"></span></li>
+        <li><svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="trust3"></span></li>
+      </ul>
     </div>
 
-    <h1 class="wordmark">VeraShield</h1>
-    <h2 class="hero-title"></h2>
-    <p class="hero-subtitle"></p>
+    <div class="panel">
+      <p class="step-label"><span class="step-num">1</span><span data-i18n="stepUpload"></span></p>
+      <label class="upload-zone" id="upload-zone" for="file-input" tabindex="0">
+        <span class="upload-preview" id="upload-preview" hidden><img id="upload-preview-img" alt=""></span>
+        <svg class="upload-icon" id="upload-icon" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 16V4m0 0 4 4m-4-4L8 8"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/>
+        </svg>
+        <span class="upload-text"></span>
+        <span class="upload-hint" id="upload-hint" data-i18n="uploadHint"></span>
+      </label>
+      <input type="file" id="file-input" accept="image/*" hidden>
 
-    <aside class="disclaimer-banner" role="note">
-      <svg class="disclaimer-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <circle cx="12" cy="12" r="10"></circle>
-        <line x1="12" y1="16" x2="12" y2="12"></line>
-        <line x1="12" y1="8" x2="12.01" y2="8"></line>
-      </svg>
-      <p class="disclaimer-text"></p>
-    </aside>
+      <p class="step-label"><span class="step-num">2</span><span data-i18n="stepAnalyze"></span></p>
+      <button type="button" id="analyze-btn" disabled></button>
+      <p class="analyze-hint" id="analyze-hint" data-i18n="analyzeHint"></p>
+      <p class="form-error" id="form-error" role="alert" hidden></p>
 
-    <label class="upload-zone" id="upload-zone" for="file-input" tabindex="0">
-      <svg class="upload-icon" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
-        <circle cx="12" cy="13" r="4"></circle>
-      </svg>
-      <p class="upload-text"></p>
-    </label>
-    <input type="file" id="file-input" accept="image/*" hidden>
+      <div class="or-divider" role="separator"><span data-i18n="or"></span></div>
 
-    <button type="button" id="analyze-btn" disabled></button>
+      <div class="alt-path">
+        <p class="alt-path-lead" data-i18n="altLead"></p>
+        <button type="button" id="direct-crisis-btn" class="secondary-btn"></button>
+        <button type="button" id="school-letter-link" class="link-btn"></button>
+      </div>
+    </div>
 
-    <p class="form-error" id="form-error" role="alert" hidden></p>
-
-    <p class="privacy-note"></p>
-
-    <button type="button" id="direct-crisis-btn" class="link-btn"></button>
-    <button type="button" id="school-letter-link" class="link-btn" hidden>Generar carta para mi escuela</button>
+    <div class="intro-foot">
+      <aside class="disclaimer-banner" role="note"><svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg><p class="disclaimer-text"></p></aside>
+      <p class="privacy-note"></p>
+    </div>
   </section>
 
-  <section id="result-screen" hidden>
-    <div class="lang-toggle">
-      <button type="button" class="lang-btn active" data-lang="es">ES</button>
-      <button type="button" class="lang-btn" data-lang="en">EN</button>
-      <button type="button" class="lang-btn" data-lang="hi">हि</button>
-    </div>
-
-    <aside class="disclaimer-banner" role="note">
-      <svg class="disclaimer-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <circle cx="12" cy="12" r="10"></circle>
-        <line x1="12" y1="16" x2="12" y2="12"></line>
-        <line x1="12" y1="8" x2="12.01" y2="8"></line>
-      </svg>
-      <p class="disclaimer-text"></p>
-    </aside>
-
-    <div class="score-display" id="score-display">
-      <span class="score-number" id="score-number">0</span>
-      <span class="score-label" id="score-label"></span>
-    </div>
-
-    <p class="score-explanation" id="score-explanation"></p>
-
-    <button type="button" id="download-pdf-btn" hidden></button>
-
-    <p class="no-detection-note" id="no-detection-note" hidden>
-      <span id="no-detection-text"></span>
-      <button type="button" id="no-detection-link" class="link-btn"></button>
-    </p>
-
-    <div class="country-selector" id="country-selector" hidden>
-      <button type="button" class="country-btn active" data-country="mx">México</button>
-      <button type="button" class="country-btn" data-country="in">India</button>
-      <button type="button" class="country-btn" data-country="us">United States</button>
-    </div>
-
-    <div class="crisis-pathway" id="crisis-pathway" hidden>
-      <h2 class="direct-crisis-heading" id="direct-crisis-heading" hidden></h2>
-      <div class="victim-toggle" id="victim-toggle">
-        <button type="button" class="victim-toggle-btn" data-mode="me"></button>
-        <button type="button" class="victim-toggle-btn" data-mode="other"></button>
+  <section id="result-screen" class="screen" aria-labelledby="result-heading" hidden>
+    <div class="result-summary">
+      <h2 class="section-heading" id="result-heading" tabindex="-1"></h2>
+      <div class="score-display" id="score-display">
+        <div class="score-value"><span class="score-number" id="score-number">0</span><span class="score-unit">%</span></div>
+        <div class="score-body">
+          <span class="score-caption" id="score-caption"></span>
+          <span class="score-label" id="score-label"></span>
+          <div class="score-meter" aria-hidden="true"><i id="score-meter-fill"></i></div>
+        </div>
       </div>
-      <p class="crisis-intro" id="crisis-intro"></p>
-      <a class="share-btn whatsapp-btn" id="whatsapp-btn" target="_blank" rel="noopener"></a>
-      <h3 class="crisis-title"></h3>
-      <ol class="crisis-steps" id="crisis-steps"></ol>
-      <div class="ngo-card" id="ngo-card"></div>
-      <p class="legal-note" id="legal-note"></p>
-      <a class="takedown-btn" id="takedown-btn" href="https://takeitdown.ncmec.org" target="_blank" rel="noopener"></a>
+      <p class="score-explanation" id="score-explanation"></p>
 
-      <section class="action-resources" id="action-resources" aria-labelledby="action-resources-title">
-        <h3 class="crisis-title" id="action-resources-title"></h3>
-        <p class="action-disclaimer" id="action-disclaimer" role="note"></p>
-        <div class="template-list" id="template-list"></div>
-      </section>
+      <div class="no-detection-note" id="no-detection-note" hidden>
+        <p id="no-detection-text"></p>
+        <button type="button" id="no-detection-link" class="primary-btn"></button>
+      </div>
 
-      <section class="school-letter" id="school-letter" aria-labelledby="school-letter-title" hidden>
-        <details id="school-letter-details">
-          <summary id="school-letter-title">Generar carta para mi escuela</summary>
-          <p class="school-letter-intro">Llena los datos que quieras (todos son opcionales) y descarga una carta formal para la dirección de tu escuela. Se genera en tu dispositivo: nada se envía ni se guarda.</p>
-          <form class="school-letter-form" id="school-letter-form" autocomplete="off" novalidate>
-            <label class="sl-field"><span>Nombre del alumno/a</span>
-              <input type="text" id="sl-student" maxlength="100" placeholder="Ej. María Pérez López"></label>
-            <label class="sl-field"><span>Grado y grupo</span>
-              <input type="text" id="sl-grade" maxlength="40" placeholder="Ej. 2.º B de secundaria"></label>
-            <label class="sl-field"><span>Nombre de la escuela</span>
-              <input type="text" id="sl-school" maxlength="120" placeholder="Ej. Secundaria Técnica No. 25"></label>
-            <label class="sl-field"><span>Fecha del incidente</span>
-              <input type="date" id="sl-date"></label>
-            <label class="sl-field"><span>Descripción breve del incidente</span>
-              <textarea id="sl-description" maxlength="300" rows="4" placeholder="Describe brevemente qué pasó, sin datos que no quieras compartir con la escuela."></textarea>
-              <small class="sl-counter" id="sl-counter">0 / 300</small></label>
-            <label class="sl-field"><span>Nombre del tutor o tutora legal</span>
-              <input type="text" id="sl-guardian" maxlength="100" placeholder="Ej. Ana López Ramírez"></label>
-            <label class="sl-field"><span>Estado</span>
-              <select id="sl-state">
-            <option value="">Selecciona tu estado</option>
-            <option value="Aguascalientes">Aguascalientes</option>
-            <option value="Baja California">Baja California</option>
-            <option value="Baja California Sur">Baja California Sur</option>
-            <option value="Campeche">Campeche</option>
-            <option value="Chiapas">Chiapas</option>
-            <option value="Chihuahua">Chihuahua</option>
-            <option value="Ciudad de México">Ciudad de México</option>
-            <option value="Coahuila">Coahuila</option>
-            <option value="Colima">Colima</option>
-            <option value="Durango">Durango</option>
-            <option value="Estado de México">Estado de México</option>
-            <option value="Guanajuato">Guanajuato</option>
-            <option value="Guerrero">Guerrero</option>
-            <option value="Hidalgo">Hidalgo</option>
-            <option value="Jalisco">Jalisco</option>
-            <option value="Michoacán">Michoacán</option>
-            <option value="Morelos">Morelos</option>
-            <option value="Nayarit">Nayarit</option>
-            <option value="Nuevo León">Nuevo León</option>
-            <option value="Oaxaca">Oaxaca</option>
-            <option value="Puebla">Puebla</option>
-            <option value="Querétaro">Querétaro</option>
-            <option value="Quintana Roo">Quintana Roo</option>
-            <option value="San Luis Potosí">San Luis Potosí</option>
-            <option value="Sinaloa">Sinaloa</option>
-            <option value="Sonora">Sonora</option>
-            <option value="Tabasco">Tabasco</option>
-            <option value="Tamaulipas">Tamaulipas</option>
-            <option value="Tlaxcala">Tlaxcala</option>
-            <option value="Veracruz">Veracruz</option>
-            <option value="Yucatán">Yucatán</option>
-            <option value="Zacatecas">Zacatecas</option>
-              </select></label>
-            <p class="form-error" id="sl-error" role="alert" hidden></p>
-            <div class="sl-actions">
-              <button type="submit" class="sl-generate-btn" id="sl-generate">Generar carta</button>
-              <button type="button" class="sl-clear-btn" id="sl-clear">Limpiar formulario</button>
-            </div>
-          </form>
-        </details>
-      </section>
+      <button type="button" id="download-pdf-btn" class="secondary-btn" hidden></button>
+      <button type="button" id="reset-btn" class="secondary-btn"></button>
+      <button type="button" id="back-to-upload-btn" class="secondary-btn" hidden></button>
+      <aside class="disclaimer-banner" role="note"><svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg><p class="disclaimer-text"></p></aside>
+      <p class="privacy-note"></p>
     </div>
 
-    <p class="privacy-note"></p>
+    <div class="result-detail">
+      <div class="country-selector-wrap" id="country-selector" hidden>
+        <p class="field-label" id="country-label"></p>
+        <div class="country-selector" role="group" aria-labelledby="country-label">
+          <button type="button" class="country-btn active" data-country="mx">México</button>
+          <button type="button" class="country-btn" data-country="in">India</button>
+          <button type="button" class="country-btn" data-country="us">United States</button>
+        </div>
+      </div>
 
-    <button type="button" id="reset-btn"></button>
-    <button type="button" id="back-to-upload-btn" class="link-btn" hidden></button>
+      <div class="crisis-pathway" id="crisis-pathway" hidden>
+        <h2 class="direct-crisis-heading section-heading" id="direct-crisis-heading" hidden></h2>
+        <div class="victim-toggle" id="victim-toggle" role="group">
+          <button type="button" class="victim-toggle-btn" data-mode="me"></button>
+          <button type="button" class="victim-toggle-btn" data-mode="other"></button>
+        </div>
+        <p class="crisis-intro" id="crisis-intro"></p>
+
+        <div class="primary-action">
+          <a class="share-btn whatsapp-btn" id="whatsapp-btn" target="_blank" rel="noopener"></a>
+          <p class="action-sub" id="whatsapp-sub"></p>
+        </div>
+
+        <h3 class="crisis-title"></h3>
+        <ol class="crisis-steps" id="crisis-steps"></ol>
+        <div class="ngo-card" id="ngo-card"></div>
+        <p class="legal-note" id="legal-note"></p>
+        <a class="takedown-btn" id="takedown-btn" href="https://takeitdown.ncmec.org" target="_blank" rel="noopener"></a>
+
+        <section class="action-resources" id="action-resources" aria-labelledby="action-resources-title">
+          <h3 class="crisis-title" id="action-resources-title"></h3>
+          <p class="action-disclaimer" id="action-disclaimer" role="note"></p>
+          <div class="template-list" id="template-list"></div>
+        </section>
+
+        <section class="school-letter" id="school-letter" aria-labelledby="school-letter-title" hidden>
+          <details id="school-letter-details">
+            <summary id="school-letter-title" data-sl="title"></summary>
+            <p class="school-letter-intro" data-sl="intro"></p>
+            <form class="school-letter-form" id="school-letter-form" autocomplete="off" novalidate>
+              <label class="sl-field"><span data-sl="student"></span>
+                <input type="text" id="sl-student" maxlength="100" data-sl-ph="studentPh"></label>
+              <label class="sl-field"><span data-sl="grade"></span>
+                <input type="text" id="sl-grade" maxlength="40" data-sl-ph="gradePh"></label>
+              <label class="sl-field"><span data-sl="school"></span>
+                <input type="text" id="sl-school" maxlength="120" data-sl-ph="schoolPh"></label>
+              <label class="sl-field"><span data-sl="date"></span>
+                <input type="date" id="sl-date"></label>
+              <label class="sl-field"><span data-sl="desc"></span>
+                <textarea id="sl-description" maxlength="300" rows="4" data-sl-ph="descPh"></textarea>
+                <small class="sl-counter" id="sl-counter">0 / 300</small></label>
+              <label class="sl-field"><span data-sl="guardian"></span>
+                <input type="text" id="sl-guardian" maxlength="100" data-sl-ph="guardianPh"></label>
+              <label class="sl-field" id="sl-state-field"><span data-sl="state"></span>
+                <select id="sl-state">
+              <option value="" data-sl="statePh"></option>
+              <option value="Aguascalientes">Aguascalientes</option>
+              <option value="Baja California">Baja California</option>
+              <option value="Baja California Sur">Baja California Sur</option>
+              <option value="Campeche">Campeche</option>
+              <option value="Chiapas">Chiapas</option>
+              <option value="Chihuahua">Chihuahua</option>
+              <option value="Ciudad de México">Ciudad de México</option>
+              <option value="Coahuila">Coahuila</option>
+              <option value="Colima">Colima</option>
+              <option value="Durango">Durango</option>
+              <option value="Estado de México">Estado de México</option>
+              <option value="Guanajuato">Guanajuato</option>
+              <option value="Guerrero">Guerrero</option>
+              <option value="Hidalgo">Hidalgo</option>
+              <option value="Jalisco">Jalisco</option>
+              <option value="Michoacán">Michoacán</option>
+              <option value="Morelos">Morelos</option>
+              <option value="Nayarit">Nayarit</option>
+              <option value="Nuevo León">Nuevo León</option>
+              <option value="Oaxaca">Oaxaca</option>
+              <option value="Puebla">Puebla</option>
+              <option value="Querétaro">Querétaro</option>
+              <option value="Quintana Roo">Quintana Roo</option>
+              <option value="San Luis Potosí">San Luis Potosí</option>
+              <option value="Sinaloa">Sinaloa</option>
+              <option value="Sonora">Sonora</option>
+              <option value="Tabasco">Tabasco</option>
+              <option value="Tamaulipas">Tamaulipas</option>
+              <option value="Tlaxcala">Tlaxcala</option>
+              <option value="Veracruz">Veracruz</option>
+              <option value="Yucatán">Yucatán</option>
+              <option value="Zacatecas">Zacatecas</option>
+                </select></label>
+              <p class="form-error" id="sl-error" role="alert" hidden></p>
+              <div class="sl-actions">
+                <button type="submit" class="sl-generate-btn" id="sl-generate" data-sl="generate"></button>
+                <button type="button" class="sl-clear-btn" id="sl-clear" data-sl="clear"></button>
+              </div>
+            </form>
+          </details>
+        </section>
+      </div>
+    </div>
   </section>
 </main>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" integrity="sha384-JcnsjUPPylna1s1fvi1u12X5qjY5OL56iySh75FdtrwhO/SWXgMjoVqcKyIIWOLk" crossorigin="anonymous"></script>

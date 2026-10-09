@@ -36,6 +36,82 @@ const noDetectionLink    = document.getElementById('no-detection-link');
 const backToUploadBtn    = document.getElementById('back-to-upload-btn');
 const downloadPdfBtn     = document.getElementById('download-pdf-btn');
 
+const analyzeHint    = document.getElementById('analyze-hint');
+const uploadPreview  = document.getElementById('upload-preview');
+const uploadPreviewImg = document.getElementById('upload-preview-img');
+const uploadIcon     = document.getElementById('upload-icon');
+const uploadHint     = document.getElementById('upload-hint');
+const resultHeading  = document.getElementById('result-heading');
+const scoreCaption   = document.getElementById('score-caption');
+const scoreMeterFill = document.getElementById('score-meter-fill');
+const countryLabel   = document.getElementById('country-label');
+const whatsappSub    = document.getElementById('whatsapp-sub');
+const heroTitle      = document.getElementById('hero-title');
+
+// ─── Extra UI strings (labels, hints, orientation copy) ─────────────────────
+const UI = {
+  es: {
+    skipLink:     'Saltar al contenido',
+    eyebrow:      'Gratis y en tu idioma',
+    trust1:       'Sin cuenta ni registro',
+    trust2:       'Tu imagen no se guarda',
+    trust3:       'Te mostramos qué hacer después del resultado',
+    stepUpload:   'Elige la imagen',
+    stepAnalyze:  'Revisa si fue creada por IA',
+    uploadHint:   'JPG, PNG o WebP. Máximo 10 MB.',
+    analyzeHint:  'Elige una imagen para activar este botón.',
+    changeImage:  'Toca para cambiar la imagen',
+    or:           'o',
+    altLead:      '¿Tu foto es real y alguien la compartió sin tu permiso? No necesitas analizarla para recibir ayuda.',
+    resultHeading:'Resultado',
+    directHeading:'Tus derechos y recursos de apoyo',
+    scoreCaption: 'Probabilidad de creada por IA',
+    countryLabel: 'Mostrar ayuda en',
+    whatsappSub:  'Se abre WhatsApp con un mensaje listo. Tú decides si lo envías.',
+    schoolLetter: 'Generar carta para mi escuela',
+  },
+  en: {
+    skipLink:     'Skip to content',
+    eyebrow:      'Free and in your language',
+    trust1:       'No account or sign-up',
+    trust2:       'Your image is not saved',
+    trust3:       'We show you what to do after the result',
+    stepUpload:   'Choose the image',
+    stepAnalyze:  'Check if it was created by AI',
+    uploadHint:   'JPG, PNG or WebP. Max 10 MB.',
+    analyzeHint:  'Choose an image to enable this button.',
+    changeImage:  'Tap to change the image',
+    or:           'or',
+    altLead:      'Is your photo real and someone shared it without your permission? You do not need to analyze it to get help.',
+    resultHeading:'Result',
+    directHeading:'Your rights and support resources',
+    scoreCaption: 'Chance it was created by AI',
+    countryLabel: 'Show help in',
+    whatsappSub:  'Opens WhatsApp with a message ready to go. You decide whether to send it.',
+    schoolLetter: 'Generate a letter for my school',
+  },
+  hi: {
+    skipLink:     'सामग्री पर जाएँ',
+    eyebrow:      'निःशुल्क और आपकी भाषा में',
+    trust1:       'कोई खाता या साइन-अप नहीं',
+    trust2:       'आपकी तस्वीर सेव नहीं होती',
+    trust3:       'परिणाम के बाद क्या करना है, हम बताते हैं',
+    stepUpload:   'तस्वीर चुनें',
+    stepAnalyze:  'जाँचें कि वह AI से बनी है या नहीं',
+    uploadHint:   'JPG, PNG या WebP। अधिकतम 10 MB।',
+    analyzeHint:  'इस बटन को चालू करने के लिए तस्वीर चुनें।',
+    changeImage:  'तस्वीर बदलने के लिए टैप करें',
+    or:           'या',
+    altLead:      'क्या आपकी असली फ़ोटो बिना अनुमति के साझा की गई? मदद पाने के लिए उसे जाँचना ज़रूरी नहीं है।',
+    resultHeading:'परिणाम',
+    directHeading:'आपके अधिकार और सहायता संसाधन',
+    scoreCaption: 'AI से बनी होने की संभावना',
+    countryLabel: 'इस देश की मदद दिखाएँ',
+    whatsappSub:  'WhatsApp में एक तैयार संदेश खुलेगा। भेजना है या नहीं, आप तय करें।',
+    schoolLetter: 'स्कूल के लिए पत्र बनाएँ',
+  },
+};
+
 // ─── Translations ────────────────────────────────────────────────────────────
 const T = {
   es: {
@@ -70,27 +146,27 @@ const T = {
     },
     crisisSteps: [
       'Guarda evidencia: toma una captura de pantalla con la URL visible.',
-      'No compartas el contenido — reportarlo a quienes necesitan verlo es suficiente.',
+      'No compartas el contenido: reportarlo a quienes necesitan verlo es suficiente.',
       'Contacta a una organización de apoyo:',
     ],
     victimToggle: {
-      me:    '🧍 Esto me pasó a mí',
-      other: '👥 Le pasó a alguien que conozco',
+      me:    'Esto me pasó a mí',
+      other: 'Le pasó a alguien que conozco',
     },
     crisisIntro: {
       me:    'Esto no es tu culpa. Lo que ves tiene solución y no estás solo/a.',
       other: 'Tu amigo/a necesita ayuda. Lo más importante ahora es que un adulto de confianza lo sepa.',
     },
-    whatsappBtn: '📱 Pedir ayuda a un adulto de confianza',
+    whatsappBtn: 'Pedir ayuda a un adulto de confianza',
     whatsappMessage: {
       me:    'Mamá/Papá, necesito tu ayuda. Encontré una imagen mía que puede haber sido creada por IA. Usé una app llamada VeraShield que lo detectó. ¿Podemos hablar?',
       other: 'Mamá/Papá, mi amigo/a necesita ayuda. Vi una imagen suya que puede haber sido creada por IA. ¿Podemos ayudarle?',
     },
     legalNote: 'Esta situación puede estar protegida por la <a href="https://www.gob.mx/conavim/articulos/ley-olimpia" target="_blank" rel="noopener">Ley Olimpia</a>.',
-    takedownBtn: '🔗 Solicitar eliminación de la imagen (NCMEC)',
-    crisisIntro_mx: 'Esto no es tu culpa. En México existen leyes y organizaciones que pueden ayudarte a resolver esta situación — no estás solo/a.',
-    crisisIntro_in: 'Esto no es tu culpa. En India existen leyes y organizaciones que pueden ayudarte a resolver esta situación — no estás solo/a.',
-    crisisIntro_us: 'Esto no es tu culpa. En Estados Unidos existen leyes y organizaciones que pueden ayudarte a resolver esta situación — no estás solo/a.',
+    takedownBtn: 'Solicitar eliminación de la imagen (NCMEC)',
+    crisisIntro_mx: 'Esto no es tu culpa. En México existen leyes y organizaciones que pueden ayudarte a resolver esta situación. No estás solo/a.',
+    crisisIntro_in: 'Esto no es tu culpa. En India existen leyes y organizaciones que pueden ayudarte a resolver esta situación. No estás solo/a.',
+    crisisIntro_us: 'Esto no es tu culpa. En Estados Unidos existen leyes y organizaciones que pueden ayudarte a resolver esta situación. No estás solo/a.',
     legalNote_in: 'En India, la Sección 66E de la Ley de TI protege a las víctimas de la difusión no consensuada de imágenes.',
     ngoTitle_mx: 'Organizaciones que pueden ayudarte (México)',
     ngoTitle_in: 'Organizaciones que pueden ayudarte (India)',
@@ -98,13 +174,13 @@ const T = {
     ngosIndia: [
       {
         name: 'iCall (TISS)',
-        description: 'Apoyo psicológico gratuito para jóvenes — llamada o chat',
+        description: 'Apoyo psicológico gratuito para jóvenes: llamada o chat',
         phone: '9152987821',
         url: 'https://icallhelpline.org',
       },
       {
         name: 'Vandrevala Foundation',
-        description: 'Línea de crisis de salud mental 24/7 — llamada y WhatsApp',
+        description: 'Línea de crisis de salud mental 24/7: llamada y WhatsApp',
         phone: '1860-2662-345',
         url: 'https://www.vandrevalafoundation.com',
       },
@@ -161,27 +237,27 @@ const T = {
     },
     crisisSteps: [
       'Save evidence: take a screenshot showing the URL.',
-      'Do not share the content — reporting it to the right people is enough.',
+      'Do not share the content: reporting it to the right people is enough.',
       'Contact a support organization:',
     ],
     victimToggle: {
-      me:    '🧍 This happened to me',
-      other: '👥 This happened to someone I know',
+      me:    'This happened to me',
+      other: 'This happened to someone I know',
     },
     crisisIntro: {
       me:    "This is not your fault. What you're seeing has a solution and you're not alone.",
       other: 'Your friend needs help. The most important thing now is that a trusted adult knows.',
     },
-    whatsappBtn: '📱 Ask a trusted adult for help',
+    whatsappBtn: 'Ask a trusted adult for help',
     whatsappMessage: {
       me:    'Mom/Dad, I need your help. I found an image of me that may have been created by AI. I used an app called VeraShield that detected it. Can we talk?',
       other: 'Mom/Dad, my friend needs help. I saw an image of them that may have been created by AI. Can we help them?',
     },
     legalNote: 'This situation may be covered under the <a href="https://takeitdown.ncmec.org" target="_blank" rel="noopener">TAKE IT DOWN Act</a>.',
-    takedownBtn: '🔗 Request image removal (NCMEC)',
-    crisisIntro_mx: "This is not your fault. In Mexico, there are laws and organizations that can help you resolve this — you're not alone.",
-    crisisIntro_in: "This is not your fault. In India, there are laws and organizations that can help you resolve this — you're not alone.",
-    crisisIntro_us: "This is not your fault. In the United States, there are laws and organizations that can help you resolve this — you're not alone.",
+    takedownBtn: 'Request image removal (NCMEC)',
+    crisisIntro_mx: "This is not your fault. In Mexico, there are laws and organizations that can help you resolve this. You're not alone.",
+    crisisIntro_in: "This is not your fault. In India, there are laws and organizations that can help you resolve this. You're not alone.",
+    crisisIntro_us: "This is not your fault. In the United States, there are laws and organizations that can help you resolve this. You're not alone.",
     legalNote_in: 'In India, IT Act Section 66E protects victims of non-consensual image sharing.',
     ngoTitle_mx: 'Organizations that can help you (Mexico)',
     ngoTitle_in: 'Organizations that can help you (India)',
@@ -189,13 +265,13 @@ const T = {
     ngosIndia: [
       {
         name: 'iCall (TISS)',
-        description: 'Free psychological support for young people — call or chat',
+        description: 'Free psychological support for young people: call or chat',
         phone: '9152987821',
         url: 'https://icallhelpline.org',
       },
       {
         name: 'Vandrevala Foundation',
-        description: '24/7 mental health crisis helpline — call and WhatsApp',
+        description: '24/7 mental health crisis helpline: call and WhatsApp',
         phone: '1860-2662-345',
         url: 'https://www.vandrevalafoundation.com',
       },
@@ -252,27 +328,27 @@ const T = {
     },
     crisisSteps: [
       'सबूत सेव करें: URL दिखाते हुए स्क्रीनशॉट लें।',
-      'सामग्री साझा न करें — सही लोगों को रिपोर्ट करना पर्याप्त है।',
+      'सामग्री साझा न करें: सही लोगों को रिपोर्ट करना पर्याप्त है।',
       'एक सहायता संगठन से संपर्क करें:',
     ],
     victimToggle: {
-      me:    '🧍 यह मेरे साथ हुआ',
-      other: '👥 यह किसी और के साथ हुआ',
+      me:    'यह मेरे साथ हुआ',
+      other: 'यह किसी और के साथ हुआ',
     },
     crisisIntro: {
       me:    'यह आपकी गलती नहीं है। इसका समाधान है और आप अकेले नहीं हैं।',
       other: 'आपके मित्र को मदद चाहिए। अभी सबसे जरूरी है कि कोई विश्वसनीय वयस्क इसे जाने।',
     },
-    whatsappBtn: '📱 किसी विश्वसनीय वयस्क से मदद माँगें',
+    whatsappBtn: 'किसी विश्वसनीय वयस्क से मदद माँगें',
     whatsappMessage: {
       me:    'मम्मी/पापा, मुझे आपकी मदद चाहिए। मुझे एक तस्वीर मिली जो AI से बनी हो सकती है। मैंने VeraShield ऐप से इसे जाँचा। क्या हम बात कर सकते हैं?',
       other: 'मम्मी/पापा, मेरे दोस्त को मदद चाहिए। मैंने उनकी एक तस्वीर देखी जो AI से बनी हो सकती है। क्या हम उनकी मदद कर सकते हैं?',
     },
     legalNote: 'यह स्थिति <a href="https://wcd.nic.in/act/protection-children-sexual-offences-pocso-act-2012" target="_blank" rel="noopener">POCSO Act</a> के तहत संरक्षित हो सकती है।',
-    takedownBtn: '🔗 तस्वीर हटाने का अनुरोध करें (NCMEC)',
-    crisisIntro_mx: 'यह आपकी गलती नहीं है। मेक्सिको में ऐसे कानून और संगठन हैं जो इस स्थिति में आपकी मदद कर सकते हैं — आप अकेले नहीं हैं।',
-    crisisIntro_in: 'यह आपकी गलती नहीं है। भारत में ऐसे कानून और संगठन हैं जो इस स्थिति में आपकी मदद कर सकते हैं — आप अकेले नहीं हैं।',
-    crisisIntro_us: 'यह आपकी गलती नहीं है। संयुक्त राज्य अमेरिका में ऐसे कानून और संगठन हैं जो इस स्थिति में आपकी मदद कर सकते हैं — आप अकेले नहीं हैं।',
+    takedownBtn: 'तस्वीर हटाने का अनुरोध करें (NCMEC)',
+    crisisIntro_mx: 'यह आपकी गलती नहीं है। मेक्सिको में ऐसे कानून और संगठन हैं जो इस स्थिति में आपकी मदद कर सकते हैं। आप अकेले नहीं हैं।',
+    crisisIntro_in: 'यह आपकी गलती नहीं है। भारत में ऐसे कानून और संगठन हैं जो इस स्थिति में आपकी मदद कर सकते हैं। आप अकेले नहीं हैं।',
+    crisisIntro_us: 'यह आपकी गलती नहीं है। संयुक्त राज्य अमेरिका में ऐसे कानून और संगठन हैं जो इस स्थिति में आपकी मदद कर सकते हैं। आप अकेले नहीं हैं।',
     legalNote_in: 'भारत में, आईटी अधिनियम की धारा 66E सहमति के बिना तस्वीरें साझा किए जाने के पीड़ितों की रक्षा करती है।',
     ngoTitle_mx: 'संगठन जो आपकी मदद कर सकते हैं (मेक्सिको)',
     ngoTitle_in: 'संगठन जो आपकी मदद कर सकते हैं (भारत)',
@@ -280,13 +356,13 @@ const T = {
     ngosIndia: [
       {
         name: 'iCall (TISS)',
-        description: 'युवाओं के लिए निःशुल्क मनोवैज्ञानिक सहायता — कॉल या चैट',
+        description: 'युवाओं के लिए निःशुल्क मनोवैज्ञानिक सहायता: कॉल या चैट',
         phone: '9152987821',
         url: 'https://icallhelpline.org',
       },
       {
         name: 'Vandrevala Foundation',
-        description: '24/7 मानसिक स्वास्थ्य संकट हेल्पलाइन — कॉल और व्हाट्सएप',
+        description: '24/7 मानसिक स्वास्थ्य संकट हेल्पलाइन: कॉल और व्हाट्सएप',
         phone: '1860-2662-345',
         url: 'https://www.vandrevalafoundation.com',
       },
@@ -316,42 +392,42 @@ const T = {
 const DIRECT_CRISIS_STRINGS = {
   en: {
     directCrisisBtn: "My image was shared without my consent (real photo)",
-    directCrisisHeading: "Your Rights & Support Resources",
+    directCrisisHeading: "Your rights and support resources",
     directCrisisIntro:
       "You don't need AI analysis to get support. " +
-      "Even if your image is real — not a deepfake — " +
+      "Even if your image is real, not a deepfake, " +
       "you have rights and there are people who can help you right now.",
     noDetectionNote:
       "If a real photo of you was shared without your consent, " +
       "you still have the right to report it.",
-    noDetectionLink: "See your resources →",
-    backToUpload: "← Analyze an image instead",
+    noDetectionLink: "See your resources",
+    backToUpload: "Analyze an image instead",
   },
   es: {
     directCrisisBtn: "Mi imagen real fue compartida sin mi consentimiento",
-    directCrisisHeading: "Tus Derechos y Recursos de Apoyo",
+    directCrisisHeading: "Tus derechos y recursos de apoyo",
     directCrisisIntro:
       "No necesitas análisis de IA para obtener apoyo. " +
-      "Aunque tu imagen sea real — no un deepfake — " +
+      "Aunque tu imagen sea real, no un deepfake, " +
       "tienes derechos y hay personas que pueden ayudarte ahora mismo.",
     noDetectionNote:
       "Si una foto real tuya fue compartida sin tu consentimiento, " +
       "sigues teniendo el derecho de denunciarlo.",
-    noDetectionLink: "Ver tus recursos →",
-    backToUpload: "← Analizar una imagen en su lugar",
+    noDetectionLink: "Ver tus recursos",
+    backToUpload: "Analizar una imagen en su lugar",
   },
   hi: {
     directCrisisBtn: "मेरी असली फ़ोटो बिना अनुमति के साझा की गई",
     directCrisisHeading: "आपके अधिकार और सहायता संसाधन",
     directCrisisIntro:
       "सहायता पाने के लिए AI विश्लेषण की ज़रूरत नहीं है। " +
-      "चाहे आपकी फ़ोटो असली हो — deepfake नहीं — " +
+      "चाहे आपकी फ़ोटो असली हो, deepfake नहीं, " +
       "आपके अधिकार हैं और ऐसे लोग हैं जो अभी आपकी मदद कर सकते हैं।",
     noDetectionNote:
       "अगर आपकी असली फ़ोटो बिना सहमति के साझा की गई है, " +
       "तो आपको रिपोर्ट करने का पूरा अधिकार है।",
-    noDetectionLink: "अपने संसाधन देखें →",
-    backToUpload: "← इसके बजाय एक छवि का विश्लेषण करें",
+    noDetectionLink: "अपने संसाधन देखें",
+    backToUpload: "इसके बजाय एक छवि का विश्लेषण करें",
   },
 };
 
@@ -423,7 +499,7 @@ const PDF_STRINGS = {
 };
 
 // ─── Action resources: copy-only email templates ────────────────────────────
-// Text is only ever copied to the user's clipboard — nothing is sent or stored.
+// Text is only ever copied to the user's clipboard: nothing is sent or stored.
 const ACTION_STRINGS = {
   es: {
     title:      'Cómo reportar',
@@ -451,7 +527,7 @@ const ACTION_STRINGS = {
 const EMAIL_TEMPLATES = {
   es: [
     {
-      title: '📧 Plataforma (Instagram, TikTok, etc.)',
+      title: 'Plataforma (Instagram, TikTok, etc.)',
       text:
         'Asunto: Solicitud urgente de eliminación de contenido\n\n' +
         'Hola equipo de seguridad:\n\n' +
@@ -461,7 +537,7 @@ const EMAIL_TEMPLATES = {
         'Gracias,\n[NOMBRE]',
     },
     {
-      title: '📧 Adulto de confianza',
+      title: 'Adulto de confianza',
       text:
         'Asunto: Necesito tu ayuda\n\n' +
         'Hola [NOMBRE]:\n\n' +
@@ -471,7 +547,7 @@ const EMAIL_TEMPLATES = {
         'Gracias por escucharme.',
     },
     {
-      title: '📧 Escuela (dirección)',
+      title: 'Escuela (dirección)',
       text:
         'Asunto: Aviso de un incidente que afecta a un estudiante\n\n' +
         'Estimada dirección:\n\n' +
@@ -483,7 +559,7 @@ const EMAIL_TEMPLATES = {
   ],
   en: [
     {
-      title: '📧 Platform (Instagram, TikTok, etc.)',
+      title: 'Platform (Instagram, TikTok, etc.)',
       text:
         'Subject: Urgent content removal request\n\n' +
         'Hello Safety Team,\n\n' +
@@ -493,7 +569,7 @@ const EMAIL_TEMPLATES = {
         'Thank you,\n[NAME]',
     },
     {
-      title: '📧 Trusted adult',
+      title: 'Trusted adult',
       text:
         'Subject: I need your help\n\n' +
         'Hi [NAME],\n\n' +
@@ -503,7 +579,7 @@ const EMAIL_TEMPLATES = {
         'Thank you for listening.',
     },
     {
-      title: '📧 School (principal’s office)',
+      title: 'School (principal’s office)',
       text:
         'Subject: Notice of an incident affecting a student\n\n' +
         'Dear Principal,\n\n' +
@@ -515,7 +591,7 @@ const EMAIL_TEMPLATES = {
   ],
   hi: [
     {
-      title: '📧 प्लेटफ़ॉर्म (Instagram, TikTok आदि)',
+      title: 'प्लेटफ़ॉर्म (Instagram, TikTok आदि)',
       text:
         'विषय: सामग्री हटाने का अत्यावश्यक अनुरोध\n\n' +
         'नमस्ते सुरक्षा टीम,\n\n' +
@@ -525,7 +601,7 @@ const EMAIL_TEMPLATES = {
         'धन्यवाद,\n[नाम]',
     },
     {
-      title: '📧 विश्वसनीय वयस्क',
+      title: 'विश्वसनीय वयस्क',
       text:
         'विषय: मुझे आपकी मदद चाहिए\n\n' +
         'नमस्ते [नाम],\n\n' +
@@ -535,7 +611,7 @@ const EMAIL_TEMPLATES = {
         'मेरी बात सुनने के लिए धन्यवाद।',
     },
     {
-      title: '📧 स्कूल (प्रधानाचार्य कार्यालय)',
+      title: 'स्कूल (प्रधानाचार्य कार्यालय)',
       text:
         'विषय: एक छात्र को प्रभावित करने वाली घटना की सूचना\n\n' +
         'आदरणीय प्रधानाचार्य जी,\n\n' +
@@ -619,12 +695,11 @@ function renderActionResources() {
   });
 }
 
-// Country-keyed resources — decoupled from UI language (a Spanish speaker
+// Country-keyed resources: decoupled from UI language (a Spanish speaker
 // can be in the US, an English speaker can be in India, etc).
 const CRISIS_RESOURCES = {
   us: {
     country: "United States",
-    flag: "🇺🇸",
     resources: [
       {
         name: "Crisis Text Line",
@@ -634,7 +709,7 @@ const CRISIS_RESOURCES = {
         type: "hotline",
       },
       {
-        name: "RAINN — National Sexual Assault Hotline",
+        name: "RAINN: National Sexual Assault Hotline",
         description:
           "Confidential support for survivors of image-based sexual abuse",
         contact: "1-800-656-HOPE (4673)",
@@ -658,7 +733,7 @@ const CRISIS_RESOURCES = {
         type: "tool",
       },
       {
-        name: "FBI — Internet Crime Complaint Center (IC3)",
+        name: "FBI: Internet Crime Complaint Center (IC3)",
         description: "Official channel to report cybercrimes involving minors",
         contact: "ic3.gov",
         url: "https://www.ic3.gov",
@@ -681,17 +756,16 @@ const CRISIS_RESOURCES = {
   },
   mx: {
     country: "México",
-    flag: "🇲🇽",
     resources: [
       {
         name: "Línea de la Vida",
-        description: "Apoyo psicológico gratuito 24/7 — crisis, estrés, violencia",
+        description: "Apoyo psicológico gratuito 24/7: crisis, estrés, violencia",
         contact: "800 911 2000",
         url: "https://www.gob.mx/conasama/articulos/linea-de-la-vida-800-911-2000",
         type: "hotline",
       },
       {
-        name: "CNDH — Comisión Nacional de los Derechos Humanos",
+        name: "CNDH: Comisión Nacional de los Derechos Humanos",
         description: "Denuncia violaciones a derechos humanos, incluyendo violencia digital",
         contact: "800 715 2000",
         url: "https://www.cndh.org.mx/programas/contacto-1",
@@ -707,7 +781,7 @@ const CRISIS_RESOURCES = {
         type: "report",
       },
       {
-        name: "REDIM — Red por los Derechos de la Infancia en México",
+        name: "REDIM: Red por los Derechos de la Infancia en México",
         description: "Organización de referencia en derechos de niñas, niños y adolescentes",
         contact: null,
         url: "https://derechosinfancia.org.mx/v1/",
@@ -780,8 +854,23 @@ function applyLanguage(lang) {
   directCrisisHeading.textContent = dc.directCrisisHeading;
   downloadPdfBtn.textContent  = PDF_STRINGS[lang].btn;
 
-  // toggle active state on ALL lang buttons (both screens)
-  langBtns.forEach(btn => btn.classList.toggle('active', btn.dataset.lang === lang));
+  // extra UI strings
+  const ui = UI[lang];
+  document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = ui[el.dataset.i18n] || ''; });
+  resultHeading.textContent = directCrisisActive ? ui.directHeading : ui.resultHeading;
+  scoreCaption.textContent  = ui.scoreCaption;
+  countryLabel.textContent  = ui.countryLabel;
+  whatsappSub.textContent   = ui.whatsappSub;
+  schoolLetterLink.textContent = ui.schoolLetter;
+  if (selectedFile) uploadHint.textContent = ui.changeImage;
+  updateAnalyzeHint();
+
+  // toggle active state on ALL lang buttons
+  langBtns.forEach(btn => {
+    const on = btn.dataset.lang === lang;
+    btn.classList.toggle('active', on);
+    btn.setAttribute('aria-pressed', String(on));
+  });
 
   // auto-detect country from language + browser locale, unless the user
   // already picked one manually via the country selector
@@ -856,6 +945,20 @@ async function maybeCompressImage(file) {
 }
 
 let handleFileToken = 0;
+let previewUrl = null;
+
+function updateAnalyzeHint() {
+  analyzeHint.hidden = !!selectedFile || analyzeBtn.classList.contains('loading');
+}
+
+function setPreview(file) {
+  if (previewUrl) URL.revokeObjectURL(previewUrl);
+  previewUrl = file ? URL.createObjectURL(file) : null;
+  uploadPreview.hidden = !file;
+  uploadIcon.hidden = !!file;
+  uploadZone.classList.toggle('has-file', !!file);
+  if (file) uploadPreviewImg.src = previewUrl; else uploadPreviewImg.removeAttribute('src');
+}
 
 async function handleFile(file) {
   clearFormError();
@@ -881,7 +984,10 @@ async function handleFile(file) {
 
   selectedFile = processed;
   uploadText.textContent = `${processed.name} (${formatFileSize(processed.size)})`;
+  uploadHint.textContent = UI[currentLang].changeImage;
+  setPreview(processed);
   analyzeBtn.disabled = false;
+  updateAnalyzeHint();
 }
 
 uploadZone.addEventListener('keydown', (e) => {
@@ -905,6 +1011,7 @@ function setLoading(isLoading) {
   analyzeBtn.disabled = isLoading;
   analyzeBtn.classList.toggle('loading', isLoading);
   analyzeBtn.textContent = isLoading ? t.analyzingBtn : t.analyzeBtn;
+  updateAnalyzeHint();
 }
 
 // ─── Score animation ─────────────────────────────────────────────────────────
@@ -913,7 +1020,9 @@ function animateScore(target) {
   const start = performance.now();
   function tick(now) {
     const progress = Math.min((now - start) / duration, 1);
-    scoreNumber.textContent = Math.round(progress * target);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    scoreNumber.textContent = Math.round(eased * target);
+    scoreMeterFill.style.transform = `scaleX(${(eased * target) / 100})`;
     if (progress < 1) requestAnimationFrame(tick);
   }
   requestAnimationFrame(tick);
@@ -980,7 +1089,14 @@ function appendResourceEntry(container, { name, description, contact, url }) {
   if (contact) {
     const contactEl = document.createElement('p');
     contactEl.className = 'ngo-contact';
-    contactEl.textContent = contact;
+    if (/^[\d\s()+-]{7,}$/.test(contact)) {
+      const call = document.createElement('a');
+      call.href = `tel:${contact.replace(/[^\d+]/g, '')}`;
+      call.textContent = contact;
+      contactEl.appendChild(call);
+    } else {
+      contactEl.textContent = contact;
+    }
     entry.appendChild(contactEl);
   }
 
@@ -1008,11 +1124,10 @@ function renderCrisisPathway() {
     btn.classList.toggle('active', btn.dataset.mode === victimMode);
   });
 
-  // heading — only shown for the direct crisis path (no AI analysis run)
-  directCrisisHeading.hidden = !directCrisisActive;
-  if (directCrisisActive) directCrisisHeading.textContent = dc.directCrisisHeading;
+  // heading: only shown for the direct crisis path (no AI analysis run)
+  directCrisisHeading.hidden = true;
 
-  // empathy-first intro — country-specific, or direct-crisis copy
+  // empathy-first intro: country-specific, or direct-crisis copy
   if (directCrisisActive) {
     crisisIntro.textContent = dc.directCrisisIntro;
   } else if (currentCountry === 'us') {
@@ -1023,7 +1138,7 @@ function renderCrisisPathway() {
     crisisIntro.textContent = t.crisisIntro_mx;
   }
 
-  // WhatsApp share — its canned message references AI detection, so it
+  // WhatsApp share: its canned message references AI detection, so it
   // doesn't fit the "this is a real photo" direct-crisis path
   whatsappBtn.hidden = directCrisisActive;
   if (!directCrisisActive) {
@@ -1058,7 +1173,7 @@ function renderCrisisPathway() {
     CRISIS_RESOURCES.mx.resources.forEach((resource) => appendResourceEntry(ngoCard, resource));
   }
 
-  // legal rights note — content is a hardcoded string, never user input.
+  // legal rights note: content is a hardcoded string, never user input.
   // MX note is decoupled from UI language (like CRISIS_RESOURCES.mx.resources)
   // since it's country-specific legal fact, not a UI string.
   const legalNoteText = currentCountry === 'us' ? CRISIS_RESOURCES.us.legalNote
@@ -1175,6 +1290,7 @@ function createPdfWriter(doc, lang) {
     pageLimit,
     get y() { return y; },
     space(mm) { y += mm; },
+    ensure(mm) { if (y + mm > pageLimit) { doc.addPage(); y = PDF_MARGIN_MM; } },
     rule(color = PDF_COLORS.accent, weight = 0.6) {
       doc.setDrawColor(...color);
       doc.setLineWidth(weight);
@@ -1189,8 +1305,10 @@ function createPdfWriter(doc, lang) {
     },
     // fixed position, no flow (used for the footer on every page)
     textAt(str, top, opts) {
-      const box = layout(str, opts.size, opts.bold, contentW);
-      draw(box, str, PDF_MARGIN_MM, top, opts, contentW);
+      const dx = opts.dx || 0;
+      const width = contentW - dx;
+      const box = layout(str, opts.size, opts.bold, width);
+      draw(box, str, PDF_MARGIN_MM + dx, top, opts, width);
     },
   };
 }
@@ -1248,6 +1366,11 @@ function generateEvidencePdf() {
 
 downloadPdfBtn.addEventListener('click', generateEvidencePdf);
 
+function enterScreen(headingEl) {
+  window.scrollTo({ top: 0, behavior: 'auto' });
+  headingEl.focus({ preventScroll: true });
+}
+
 // ─── Show result ─────────────────────────────────────────────────────────────
 function showResult(data) {
   currentResult = data;
@@ -1264,6 +1387,7 @@ function showResult(data) {
   resetBtn.hidden = false;
   backToUploadBtn.hidden = true;
 
+  resultHeading.textContent = UI[currentLang].resultHeading;
   scoreDisplay.dataset.bucket = data.bucket;
   scoreNumber.textContent = '0';
   animateScore(data.score_percent);
@@ -1282,6 +1406,7 @@ function showResult(data) {
     renderNoDetectionNote();
     noDetectionNote.hidden = false;
   }
+  enterScreen(resultHeading);
 }
 
 // ─── Direct crisis path ──────────────────────────────────────────────────────
@@ -1306,12 +1431,34 @@ function showDirectCrisisPath() {
   scoreExplanation.hidden = true;
   resetBtn.hidden = true;
   backToUploadBtn.hidden = false;
+  resultHeading.textContent = UI[currentLang].directHeading;
   revealCrisisResources();
+  enterScreen(resultHeading);
 }
 
 directCrisisBtn.addEventListener('click', showDirectCrisisPath);
 noDetectionLink.addEventListener('click', revealCrisisResources);
-backToUploadBtn.addEventListener('click', () => window.location.reload());
+function resetToUpload() {
+  handleFileToken++;
+  selectedFile = null;
+  currentResult = null;
+  directCrisisActive = false;
+  fileInput.value = '';
+  setPreview(null);
+  uploadText.textContent = T[currentLang].uploadPrompt;
+  uploadHint.textContent = UI[currentLang].uploadHint;
+  analyzeBtn.disabled = true;
+  setLoading(false);
+  clearFormError();
+  crisisPathway.hidden = true;
+  countrySelector.hidden = true;
+  noDetectionNote.hidden = true;
+  schoolLetterDetails.open = false;
+  resultScreen.hidden = true;
+  uploadScreen.hidden = false;
+  enterScreen(heroTitle);
+}
+backToUploadBtn.addEventListener('click', resetToUpload);
 
 // ─── School letter (MX / ES only) ────────────────────────────────────────────
 // 100% client-side: form values never leave the browser. Reuses the jsPDF
@@ -1330,9 +1477,6 @@ const LEY_OLIMPIA_STATES = new Set([
   'Tabasco', 'Tamaulipas', 'Tlaxcala', 'Veracruz', 'Yucatán', 'Zacatecas',
 ]);
 
-const MESES_ES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio',
-  'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
-
 const schoolLetterLink    = document.getElementById('school-letter-link');
 const schoolLetterSection = document.getElementById('school-letter');
 const schoolLetterDetails = document.getElementById('school-letter-details');
@@ -1341,144 +1485,231 @@ const slDescription       = document.getElementById('sl-description');
 const slCounter           = document.getElementById('sl-counter');
 const slError             = document.getElementById('sl-error');
 
+const SL = {
+  es: {
+    locale: 'es-MX',
+    title: 'Generar carta para mi escuela',
+    intro: 'Llena los datos que quieras (todos son opcionales) y descarga una carta formal para la dirección de tu escuela. Se genera en tu dispositivo: nada se envía ni se guarda.',
+    student: 'Nombre del alumno/a', studentPh: 'Ej. María Pérez López',
+    grade: 'Grado y grupo', gradePh: 'Ej. 2.º B de secundaria',
+    school: 'Nombre de la escuela', schoolPh: 'Ej. Secundaria Técnica No. 25',
+    date: 'Fecha del incidente',
+    desc: 'Descripción breve del incidente', descPh: 'Describe brevemente qué pasó, sin datos que no quieras compartir con la escuela.',
+    guardian: 'Nombre del tutor o tutora legal', guardianPh: 'Ej. Ana López Ramírez',
+    state: 'Estado', statePh: 'Selecciona tu estado',
+    generate: 'Generar carta', clear: 'Limpiar formulario',
+    pdfError: 'No se pudo cargar el generador de PDF. Revisa tu conexión e inténtalo de nuevo.',
+    file: 'carta-escuela-verashield',
+    addressee: (school) => 'C. Director(a) de ' + school,
+    greeting: 'Presente',
+    subject: 'Asunto: Solicitud de intervención por incidente de contenido digital no consensuado',
+    body: (g, st, gr, inc) => 'Por medio de la presente, yo, ' + g + ', en mi carácter de tutor(a) legal del/de la alumno/a ' + st + ', quien cursa ' + gr + ' en esa institución, me dirijo a usted para hacer de su conocimiento un incidente de difusión o manipulación de contenido digital (imágenes o video) sin consentimiento, ocurrido ' + (inc ? 'el ' + inc : 'en fecha ____________________') + ', que afecta al/a la alumno/a.',
+    descLabel: 'Descripción de los hechos: ',
+    legal: {
+      mx: (state) => 'Hago de su conocimiento que la difusión de contenido íntimo o sexual sin consentimiento constituye una conducta sancionada por la denominada «Ley Olimpia», ' + (state ? 'tanto en el ámbito federal (Ley General de Acceso de las Mujeres a una Vida Libre de Violencia y Código Penal Federal) como en la legislación penal de ' + state : 'en el ámbito federal (Ley General de Acceso de las Mujeres a una Vida Libre de Violencia y Código Penal Federal)') + '. Al tratarse de una persona menor de edad, debe prevalecer además el interés superior de la niñez, conforme a la Ley General de los Derechos de Niñas, Niños y Adolescentes.',
+      in: () => 'Hago de su conocimiento que difundir o manipular imágenes de una persona sin su consentimiento puede constituir un delito conforme a la Sección 66E de la Ley de Tecnología de la Información de 2000 y, al tratarse de una persona menor de edad, también puede estar comprendido en la Ley POCSO de 2012. Debe prevalecer el interés superior de la niñez.',
+      us: () => 'Hago de su conocimiento que difundir o manipular imágenes de una persona menor de edad sin su consentimiento puede violar la ley federal (incluida la ley TAKE IT DOWN) y las leyes estatales aplicables. La seguridad y el interés superior del alumno/a deben ser la prioridad.',
+    },
+    requestsIntro: 'Por lo anterior, solicito respetuosamente a esa dirección:',
+    requests: [
+      '1. Que se realice una investigación interna para esclarecer los hechos y deslindar responsabilidades.',
+      '2. Que se implementen medidas de protección inmediatas para el/la alumno/a, que garanticen su seguridad e integridad y eviten la revictimización.',
+      '3. Que se levante el acta correspondiente y se me entregue copia de la misma, así como del folio de seguimiento.',
+    ],
+    closing: 'Sin otro particular, agradezco su atención y quedo en espera de su pronta respuesta.',
+    farewell: 'Atentamente',
+    signature: 'Tutor(a) legal (firma)',
+    stampTitle: 'Para uso de la escuela',
+    stampLine: 'Recibido por: ____________________   Fecha: ______________   Folio: ______________',
+    footer: {
+      mx: 'Esta carta es para reporte escolar. Para denuncia penal, el tutor debe acompañar al menor al Ministerio Público.',
+      in: 'Esta carta es para reporte escolar. Para una denuncia penal, el tutor puede acompañar al menor a la comisaría más cercana o presentar la queja en cybercrime.gov.in.',
+      us: 'Esta carta es para reporte escolar. Para una denuncia penal, contacta a la policía local o reporta en la CyberTipline del NCMEC.',
+    },
+    generated: 'Generado con VeraShield | verashield.app',
+  },
+  en: {
+    locale: 'en-US',
+    title: 'Generate a letter for my school',
+    intro: 'Fill in whatever you like (everything is optional) and download a formal letter for your school principal. It is created on your device: nothing is sent or saved.',
+    student: 'Student name', studentPh: 'e.g. Maria Perez Lopez',
+    grade: 'Grade and class', gradePh: 'e.g. Grade 8, Section B',
+    school: 'School name', schoolPh: 'e.g. Riverside Secondary School',
+    date: 'Date of the incident',
+    desc: 'Short description of the incident', descPh: 'Briefly describe what happened. Leave out anything you do not want the school to know.',
+    guardian: 'Name of parent or legal guardian', guardianPh: 'e.g. Ana Lopez Ramirez',
+    state: 'State', statePh: 'Select your state',
+    generate: 'Generate letter', clear: 'Clear form',
+    pdfError: 'The PDF generator could not be loaded. Check your connection and try again.',
+    file: 'school-letter-verashield',
+    addressee: (school) => 'To the Principal of ' + school,
+    greeting: 'Dear Principal,',
+    subject: 'Subject: Request for action on a non-consensual digital content incident',
+    body: (g, st, gr, inc) => 'I, ' + g + ', as the legal guardian of the student ' + st + ', who attends ' + gr + ' at your institution, am writing to inform you of an incident involving the sharing or manipulation of digital content (images or video) without consent, which occurred ' + (inc ? 'on ' + inc : 'on a date ____________________') + ' and affects the student.',
+    descLabel: 'Description of events: ',
+    legal: {
+      mx: (state) => 'Please be advised that sharing intimate or sexual content without consent is conduct punishable under the so-called "Ley Olimpia", ' + (state ? 'both at the federal level (General Law on Women\'s Access to a Life Free of Violence and the Federal Criminal Code) and under the criminal law of ' + state : 'at the federal level (General Law on Women\'s Access to a Life Free of Violence and the Federal Criminal Code)') + '. Because the student is a minor, the best interests of the child must also prevail under the General Law on the Rights of Children and Adolescents.',
+      in: () => 'Please be advised that sharing or manipulating a person\'s images without consent may be an offence under Section 66E of the Information Technology Act, 2000 and, because the student is a minor, may also fall under the POCSO Act, 2012. The best interests of the child must prevail.',
+      us: () => 'Please be advised that sharing or manipulating images of a minor without consent may violate federal law (including the TAKE IT DOWN Act) and applicable state law. The student\'s safety and best interests must come first.',
+    },
+    requestsIntro: 'For these reasons, I respectfully ask the school to:',
+    requests: [
+      '1. Carry out an internal investigation to establish the facts and determine responsibilities.',
+      '2. Put immediate protective measures in place for the student, ensuring their safety and preventing re-victimization.',
+      '3. Make a formal record of the incident and give me a copy of it, together with a follow-up reference number.',
+    ],
+    closing: 'Thank you for your attention. I look forward to your prompt reply.',
+    farewell: 'Sincerely,',
+    signature: 'Parent or legal guardian (signature)',
+    stampTitle: 'For school use',
+    stampLine: 'Received by: ____________________   Date: ______________   Ref. no.: ______________',
+    footer: {
+      mx: 'This letter is for school reporting. For a criminal complaint, the guardian should accompany the minor to the Public Prosecutor\'s Office (Ministerio Publico).',
+      in: 'This letter is for school reporting. For a criminal complaint, the guardian can accompany the minor to the nearest police station or file at cybercrime.gov.in.',
+      us: 'This letter is for school reporting. For a criminal complaint, contact local law enforcement or report to the NCMEC CyberTipline.',
+    },
+    generated: 'Generated with VeraShield | verashield.app',
+  },
+  hi: {
+    locale: 'hi-IN',
+    title: 'स्कूल के लिए पत्र बनाएँ',
+    intro: 'जो जानकारी देना चाहें भरें (सब वैकल्पिक है) और अपने स्कूल के प्रधानाचार्य के लिए औपचारिक पत्र डाउनलोड करें। यह आपके डिवाइस पर बनता है: कुछ भेजा या सेव नहीं किया जाता।',
+    student: 'छात्र/छात्रा का नाम', studentPh: 'जैसे: प्रिया शर्मा',
+    grade: 'कक्षा और सेक्शन', gradePh: 'जैसे: कक्षा 8, सेक्शन बी',
+    school: 'स्कूल का नाम', schoolPh: 'जैसे: राजकीय उच्च माध्यमिक विद्यालय',
+    date: 'घटना की तारीख',
+    desc: 'घटना का संक्षिप्त विवरण', descPh: 'संक्षेप में बताएँ क्या हुआ। ऐसी बातें न लिखें जो आप स्कूल को नहीं बताना चाहते।',
+    guardian: 'अभिभावक का नाम', guardianPh: 'जैसे: सुनीता शर्मा',
+    state: 'राज्य', statePh: 'अपना राज्य चुनें',
+    generate: 'पत्र बनाएँ', clear: 'फ़ॉर्म साफ़ करें',
+    pdfError: 'PDF जनरेटर लोड नहीं हो सका। अपना कनेक्शन जाँचें और दोबारा कोशिश करें।',
+    file: 'school-letter-verashield',
+    addressee: (school) => 'सेवा में, प्रधानाचार्य, ' + school,
+    greeting: 'आदरणीय प्रधानाचार्य जी,',
+    subject: 'विषय: बिना सहमति के डिजिटल सामग्री से जुड़ी घटना पर कार्रवाई का अनुरोध',
+    body: (g, st, gr, inc) => 'मैं, ' + g + ', छात्र/छात्रा ' + st + ' का कानूनी अभिभावक, जो आपके विद्यालय में ' + gr + ' में पढ़ता/पढ़ती है, आपको एक घटना की जानकारी देने के लिए लिख रहा/रही हूँ, जिसमें डिजिटल सामग्री (तस्वीरें या वीडियो) बिना सहमति के साझा या बदली गई। यह घटना ' + (inc ? inc + ' को' : 'दिनांक ____________________ को') + ' हुई और इससे छात्र/छात्रा प्रभावित है।',
+    descLabel: 'घटना का विवरण: ',
+    legal: {
+      mx: (state) => 'मैं आपको सूचित करता/करती हूँ कि सहमति के बिना निजी या यौन सामग्री साझा करना मेक्सिको की "ले ओलम्पिया" के तहत दंडनीय है' + (state ? ', संघीय स्तर पर भी और ' + state + ' के आपराधिक कानून के तहत भी' : ', संघीय स्तर पर') + '। छात्र/छात्रा नाबालिग है, इसलिए बच्चों और किशोरों के अधिकारों के सामान्य कानून के अनुसार बच्चे का सर्वोत्तम हित सर्वोपरि होना चाहिए।',
+      in: () => 'मैं आपको सूचित करता/करती हूँ कि किसी व्यक्ति की तस्वीरें बिना सहमति के साझा करना या बदलना सूचना प्रौद्योगिकी अधिनियम, 2000 की धारा 66E के तहत अपराध हो सकता है और, छात्र/छात्रा नाबालिग होने के कारण, POCSO अधिनियम, 2012 के अंतर्गत भी आ सकता है। बच्चे का सर्वोत्तम हित सर्वोपरि होना चाहिए।',
+      us: () => 'मैं आपको सूचित करता/करती हूँ कि किसी नाबालिग की तस्वीरें बिना सहमति के साझा करना या बदलना संघीय कानून (TAKE IT DOWN Act सहित) और लागू राज्य कानूनों का उल्लंघन हो सकता है। छात्र/छात्रा की सुरक्षा और सर्वोत्तम हित को प्राथमिकता मिलनी चाहिए।',
+    },
+    requestsIntro: 'इसलिए मैं विद्यालय से विनम्र अनुरोध करता/करती हूँ कि:',
+    requests: [
+      '1. तथ्यों का पता लगाने और ज़िम्मेदारी तय करने के लिए आंतरिक जाँच की जाए।',
+      '2. छात्र/छात्रा की सुरक्षा सुनिश्चित करने और दोबारा पीड़ित होने से बचाने के लिए तुरंत सुरक्षात्मक कदम उठाए जाएँ।',
+      '3. घटना का औपचारिक रिकॉर्ड बनाया जाए और उसकी प्रति तथा अनुवर्ती संदर्भ संख्या मुझे दी जाए।',
+    ],
+    closing: 'आपके ध्यान के लिए धन्यवाद। मैं आपके शीघ्र उत्तर की प्रतीक्षा करूँगा/करूँगी।',
+    farewell: 'सादर,',
+    signature: 'अभिभावक (हस्ताक्षर)',
+    stampTitle: 'विद्यालय के उपयोग के लिए',
+    stampLine: 'प्राप्तकर्ता: ____________________   तारीख: ______________   संदर्भ संख्या: ______________',
+    footer: {
+      mx: 'यह पत्र विद्यालय को सूचित करने के लिए है। आपराधिक शिकायत के लिए अभिभावक नाबालिग के साथ लोक अभियोजक कार्यालय (Ministerio Publico) जाएँ।',
+      in: 'यह पत्र विद्यालय को सूचित करने के लिए है। आपराधिक शिकायत के लिए अभिभावक नाबालिग के साथ नज़दीकी पुलिस थाने जा सकते हैं या cybercrime.gov.in पर शिकायत दर्ज कर सकते हैं।',
+      us: 'यह पत्र विद्यालय को सूचित करने के लिए है। आपराधिक शिकायत के लिए स्थानीय पुलिस से संपर्क करें या NCMEC CyberTipline पर रिपोर्ट करें।',
+    },
+    generated: 'VeraShield से बनाया गया | verashield.app',
+  },
+};
+
+const stateField = document.getElementById('sl-state-field');
+
+function applySchoolLetterStrings() {
+  const sl = SL[currentLang];
+  document.querySelectorAll('[data-sl]').forEach((el) => { el.textContent = sl[el.dataset.sl] || ''; });
+  document.querySelectorAll('[data-sl-ph]').forEach((el) => { el.placeholder = sl[el.dataset.slPh] || ''; });
+}
+
 function updateSchoolLetterVisibility() {
-  const show = currentLang === 'es' || currentCountry === 'mx';
-  schoolLetterSection.hidden = !show;
-  schoolLetterLink.hidden = currentLang !== 'es';
+  schoolLetterSection.hidden = false;
+  schoolLetterLink.hidden = false;
+  stateField.hidden = currentCountry !== 'mx';
+  applySchoolLetterStrings();
 }
 
-function formatDateEs(date) {
-  return `${date.getDate()} de ${MESES_ES[date.getMonth()]} de ${date.getFullYear()}`;
-}
-
-function isoToDateEs(iso) {
+function isoToDate(iso, locale) {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || '');
   if (!m) return '';
-  return formatDateEs(new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])));
+  return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])).toLocaleDateString(locale, { dateStyle: 'long' });
 }
 
 function todayStamp(d) {
   const pad = (n) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
 }
 
 function generateSchoolLetter() {
   slError.hidden = true;
+  const sl = SL[currentLang];
   const jsPDFCtor = window.jspdf && window.jspdf.jsPDF;
   if (!jsPDFCtor) {
-    slError.textContent = 'No se pudo cargar el generador de PDF. Revisa tu conexión e inténtalo de nuevo.';
+    slError.textContent = sl.pdfError;
     slError.hidden = false;
     return;
   }
 
   const val = (id) => document.getElementById(id).value.trim();
   const blank = (v, n = 18) => v || '_'.repeat(n);
+  const country  = currentCountry;
   const student  = val('sl-student');
   const grade    = val('sl-grade');
   const school   = val('sl-school');
   const guardian = val('sl-guardian');
-  const state    = val('sl-state');
-  const incident = isoToDateEs(val('sl-date'));
+  const state    = country === 'mx' ? val('sl-state') : '';
+  const incident = isoToDate(val('sl-date'), sl.locale);
   const desc     = val('sl-description').slice(0, 300);
   const now      = new Date();
+  const today    = now.toLocaleDateString(sl.locale, { dateStyle: 'long' });
 
   const doc = new jsPDFCtor({ unit: 'mm', format: 'a4' });
-  const L = 25, W = 160, LH = 5.6, PAGE_BOTTOM = 270;
-  let y = 28;
+  const w = createPdfWriter(doc, currentLang);
+  const ink = PDF_COLORS.ink;
 
-  const ensure = (h) => { if (y + h > PAGE_BOTTOM) { doc.addPage(); y = 28; } };
-  const para = (text, opts = {}) => {
-    doc.setFont('helvetica', opts.bold ? 'bold' : 'normal');
-    doc.setFontSize(opts.size || 11);
-    const width = opts.width || W;
-    const lines = doc.splitTextToSize(text, width);
-    ensure(lines.length * LH);
-    doc.text(lines, opts.x || L, y, { align: opts.align || 'left' });
-    y += lines.length * LH + (opts.gap === undefined ? 3 : opts.gap);
-  };
+  w.text(state ? state + ', ' + today : today, { align: 'right', gap: 8, color: ink });
+  w.text(sl.addressee(school || '______________________________'), { bold: true, gap: 0, color: ink });
+  w.text(sl.greeting, { bold: true, gap: 8, color: ink });
+  w.text(sl.subject, { bold: true, gap: 8, color: ink });
 
-  // 1. Encabezado
-  para(`${state || '____________'}, a ${formatDateEs(now)}`,
-    { x: L + W, align: 'right', gap: 8 });
+  w.text(sl.body(blank(guardian, 28), blank(student, 28), blank(grade, 14), incident), { gap: 4, color: ink });
+  w.text(sl.descLabel + (desc || '_'.repeat(40)), { gap: desc ? 4 : 1, color: ink });
+  if (!desc) w.text('_'.repeat(75), { gap: 4, color: ink });
 
-  // 2. Destinatario
-  para(`C. Director(a) de ${school || '______________________________'}`, { bold: true, gap: 0 });
-  para('Presente', { bold: true, gap: 8 });
+  w.text(sl.legal[country](state && LEY_OLIMPIA_STATES.has(state) ? state : ''), { gap: 4, color: ink });
 
-  // 3. Asunto
-  para('Asunto: Solicitud de intervención — incidente de contenido digital no consensuado',
-    { bold: true, gap: 8 });
+  w.text(sl.requestsIntro, { gap: 2, color: ink });
+  sl.requests.forEach((item) => w.text(item, { gap: 2, color: ink }));
+  w.space(2);
+  w.text(sl.closing, { gap: 8, color: ink });
 
-  // 4. Cuerpo
-  para(`Por medio de la presente, yo, ${blank(guardian, 28)}, en mi carácter de tutor(a) legal ` +
-    `del/de la alumno/a ${blank(student, 28)}, quien cursa ${blank(grade, 14)} en esa institución, ` +
-    `me dirijo a usted para hacer de su conocimiento un incidente de difusión o manipulación de ` +
-    `contenido digital (imágenes o video) sin consentimiento, ocurrido ` +
-    `${incident ? `el ${incident}` : 'en fecha ____________________'}, que afecta al/a la alumno/a.`);
-  if (desc) {
-    para(`Descripción de los hechos: ${desc}`);
-  } else {
-    para('Descripción de los hechos: ' + '_'.repeat(40), { gap: 1 });
-    para('_'.repeat(75));
-  }
+  w.ensure(50);
+  w.text(sl.farewell, { gap: 14, color: ink });
+  doc.setDrawColor(0);
+  doc.setLineWidth(0.3);
+  doc.line(PDF_MARGIN_MM, w.y, PDF_MARGIN_MM + 80, w.y);
+  w.space(3);
+  w.text(blank(guardian, 28), { bold: true, gap: 0, color: ink });
+  w.text(sl.signature, { size: 9, gap: 8, color: PDF_COLORS.muted });
 
-  // 5. Ley Olimpia
-  const federal = 'Ley General de Acceso de las Mujeres a una Vida Libre de Violencia y Código Penal Federal';
-  const olimpia = state && LEY_OLIMPIA_STATES.has(state)
-    ? `Hago de su conocimiento que la difusión de contenido íntimo o sexual sin consentimiento ` +
-      `constituye una conducta sancionada por la denominada «Ley Olimpia», tanto en el ámbito ` +
-      `federal (${federal}) como en la legislación penal de ${state}. Al tratarse de una persona ` +
-      `menor de edad, debe prevalecer además el interés superior de la niñez, conforme a la Ley ` +
-      `General de los Derechos de Niñas, Niños y Adolescentes.`
-    : `Hago de su conocimiento que la difusión de contenido íntimo o sexual sin consentimiento ` +
-      `constituye una conducta sancionada por la denominada «Ley Olimpia» en el ámbito federal ` +
-      `(${federal}). Al tratarse de una persona menor de edad, debe prevalecer además el interés ` +
-      `superior de la niñez, conforme a la Ley General de los Derechos de Niñas, Niños y Adolescentes.`;
-  para(olimpia);
-
-  // 6. Solicitudes
-  para('Por lo anterior, solicito respetuosamente a esa dirección:', { gap: 2 });
-  [
-    '1. Que se realice una investigación interna para esclarecer los hechos y deslindar responsabilidades.',
-    '2. Que se implementen medidas de protección inmediatas para el/la alumno/a, que garanticen su seguridad e integridad y eviten la revictimización.',
-    '3. Que se levante el acta correspondiente y se me entregue copia de la misma, así como del folio de seguimiento.',
-  ].forEach((item) => para(item, { x: L + 4, width: W - 4, gap: 1.5 }));
-  y += 2;
-  para('Sin otro particular, agradezco su atención y quedo en espera de su pronta respuesta.', { gap: 10 });
-
-  // 7. Firma
-  ensure(50);
-  para('Atentamente', { gap: 16 });
-  doc.line(L, y, L + 80, y);
-  y += 5;
-  para(blank(guardian, 28), { bold: true, gap: 0 });
-  para('Tutor(a) legal — firma', { size: 9, gap: 8 });
-
-  // 8. Sello de la escuela
-  ensure(28);
+  w.ensure(30);
+  const boxTop = w.y;
   doc.setDrawColor(120);
-  doc.rect(L, y, W, 24);
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(9);
-  doc.text('Para uso de la escuela', L + 3, y + 6);
-  doc.setFont('helvetica', 'normal');
-  doc.text('Recibido por: ____________________   Fecha: ______________   Folio: ______________', L + 3, y + 17);
+  doc.setLineWidth(0.2);
+  doc.rect(PDF_MARGIN_MM, boxTop, w.contentW, 24);
+  w.textAt(sl.stampTitle, boxTop + 4, { size: 9, bold: true, color: ink, align: 'left', dx: 3 });
+  w.textAt(sl.stampLine, boxTop + 13, { size: 9, bold: false, color: ink, align: 'left', dx: 3 });
 
-  // 9-10. Pie (en cada página)
   const pages = doc.getNumberOfPages();
   for (let i = 1; i <= pages; i++) {
     doc.setPage(i);
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(8);
-    doc.setTextColor(90);
-    const disc = doc.splitTextToSize(
-      'Esta carta es para reporte escolar. Para denuncia penal, el tutor debe acompañar al menor al Ministerio Público.', W);
-    doc.text(disc, L, 280);
-    doc.text('Generado con VeraShield · verashield.app', L, 280 + disc.length * 3.6 + 1);
-    doc.setTextColor(0);
+    doc.setDrawColor(...PDF_COLORS.muted);
+    doc.setLineWidth(0.2);
+    doc.line(PDF_MARGIN_MM, PDF_PAGE_H_MM - 20, PDF_PAGE_W_MM - PDF_MARGIN_MM, PDF_PAGE_H_MM - 20);
+    w.textAt(sl.footer[country] + ' ' + sl.generated, PDF_PAGE_H_MM - 18, { size: 8, bold: false, color: PDF_COLORS.muted, align: 'left' });
   }
 
-  doc.save(`carta-escuela-verashield-${todayStamp(now)}.pdf`);
+  doc.save(sl.file + '-' + todayStamp(now) + '.pdf');
 }
 
 schoolLetterForm.addEventListener('submit', (e) => {
@@ -1539,7 +1770,10 @@ analyzeBtn.addEventListener('click', async () => {
 });
 
 // ─── Reset ───────────────────────────────────────────────────────────────────
-resetBtn.addEventListener('click', () => window.location.reload());
+resetBtn.addEventListener('click', resetToUpload);
 
 // ─── Init ────────────────────────────────────────────────────────────────────
-applyLanguage('es');
+(function initLanguage() {
+  const nav = (navigator.language || 'es').slice(0, 2).toLowerCase();
+  applyLanguage(['es', 'en', 'hi'].includes(nav) ? nav : 'es');
+})();
