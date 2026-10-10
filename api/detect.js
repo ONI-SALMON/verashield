@@ -5,7 +5,7 @@ export const config = { api: { bodyParser: false } };
 
 const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
 const MOCK_SCORE = 0.82;
-const HIVE_FETCH_TIMEOUT_MS = 12000;
+const SIGHTENGINE_FETCH_TIMEOUT_MS = 12000;
 const AZURE_FETCH_TIMEOUT_MS = 12000;
 
 function scoreToBucket(scorePercent) {
@@ -20,12 +20,48 @@ function bucketToLabel(bucket) {
   return 'likely_fake';
 }
 
-function buildResult(scoreFraction, source) {
+const GENERATOR_NAMES = {
+  dalle: 'DALL-E',
+  midjourney: 'Midjourney',
+  stable_diffusion: 'Stable Diffusion',
+  flux: 'FLUX',
+};
+const GENERATOR_MIN_SCORE = 0.1;
+
+function formatGenerator(key) {
+  if (GENERATOR_NAMES[key]) return GENERATOR_NAMES[key];
+  return key
+    .split('_')
+    .filter(Boolean)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
+}
+
+function topGeneratorFrom(generators) {
+  if (!generators || typeof generators !== 'object') return null;
+  let bestKey = null;
+  let bestValue = 0;
+  for (const [key, value] of Object.entries(generators)) {
+    if (typeof value === 'number' && value > bestValue) {
+      bestKey = key;
+      bestValue = value;
+    }
+  }
+  if (!bestKey || bestValue < GENERATOR_MIN_SCORE) return null;
+  return formatGenerator(bestKey);
+}
+
+function buildResult({ aiGenerated, deepfake = 0, topGenerator = null }, source) {
+  const scoreFraction = Math.max(aiGenerated, deepfake);
   const score_percent = Math.round(scoreFraction * 100);
   const bucket = scoreToBucket(score_percent);
   const label = bucketToLabel(bucket);
   return {
     score: scoreFraction,
+    aiGenerated,
+    deepfake,
+    topGenerator,
+    confidence: score_percent,
     score_percent,
     label,
     bucket,
@@ -34,54 +70,57 @@ function buildResult(scoreFraction, source) {
   };
 }
 
-async function callHive(file) {
-  const buffer = await file.arrayBuffer();
-  const base64 = Buffer.from(buffer).toString('base64');
-  const mimeType = file.type || 'image/jpeg';
+async function callSightengine(file) {
+  const form = new FormData();
+  form.append('api_user', process.env.SIGHTENGINE_API_USER);
+  form.append('api_secret', process.env.SIGHTENGINE_API_SECRET);
+  form.append('models', 'genai,deepfake');
+  form.append('media', file, 'upload');
 
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), HIVE_FETCH_TIMEOUT_MS);
+  const timeoutId = setTimeout(() => controller.abort(), SIGHTENGINE_FETCH_TIMEOUT_MS);
 
   let response;
   try {
-    response = await fetch(
-      'https://api.thehive.ai/api/v3/hive/ai-generated-and-deepfake-content-detection',
-      {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${process.env.HIVE_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          media_metadata: true,
-          input: [{ media_base64: `data:${mimeType};base64,${base64}` }],
-        }),
-        signal: controller.signal,
-      }
-    );
+    response = await fetch('https://api.sightengine.com/1.0/check.json', {
+      method: 'POST',
+      body: form,
+      signal: controller.signal,
+    });
   } finally {
     clearTimeout(timeoutId);
   }
 
   if (!response.ok) {
-    const errBody = await response.text();
-    console.error('[detect] Hive V3 error body:', errBody);
-    const error = new Error(`Hive API returned ${response.status}`);
+    const error = new Error(`Sightengine API returned ${response.status}`);
     error.status = response.status;
     throw error;
   }
 
-  const data = await response.json();
-  console.log('[detect] Hive V3 raw response:', JSON.stringify(data).slice(0, 500));
-
-  // V3 returns per-frame results — take the first frame's score
-  const output = data?.output?.[0];
-  const classes = output?.classes || [];
-  const match = classes.find((c) => c.class === 'ai_generated');
-  if (!match) {
-    throw new Error('Hive V3 response missing ai-generated class');
+  let data;
+  try {
+    data = await response.json();
+  } catch {
+    throw new Error('Sightengine returned invalid JSON');
   }
-  return buildResult(match.value, 'hive');
+
+  if (data?.status !== 'success' || data.error) {
+    throw new Error(`Sightengine status: ${data?.status ?? 'unknown'}${data?.error?.type ? ` (${data.error.type})` : ''}`);
+  }
+
+  const type = data.type;
+  if (!type || typeof type.ai_generated !== 'number') {
+    throw new Error('Sightengine response missing ai_generated score');
+  }
+
+  return buildResult(
+    {
+      aiGenerated: type.ai_generated,
+      deepfake: typeof type.deepfake === 'number' ? type.deepfake : 0,
+      topGenerator: topGeneratorFrom(type.ai_generators),
+    },
+    'sightengine'
+  );
 }
 
 async function callAzure(file) {
@@ -115,7 +154,7 @@ async function callAzure(file) {
   }
 
   const data = await response.json();
-  return buildResult(data.score, 'azure');
+  return buildResult({ aiGenerated: data.score }, 'azure');
 }
 
 function logDetection(result) {
@@ -171,19 +210,19 @@ export default async function handler(req, res) {
     const buffer = await readFile(uploaded.filepath);
     const file = new Blob([buffer], { type: mimetype });
 
-    if (!process.env.HIVE_API_KEY) {
-      const mock = buildResult(MOCK_SCORE, 'mock');
+    if (!process.env.SIGHTENGINE_API_USER || !process.env.SIGHTENGINE_API_SECRET) {
+      const mock = buildResult({ aiGenerated: MOCK_SCORE }, 'mock');
       logDetection(mock);
       return res.status(200).json(mock);
     }
 
     let result;
     try {
-      result = await callHive(file);
-    } catch (hiveError) {
-      const shouldFallback = hiveError.status === 429 || hiveError.status >= 500;
+      result = await callSightengine(file);
+    } catch (detectError) {
+      const shouldFallback = detectError.status === 429 || detectError.status >= 500;
       if (!shouldFallback || !process.env.AZURE_ENDPOINT || !process.env.AZURE_KEY) {
-        throw hiveError;
+        throw detectError;
       }
       result = await callAzure(file);
     }

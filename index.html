@@ -44,18 +44,51 @@
     </div>
 
     <div class="panel">
-      <p class="step-label"><span class="step-num">1</span><span data-i18n="stepUpload"></span></p>
-      <label class="upload-zone" id="upload-zone" for="file-input" tabindex="0">
-        <span class="upload-preview" id="upload-preview" hidden><img id="upload-preview-img" alt=""></span>
-        <svg class="upload-icon" id="upload-icon" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M12 16V4m0 0 4 4m-4-4L8 8"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/>
-        </svg>
-        <span class="upload-text"></span>
-        <span class="upload-hint" id="upload-hint" data-i18n="uploadHint"></span>
-      </label>
-      <input type="file" id="file-input" accept="image/*" hidden>
+      <div class="mode-toggle" id="mode-toggle" role="group">
+        <button type="button" class="mode-btn active" data-mode="photo" aria-pressed="true" data-vi18n="modePhoto"></button>
+        <button type="button" class="mode-btn" data-mode="video" aria-pressed="false" data-vi18n="modeVideo"></button>
+      </div>
 
-      <p class="step-label"><span class="step-num">2</span><span data-i18n="stepAnalyze"></span></p>
+      <div class="input-block" id="photo-input-block">
+        <p class="step-label"><span class="step-num">1</span><span data-i18n="stepUpload"></span></p>
+        <label class="upload-zone" id="upload-zone" for="file-input" tabindex="0">
+          <span class="upload-preview" id="upload-preview" hidden><img id="upload-preview-img" alt=""></span>
+          <svg class="upload-icon" id="upload-icon" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 16V4m0 0 4 4m-4-4L8 8"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/>
+          </svg>
+          <span class="upload-text"></span>
+          <span class="upload-hint" id="upload-hint" data-i18n="uploadHint"></span>
+        </label>
+        <input type="file" id="file-input" accept="image/*" hidden>
+        <p class="upload-disclaimer" id="upload-disclaimer"><span id="upload-disclaimer-text"></span><button type="button" class="privacy-link" data-privacy-open></button></p>
+      </div>
+
+      <div class="input-block" id="video-input-block" hidden>
+        <p class="step-label"><span class="step-num">1</span><span data-vi18n="stepVideo"></span></p>
+        <label class="upload-zone" id="video-upload-zone" for="video-input" tabindex="0">
+          <svg class="upload-icon" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="3" y="5" width="13" height="14" rx="2"/><path d="m16 10 5-3v10l-5-3"/>
+          </svg>
+          <span class="video-upload-text" id="video-upload-text" data-vi18n="videoPrompt"></span>
+          <span class="upload-hint" id="video-upload-hint" data-vi18n="videoLimit"></span>
+        </label>
+        <input type="file" id="video-input" accept="video/mp4,video/quicktime,video/webm,video/x-msvideo,.mp4,.mov,.webm,.avi" hidden>
+
+        <div class="or-divider" role="separator"><span data-vi18n="or"></span></div>
+
+        <label class="url-field"><span class="visually-hidden" data-vi18n="urlLabel"></span>
+          <input type="url" id="video-url" inputmode="url" autocomplete="off" spellcheck="false" maxlength="2048" data-vi18n-ph="urlPlaceholder">
+        </label>
+        <p class="url-note" id="video-url-note" data-vi18n="urlNote"></p>
+      </div>
+
+      <div class="video-soon" id="video-soon" hidden>
+        <svg class="video-soon-icon" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="13" height="14" rx="2"/><path d="m16 10 5-3v10l-5-3"/></svg>
+        <h2 class="video-soon-title" id="video-soon-title"></h2>
+        <p class="video-soon-body" id="video-soon-body"></p>
+      </div>
+
+      <p class="step-label" id="step-analyze-label"><span class="step-num">2</span><span data-i18n="stepAnalyze"></span></p>
       <button type="button" id="analyze-btn" disabled></button>
       <p class="analyze-hint" id="analyze-hint" data-i18n="analyzeHint"></p>
       <p class="form-error" id="form-error" role="alert" hidden></p>
@@ -87,6 +120,7 @@
         </div>
       </div>
       <p class="score-explanation" id="score-explanation"></p>
+      <p class="score-generator" id="score-generator" hidden></p>
 
       <div class="no-detection-note" id="no-detection-note" hidden>
         <p id="no-detection-text"></p>
@@ -119,6 +153,7 @@
         <p class="crisis-intro" id="crisis-intro"></p>
 
         <div class="primary-action">
+          <p class="action-sub whatsapp-disclaimer" id="whatsapp-disclaimer"></p>
           <a class="share-btn whatsapp-btn" id="whatsapp-btn" target="_blank" rel="noopener"></a>
           <p class="action-sub" id="whatsapp-sub"></p>
         </div>
@@ -201,6 +236,14 @@
     </div>
   </section>
 </main>
+
+<div class="privacy-modal" id="privacy-modal" hidden>
+  <div class="privacy-modal-card" role="dialog" aria-modal="true" aria-labelledby="privacy-modal-title">
+    <button type="button" class="privacy-modal-close" id="privacy-modal-close">&times;</button>
+    <h2 id="privacy-modal-title"></h2>
+    <div id="privacy-modal-body"></div>
+  </div>
+</div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" integrity="sha384-JcnsjUPPylna1s1fvi1u12X5qjY5OL56iySh75FdtrwhO/SWXgMjoVqcKyIIWOLk" crossorigin="anonymous"></script>
 <script src="app.js"></script>
 </body>
