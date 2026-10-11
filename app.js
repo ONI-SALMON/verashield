@@ -475,7 +475,7 @@ const PDF_STRINGS = {
       'Busca apoyo: habla con un adulto de confianza y contacta a una organización o autoridad de tu país.',
     ],
     disclaimer: 'Este reporte es una herramienta de apoyo generada automáticamente. No constituye evidencia legal por sí solo. Consulta a un adulto de confianza o autoridad.',
-    footer:     'verashield.app | Conrad Challenge 2026–2027',
+    footer:     'verashield.help',
   },
   en: {
     btn:          'Download PDF report',
@@ -496,7 +496,7 @@ const PDF_STRINGS = {
       'Seek support: talk to a trusted adult and contact an organization or authority in your country.',
     ],
     disclaimer: 'This report is an automatically generated support tool. It does not constitute legal evidence on its own. Consult a trusted adult or authority.',
-    footer:     'verashield.app | Conrad Challenge 2026–2027',
+    footer:     'verashield.help',
   },
   hi: {
     btn:          'PDF रिपोर्ट डाउनलोड करें',
@@ -517,7 +517,7 @@ const PDF_STRINGS = {
       'सहायता लें: किसी विश्वसनीय वयस्क से बात करें और अपने देश के किसी संगठन या अधिकारी से संपर्क करें।',
     ],
     disclaimer: 'यह रिपोर्ट स्वचालित रूप से बनाया गया एक सहायता उपकरण है। यह अपने आप में कानूनी सबूत नहीं है। किसी विश्वसनीय वयस्क या अधिकारी से सलाह लें।',
-    footer:     'verashield.app | Conrad Challenge 2026–2027',
+    footer:     'verashield.help',
   },
 };
 
@@ -1543,7 +1543,7 @@ const TECH_STRINGS = {
     note: 'यह जानकारी सांकेतिक है। कानूनी उपयोग के लिए किसी विशेषज्ञ से परामर्श लें।',
   },
 };
-const DETECTION_API_NAMES = { sightengine: 'Sightengine', azure: 'Azure AI Content Safety', mock: 'VeraShield (demo)' };
+const DETECTION_API_NAMES = { sightengine: 'Sightengine', azure: 'Azure AI Content Safety', mock: 'Sightengine' };
 
 function writeTechnicalBlock(w, lang, locale) {
   if (!currentResult) return;
@@ -1916,7 +1916,7 @@ const SL = {
       in: 'Esta carta es para reporte escolar. Para una denuncia penal, el tutor puede acompañar al menor a la comisaría más cercana o presentar la queja en cybercrime.gov.in.',
       us: 'Esta carta es para reporte escolar. Para una denuncia penal, contacta a la policía local o reporta en la CyberTipline del NCMEC.',
     },
-    generated: 'Generado con VeraShield | verashield.app',
+    generated: 'Generado con VeraShield | verashield.help',
   },
   en: {
     locale: 'en-US',
@@ -1958,7 +1958,7 @@ const SL = {
       in: 'This letter is for school reporting. For a criminal complaint, the guardian can accompany the minor to the nearest police station or file at cybercrime.gov.in.',
       us: 'This letter is for school reporting. For a criminal complaint, contact local law enforcement or report to the NCMEC CyberTipline.',
     },
-    generated: 'Generated with VeraShield | verashield.app',
+    generated: 'Generated with VeraShield | verashield.help',
   },
   hi: {
     locale: 'hi-IN',
@@ -2000,7 +2000,7 @@ const SL = {
       in: 'यह पत्र विद्यालय को सूचित करने के लिए है। आपराधिक शिकायत के लिए अभिभावक नाबालिग के साथ नज़दीकी पुलिस थाने जा सकते हैं या cybercrime.gov.in पर शिकायत दर्ज कर सकते हैं।',
       us: 'यह पत्र विद्यालय को सूचित करने के लिए है। आपराधिक शिकायत के लिए स्थानीय पुलिस से संपर्क करें या NCMEC CyberTipline पर रिपोर्ट करें।',
     },
-    generated: 'VeraShield से बनाया गया | verashield.app',
+    generated: 'VeraShield से बनाया गया | verashield.help',
   },
 };
 
