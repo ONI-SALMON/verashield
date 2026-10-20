@@ -58,6 +58,8 @@ const UI = {
     trust1:       'Sin cuenta ni registro',
     trust2:       'Tu imagen no se guarda',
     trust3:       'Te mostramos qué hacer después del resultado',
+    scopeLead:    'VeraShield detecta imágenes generadas o alteradas con IA, incluido el contenido íntimo compartido sin consentimiento. Si esto te pasó a ti o a alguien cercano, aquí puedes pedir ayuda: no tienes la culpa.',
+    scopeNot:     'Si solo quieres saber si una imagen cualquiera fue hecha con IA, esta no es la herramienta indicada; busca un verificador general.',
     stepUpload:   'Elige la imagen',
     stepAnalyze:  'Revisa si fue creada por IA',
     uploadHint:   'JPG, PNG o WebP. Máximo 10 MB.',
@@ -80,6 +82,8 @@ const UI = {
     trust1:       'No account or sign-up',
     trust2:       'Your image is not saved',
     trust3:       'We show you what to do after the result',
+    scopeLead:    'VeraShield detects images generated or altered with AI, including intimate content shared without consent. If this happened to you or someone close to you, you can ask for help here: it is not your fault.',
+    scopeNot:     'If you only want to know whether any random image was made with AI, this is not the right tool; please look for a general image checker.',
     stepUpload:   'Choose the image',
     stepAnalyze:  'Check if it was created by AI',
     uploadHint:   'JPG, PNG or WebP. Max 10 MB.',
@@ -102,6 +106,8 @@ const UI = {
     trust1:       'कोई खाता या साइन-अप नहीं',
     trust2:       'आपकी तस्वीर सेव नहीं होती',
     trust3:       'परिणाम के बाद क्या करना है, हम बताते हैं',
+    scopeLead:    'VeraShield AI से बनी या बदली गई तस्वीरों का पता लगाता है, जिनमें बिना सहमति के साझा की गई निजी तस्वीरें भी शामिल हैं। अगर यह आपके या किसी करीबी के साथ हुआ है, तो यहाँ मदद माँग सकते हैं: इसमें आपकी कोई गलती नहीं है।',
+    scopeNot:     'अगर आप बस यह जानना चाहते हैं कि कोई भी आम तस्वीर AI से बनी है या नहीं, तो यह सही टूल नहीं है; कृपया कोई सामान्य इमेज चेकर खोजें।',
     stepUpload:   'तस्वीर चुनें',
     stepAnalyze:  'जाँचें कि वह AI से बनी है या नहीं',
     uploadHint:   'JPG, PNG या WebP। अधिकतम 10 MB।',
@@ -683,10 +689,10 @@ function renderActionResources() {
   list.innerHTML = '';
 
   EMAIL_TEMPLATES[currentLang].forEach((tpl) => {
-    const card = document.createElement('article');
+    const card = document.createElement('details');
     card.className = 'template-card';
 
-    const title = document.createElement('h4');
+    const title = document.createElement('summary');
     title.className = 'template-title';
     title.textContent = tpl.title;
     card.appendChild(title);
@@ -1336,6 +1342,7 @@ const FIND_STRINGS = {
     btn: 'Buscar ahora',
     needAnalysis: 'Para usar esta función, analiza primero tu imagen.',
     privacy: 'Al buscar, tu imagen se envía a Google Vision para compararla con sitios públicos. No la guardamos.',
+    results: 'Si la imagen aparece en otros sitios, solo te mostramos los links que Google Vision devuelve. VeraShield no guarda esos resultados ni entra a esos sitios; tú decides si los visitas o los reportas.',
     searching: 'Buscando…',
     none: 'No encontramos esta imagen en sitios públicos indexados. Esto no significa que no haya sido compartida en mensajes privados.',
     error: 'No se pudo completar la búsqueda. Inténtalo de nuevo en unos minutos.',
@@ -1348,6 +1355,7 @@ const FIND_STRINGS = {
     btn: 'Search now',
     needAnalysis: 'To use this feature, analyze your image first.',
     privacy: 'When you search, your image is sent to Google Vision to compare it with public sites. We do not store it.',
+    results: 'If the image appears on other sites, we only show you the links Google Vision returns. VeraShield does not store those results or visit those sites; you decide whether to visit or report them.',
     searching: 'Searching…',
     none: "We didn't find this image on public indexed sites. This doesn't mean it hasn't been shared in private messages.",
     error: 'The search could not be completed. Please try again in a few minutes.',
@@ -1360,6 +1368,7 @@ const FIND_STRINGS = {
     btn: 'अभी खोजें',
     needAnalysis: 'यह फ़ीचर उपयोग करने के लिए पहले अपनी इमेज का विश्लेषण करें।',
     privacy: 'खोज करने पर आपकी इमेज सार्वजनिक साइटों से मिलान के लिए Google Vision को भेजी जाती है। हम इसे सेव नहीं करते।',
+    results: 'अगर इमेज दूसरी साइटों पर मिलती है, तो हम सिर्फ़ वही लिंक दिखाते हैं जो Google Vision लौटाता है। VeraShield न इन नतीजों को सेव करता है और न इन साइटों पर जाता है; इन्हें खोलना या रिपोर्ट करना आप तय करें।',
     searching: 'खोज रहे हैं…',
     none: 'हमें यह इमेज सार्वजनिक रूप से इंडेक्स की गई साइटों पर नहीं मिली। इसका मतलब यह नहीं कि यह निजी संदेशों में शेयर नहीं हुई।',
     error: 'खोज पूरी नहीं हो सकी। कुछ मिनट बाद दोबारा कोशिश करें।',
@@ -1458,6 +1467,7 @@ function buildFindLinksStep() {
     privacyBtn.dataset.privacyOpen = '';
     privacyBtn.textContent = PRIVACY_STRINGS[currentLang].link;
     privacyP.appendChild(privacyBtn);
+    addNote(f.results);
     if (findState.status === 'error') addNote(f.error, 'find-note find-error');
     return li;
   }
