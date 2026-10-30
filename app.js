@@ -527,6 +527,58 @@ const PDF_STRINGS = {
   },
 };
 
+// ─── Evidence preservation (UI callout + PDF section; text only, no inputs) ──
+// Art. 20 Sexies LGAMVLV: the authority safeguards the reported content, so the victim must
+// document it first and must not download or forward it (art. 202 CPF).
+const EVIDENCE_STRINGS = {
+  es: {
+    title: 'Antes de pedir que lo eliminen, guarda esta evidencia:',
+    items: [
+      'URL completa donde aparece el contenido',
+      'Captura de pantalla del perfil o cuenta que lo publicó',
+      'Fecha y hora en que lo viste por primera vez',
+      'Nombre de usuario o identificador visible',
+    ],
+    warn: 'No descargues ni reenvíes la imagen o video.',
+    warnBody: 'Eso puede tener consecuencias legales. La autoridad es quien debe resguardar el contenido.',
+  },
+  en: {
+    title: 'Before requesting removal, preserve this evidence:',
+    items: [
+      'Full URL where the content appears',
+      'Screenshot of the profile or account that posted it',
+      'Date and time you first saw it',
+      'Visible username or identifier',
+    ],
+    warn: 'Do not download or forward the image or video.',
+    warnBody: 'That may have legal consequences. The authority is responsible for preserving the content.',
+  },
+  hi: {
+    title: 'हटाने का अनुरोध करने से पहले यह सबूत सुरक्षित रखें:',
+    items: [
+      'वह पूरा URL जहाँ सामग्री दिखती है',
+      'उस प्रोफ़ाइल या अकाउंट का स्क्रीनशॉट जिसने इसे पोस्ट किया',
+      'वह तारीख और समय जब आपने इसे पहली बार देखा',
+      'दिखाई देने वाला यूज़रनेम या पहचान',
+    ],
+    warn: 'तस्वीर या वीडियो को डाउनलोड या फ़ॉरवर्ड न करें।',
+    warnBody: 'इसके कानूनी परिणाम हो सकते हैं। सामग्री को सुरक्षित रखना अधिकारियों की ज़िम्मेदारी है।',
+  },
+};
+
+function renderEvidenceNote() {
+  const s = EVIDENCE_STRINGS[currentLang];
+  document.getElementById('evidence-note-title').textContent = '📋 ' + s.title;
+  document.getElementById('evidence-list').replaceChildren(...s.items.map((text) => {
+    const li = document.createElement('li');
+    li.textContent = '✓ ' + text;
+    return li;
+  }));
+  const warn = document.createElement('strong');
+  warn.textContent = '⚠️ ' + s.warn;
+  document.getElementById('evidence-warn').replaceChildren(warn, document.createTextNode(' ' + s.warnBody));
+}
+
 // ─── Action resources: copy-only email templates ────────────────────────────
 // Text is only ever copied to the user's clipboard: nothing is sent or stored.
 const ACTION_STRINGS = {
@@ -795,7 +847,7 @@ const CRISIS_RESOURCES = {
       },
       {
         name: "CNDH: Comisión Nacional de los Derechos Humanos",
-        description: "Denuncia violaciones a derechos humanos, incluyendo violencia digital",
+        description: "Denuncia violaciones a derechos humanos, incluyendo violencia digital. " + LEGAL_REFS.cndhNote.es,
         contact: "800 715 2000",
         url: "https://www.cndh.org.mx/programas/contacto-1",
         type: "legal",
@@ -894,6 +946,9 @@ function applyLanguage(lang) {
   if (selectedFile) uploadHint.textContent = ui.changeImage;
   updateAnalyzeHint();
   renderPrivacyUi();
+  renderContentGuard();
+  renderEvidenceNote();
+  if (!altRouteEl.hidden) renderAlternativeRoute(altRouteEl);
 
   // toggle active state on ALL lang buttons
   langBtns.forEach(btn => {
@@ -993,6 +1048,7 @@ function setPreview(file) {
 
 async function handleFile(file) {
   clearFormError();
+  hideAlternativeRoute();
   const t = T[currentLang];
   const myToken = ++handleFileToken;
 
@@ -1175,7 +1231,7 @@ function renderCrisisPathway() {
   whatsappDisclaimer.textContent = t.whatsappDisclaimer;
   whatsappBtn.textContent = t.whatsappBtn;
   const waMessages = directCrisisActive ? t.whatsappMessageDirect : t.whatsappMessage;
-  whatsappBtn.href = `https://wa.me/?text=${encodeURIComponent(waMessages[victimMode])}`;
+  whatsappBtn.href = whatsappShareUrl(waMessages[victimMode]);
 
   const crisisTitleEl = document.querySelector('.crisis-title');
   if (crisisTitleEl) crisisTitleEl.textContent = t.crisisTitle;
@@ -1335,6 +1391,193 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && !privacyModal.hidden) closePrivacyModal();
 });
 
+// ─── Content guard ───────────────────────────────────────────────────────────
+// Blocking question asked BEFORE any file leaves the browser (Sightengine, Google Vision).
+// Art. 202 CPF (MX) punishes "transmitting" sexual material involving minors, so sending it to
+// a third-party API is itself the offence. Nothing is logged externally; only console.warn.
+const CONTENT_GUARD_STRINGS = {
+  es: {
+    question: 'Antes de continuar: ¿La imagen o video que vas a analizar muestra desnudez o contenido sexual de alguien menor de 18 años?',
+    no: 'No, continuar',
+    yes: 'Sí, detener el análisis',
+  },
+  en: {
+    question: "Before continuing: Does the image or video you're uploading contain nudity or sexual content of someone under 18?",
+    no: 'No, continue',
+    yes: 'Yes, stop the analysis',
+  },
+  hi: {
+    question: 'जारी रखने से पहले: क्या जिस फ़ोटो या वीडियो का आप विश्लेषण करने जा रहे हैं, उसमें 18 वर्ष से कम उम्र के किसी व्यक्ति की नग्नता या यौन सामग्री है?',
+    no: 'नहीं, जारी रखें',
+    yes: 'हाँ, विश्लेषण रोकें',
+  },
+};
+
+const contentGuardModal    = document.getElementById('content-guard-modal');
+const contentGuardQuestion = document.getElementById('content-guard-question');
+const contentGuardNo       = document.getElementById('content-guard-no');
+const contentGuardYes      = document.getElementById('content-guard-yes');
+let contentGuardResolve   = null;  // pending answer while the modal is open
+let contentGuardConfirmed = null;  // File (or 'url:…' key) the user already answered "No" for
+let contentGuardLastFocus = null;
+
+function renderContentGuard() {
+  const s = CONTENT_GUARD_STRINGS[currentLang];
+  contentGuardQuestion.textContent = s.question;
+  contentGuardNo.textContent = s.no;
+  contentGuardYes.textContent = s.yes;
+}
+
+function askContentGuard() {
+  if (contentGuardResolve) return Promise.resolve(false);
+  contentGuardLastFocus = document.activeElement;
+  renderContentGuard();
+  contentGuardModal.hidden = false;
+  contentGuardYes.focus(); // safe default: stopping is the focused action
+  return new Promise(resolve => { contentGuardResolve = resolve; });
+}
+
+function answerContentGuard(continueAnalysis) {
+  const resolve = contentGuardResolve;
+  if (!resolve) return;
+  contentGuardResolve = null;
+  contentGuardModal.hidden = true;
+  if (contentGuardLastFocus && contentGuardLastFocus.focus) contentGuardLastFocus.focus();
+  resolve(continueAnalysis);
+}
+
+contentGuardNo.addEventListener('click', () => answerContentGuard(true));
+contentGuardYes.addEventListener('click', () => answerContentGuard(false));
+// Blocking: Escape never dismisses it, and Tab stays inside the dialog.
+document.addEventListener('keydown', (e) => {
+  if (contentGuardModal.hidden) return;
+  if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); return; }
+  if (e.key !== 'Tab') return;
+  const [first, last] = [contentGuardNo, contentGuardYes];
+  if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  else if (document.activeElement !== first && document.activeElement !== last) { e.preventDefault(); last.focus(); }
+}, true);
+
+function blockAnalysis() {
+  console.warn('[VeraShield] Análisis bloqueado: el usuario indicó posible desnudez/contenido sexual de un menor de 18 años. No se envió ningún archivo a APIs externas.');
+  resetToUpload();
+  showAlternativeRoute();
+}
+
+// ─── AlternativeRoute ────────────────────────────────────────────────────────
+// Shown instead of an error when the analysis is blocked (content guard). Self-contained:
+// renderAlternativeRoute(container) can be reused from any other part of the app.
+const ALT_ROUTE_STRINGS = {
+  es: {
+    title: 'Esta imagen no puede analizarse aquí.',
+    lead: 'Si eres la persona afectada o conoces a alguien en esta situación:',
+    tidName: 'Take It Down (NCMEC)',
+    tidDomain: 'takeitdown.ncmec.org',
+    tidBody: 'Servicio gratuito para que la imagen no se difunda más. La imagen nunca sale de tu dispositivo.',
+    tidBtn: 'Ir a Take It Down →',
+    waHeading: 'Avisar a un adulto de confianza',
+    letterHeading: 'Carta para tu escuela',
+    letterBody: 'Puedes generar la carta aunque no hayas podido analizar la imagen.',
+    letterBtn: 'Generar carta →',
+  },
+  en: {
+    title: 'This image cannot be analyzed here.',
+    lead: 'If you are the person affected or you know someone in this situation:',
+    tidName: 'Take It Down (NCMEC)',
+    tidDomain: 'takeitdown.ncmec.org',
+    tidBody: 'A free service to stop the image from spreading further. The image never leaves your device.',
+    tidBtn: 'Go to Take It Down →',
+    waHeading: 'Tell a trusted adult',
+    letterHeading: 'Letter for your school',
+    letterBody: 'You can generate the letter even if the image could not be analyzed.',
+    letterBtn: 'Generate letter →',
+  },
+  hi: {
+    title: 'इस तस्वीर का विश्लेषण यहाँ नहीं किया जा सकता।',
+    lead: 'अगर आप प्रभावित व्यक्ति हैं या ऐसी स्थिति में किसी को जानते हैं:',
+    tidName: 'Take It Down (NCMEC)',
+    tidDomain: 'takeitdown.ncmec.org',
+    tidBody: 'तस्वीर को और फैलने से रोकने के लिए एक निःशुल्क सेवा। तस्वीर कभी आपके डिवाइस से बाहर नहीं जाती।',
+    tidBtn: 'Take It Down पर जाएँ →',
+    waHeading: 'किसी विश्वसनीय वयस्क को बताएँ',
+    letterHeading: 'आपके स्कूल के लिए पत्र',
+    letterBody: 'तस्वीर का विश्लेषण न हो पाने पर भी आप पत्र बना सकते हैं।',
+    letterBtn: 'पत्र बनाएँ →',
+  },
+};
+
+const altRouteEl = document.getElementById('alternative-route');
+
+function whatsappShareUrl(text) {
+  return `https://wa.me/?text=${encodeURIComponent(text)}`;
+}
+
+function renderAlternativeRoute(container) {
+  const s = ALT_ROUTE_STRINGS[currentLang];
+  const t = T[currentLang];
+  const make = (tag, className, text) => {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  };
+  const item = (heading, ...children) => {
+    const box = make('div', 'alt-route-item');
+    box.append(make('h3', '', heading), ...children);
+    return box;
+  };
+
+  const title = make('h2', 'crisis-title', s.title);
+  title.id = 'alt-route-title';
+  title.tabIndex = -1;
+
+  // Take It Down: external service, the image never leaves the device
+  const tidLink = make('a', 'takedown-btn', s.tidBtn);
+  tidLink.href = 'https://takeitdown.ncmec.org';
+  tidLink.target = '_blank';
+  tidLink.rel = 'noopener';
+
+  // WhatsApp: same share link and message as the crisis path without analysis
+  const waLink = make('a', 'share-btn whatsapp-btn', t.whatsappBtn);
+  waLink.href = whatsappShareUrl(t.whatsappMessageDirect[victimMode]);
+  waLink.target = '_blank';
+  waLink.rel = 'noopener';
+
+  // School letter: jumps straight to the letter form, skipping the analysis
+  const letterBtn = make('button', 'secondary-btn', s.letterBtn);
+  letterBtn.type = 'button';
+  letterBtn.addEventListener('click', openSchoolLetterFromUpload);
+
+  container.replaceChildren(
+    title,
+    make('p', 'alt-path-lead', s.lead),
+    item('🔗 ' + s.tidName, make('p', 'alt-path-lead', s.tidDomain), make('p', 'alt-path-lead', s.tidBody), tidLink),
+    item('📱 ' + s.waHeading, make('p', 'alt-path-lead', t.whatsappDisclaimer), waLink),
+    item('📄 ' + s.letterHeading, make('p', 'alt-path-lead', s.letterBody), letterBtn),
+  );
+}
+
+function showAlternativeRoute() {
+  renderAlternativeRoute(altRouteEl);
+  altRouteEl.hidden = false;
+  altRouteEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.getElementById('alt-route-title').focus({ preventScroll: true });
+}
+
+function hideAlternativeRoute() {
+  altRouteEl.hidden = true;
+  altRouteEl.replaceChildren();
+}
+
+// key: the File (photo) or 'url:…' string (video URL) about to be sent. Resolves true only when it is safe to send.
+async function ensureContentGuard(key) {
+  if (key && key === contentGuardConfirmed) return true;
+  if (await askContentGuard()) { contentGuardConfirmed = key; return true; }
+  blockAnalysis();
+  return false;
+}
+
 // ─── Find where the image was shared (Google Vision web detection) ──────────
 const FIND_STRINGS = {
   es: {
@@ -1403,6 +1646,7 @@ function fileToBase64(file) {
 
 async function runFindLinks() {
   if (!canSearchLinks() || findState.status === 'loading') return;
+  if (!(await ensureContentGuard(analyzedImage))) return; // already confirmed for this file in the normal flow
   findState = { status: 'loading', data: null };
   renderCrisisPathway();
   try {
@@ -1671,6 +1915,27 @@ function createPdfWriter(doc, lang) {
       draw(box, str, PDF_MARGIN_MM, y, { size, bold, color, align }, contentW);
       y += box.h + gap;
     },
+    // Light-gray box with a colored left border; `blocks` are text() options plus `str`.
+    callout(blocks, { bar = PDF_COLORS.accent } = {}) {
+      const pad = 4;
+      const innerW = contentW - 2 * pad;
+      const boxes = blocks.map((b) => {
+        const opts = { size: 10.5, bold: false, color: PDF_COLORS.ink, align: 'left', gap: 1.5, ...b };
+        return { opts, box: layout(opts.str, opts.size, opts.bold, innerW) };
+      });
+      const total = boxes.reduce((sum, { box, opts }) => sum + box.h + opts.gap, 0) + 2 * pad - boxes[boxes.length - 1].opts.gap;
+      if (y + total > pageLimit) { doc.addPage(); y = PDF_MARGIN_MM; }
+      doc.setFillColor(240, 241, 244);
+      doc.rect(PDF_MARGIN_MM, y, contentW, total, 'F');
+      doc.setFillColor(...bar);
+      doc.rect(PDF_MARGIN_MM, y, 1.2, total, 'F');
+      let top = y + pad;
+      boxes.forEach(({ opts, box }) => {
+        draw(box, opts.str, PDF_MARGIN_MM + pad, top, opts, innerW);
+        top += box.h + opts.gap;
+      });
+      y += total + 5;
+    },
     // fixed position, no flow (used for the footer on every page)
     textAt(str, top, opts) {
       const dx = opts.dx || 0;
@@ -1709,6 +1974,16 @@ function generateEvidencePdf() {
   // 3. What this result means (by bucket)
   w.text(p.meaningTitle, { size: 15, bold: true, gap: 3 });
   w.text(p.meaning[bucket], { size: 11, gap: 6 });
+
+  // 3b. Evidence preservation (own section, before the reporting steps).
+  // Helvetica has no check/warning glyphs, so the PDF uses plain "- " bullets.
+  const ev = EVIDENCE_STRINGS[lang];
+  w.callout([
+    { str: ev.title, bold: true, size: 11.5, gap: 2.5 },
+    ...ev.items.map((item) => ({ str: '- ' + item })),
+    { str: ev.warn, bold: true, color: PDF_COLORS.bucket.high, gap: 1 },
+    { str: ev.warnBody, gap: 0 },
+  ], { bar: PDF_COLORS.bucket.medium });
 
   // 4. Recommended steps
   w.text(p.stepsTitle, { size: 15, bold: true, gap: 3 });
@@ -1835,8 +2110,10 @@ function showDirectCrisisPath() {
 directCrisisBtn.addEventListener('click', showDirectCrisisPath);
 noDetectionLink.addEventListener('click', revealCrisisResources);
 function resetToUpload() {
+  hideAlternativeRoute();
   handleFileToken++;
   selectedFile = null;
+  contentGuardConfirmed = null;
   currentResult = null;
   analyzedImage = null;
   findState = { status: 'idle', data: null };
@@ -1897,6 +2174,10 @@ const SL = {
     desc: 'Descripción breve del incidente', descPh: 'Describe brevemente qué pasó, sin datos que no quieras compartir con la escuela.',
     guardian: 'Nombre del tutor o tutora legal', guardianPh: 'Ej. Ana López Ramírez',
     state: 'Estado', statePh: 'Selecciona tu estado',
+    level: 'Nivel educativo', levelPh: 'Selecciona el nivel',
+    levelBasica: 'Educación básica (preescolar, primaria o secundaria)',
+    levelMediaFederal: 'Bachillerato federal',
+    levelLocal: 'Bachillerato estatal o privado',
     generate: 'Generar carta', clear: 'Limpiar formulario',
     pdfError: 'No se pudo cargar el generador de PDF. Revisa tu conexión e inténtalo de nuevo.',
     file: 'carta-escuela-verashield',
@@ -1906,7 +2187,7 @@ const SL = {
     body: (g, st, gr, inc) => 'Por medio de la presente, yo, ' + g + ', en mi carácter de tutor(a) legal del/de la alumno/a ' + st + ', quien cursa ' + gr + ' en esa institución, me dirijo a usted para hacer de su conocimiento un incidente de difusión o manipulación de contenido digital (imágenes o video) sin consentimiento, ocurrido ' + (inc ? 'el ' + inc : 'en fecha ____________________') + ', que afecta al/a la alumno/a.',
     descLabel: 'Descripción de los hechos: ',
     legal: {
-      mx: (state) => 'Hago de su conocimiento que la difusión de contenido íntimo o sexual sin consentimiento constituye una conducta sancionada por la denominada «Ley Olimpia», ' + (state ? 'tanto en el ámbito federal (Ley General de Acceso de las Mujeres a una Vida Libre de Violencia y Código Penal Federal) como en la legislación penal de ' + state : 'en el ámbito federal (Ley General de Acceso de las Mujeres a una Vida Libre de Violencia y Código Penal Federal)') + '. Al tratarse de una persona menor de edad, debe prevalecer además el interés superior de la niñez, conforme a la Ley General de los Derechos de Niñas, Niños y Adolescentes.',
+      mx: (state, level) => buildMxLetterLegal('es', state, level), // text lives in legal-references.js
       in: () => 'Hago de su conocimiento que difundir o manipular imágenes de una persona sin su consentimiento puede constituir un delito conforme a la Sección 66E de la Ley de Tecnología de la Información de 2000 y, al tratarse de una persona menor de edad, también puede estar comprendido en la Ley POCSO de 2012. Debe prevalecer el interés superior de la niñez.',
       us: () => 'Hago de su conocimiento que difundir o manipular imágenes de una persona menor de edad sin su consentimiento puede violar la ley federal (incluida la ley TAKE IT DOWN) y las leyes estatales aplicables. La seguridad y el interés superior del alumno/a deben ser la prioridad.',
     },
@@ -1939,6 +2220,10 @@ const SL = {
     desc: 'Short description of the incident', descPh: 'Briefly describe what happened. Leave out anything you do not want the school to know.',
     guardian: 'Name of parent or legal guardian', guardianPh: 'e.g. Ana Lopez Ramirez',
     state: 'State', statePh: 'Select your state',
+    level: 'School level', levelPh: 'Select the level',
+    levelBasica: 'Basic education (preschool, primary or lower secondary)',
+    levelMediaFederal: 'Federal upper secondary (bachillerato)',
+    levelLocal: 'State or private upper secondary (bachillerato)',
     generate: 'Generate letter', clear: 'Clear form',
     pdfError: 'The PDF generator could not be loaded. Check your connection and try again.',
     file: 'school-letter-verashield',
@@ -1948,7 +2233,7 @@ const SL = {
     body: (g, st, gr, inc) => 'I, ' + g + ', as the legal guardian of the student ' + st + ', who attends ' + gr + ' at your institution, am writing to inform you of an incident involving the sharing or manipulation of digital content (images or video) without consent, which occurred ' + (inc ? 'on ' + inc : 'on a date ____________________') + ' and affects the student.',
     descLabel: 'Description of events: ',
     legal: {
-      mx: (state) => 'Please be advised that sharing intimate or sexual content without consent is conduct punishable under the so-called "Ley Olimpia", ' + (state ? 'both at the federal level (General Law on Women\'s Access to a Life Free of Violence and the Federal Criminal Code) and under the criminal law of ' + state : 'at the federal level (General Law on Women\'s Access to a Life Free of Violence and the Federal Criminal Code)') + '. Because the student is a minor, the best interests of the child must also prevail under the General Law on the Rights of Children and Adolescents.',
+      mx: (state, level) => buildMxLetterLegal('en', state, level),
       in: () => 'Please be advised that sharing or manipulating a person\'s images without consent may be an offence under Section 66E of the Information Technology Act, 2000 and, because the student is a minor, may also fall under the POCSO Act, 2012. The best interests of the child must prevail.',
       us: () => 'Please be advised that sharing or manipulating images of a minor without consent may violate federal law (including the TAKE IT DOWN Act) and applicable state law. The student\'s safety and best interests must come first.',
     },
@@ -1981,6 +2266,10 @@ const SL = {
     desc: 'घटना का संक्षिप्त विवरण', descPh: 'संक्षेप में बताएँ क्या हुआ। ऐसी बातें न लिखें जो आप स्कूल को नहीं बताना चाहते।',
     guardian: 'अभिभावक का नाम', guardianPh: 'जैसे: सुनीता शर्मा',
     state: 'राज्य', statePh: 'अपना राज्य चुनें',
+    level: 'शिक्षा स्तर', levelPh: 'स्तर चुनें',
+    levelBasica: 'बुनियादी शिक्षा (प्रीस्कूल, प्राथमिक या माध्यमिक)',
+    levelMediaFederal: 'संघीय बाचिलेराटो (उच्च माध्यमिक)',
+    levelLocal: 'राज्य या निजी बाचिलेराटो (उच्च माध्यमिक)',
     generate: 'पत्र बनाएँ', clear: 'फ़ॉर्म साफ़ करें',
     pdfError: 'PDF जनरेटर लोड नहीं हो सका। अपना कनेक्शन जाँचें और दोबारा कोशिश करें।',
     file: 'school-letter-verashield',
@@ -1990,7 +2279,7 @@ const SL = {
     body: (g, st, gr, inc) => 'मैं, ' + g + ', छात्र/छात्रा ' + st + ' का कानूनी अभिभावक, जो आपके विद्यालय में ' + gr + ' में पढ़ता/पढ़ती है, आपको एक घटना की जानकारी देने के लिए लिख रहा/रही हूँ, जिसमें डिजिटल सामग्री (तस्वीरें या वीडियो) बिना सहमति के साझा या बदली गई। यह घटना ' + (inc ? inc + ' को' : 'दिनांक ____________________ को') + ' हुई और इससे छात्र/छात्रा प्रभावित है।',
     descLabel: 'घटना का विवरण: ',
     legal: {
-      mx: (state) => 'मैं आपको सूचित करता/करती हूँ कि सहमति के बिना निजी या यौन सामग्री साझा करना मेक्सिको की "ले ओलम्पिया" के तहत दंडनीय है' + (state ? ', संघीय स्तर पर भी और ' + state + ' के आपराधिक कानून के तहत भी' : ', संघीय स्तर पर') + '। छात्र/छात्रा नाबालिग है, इसलिए बच्चों और किशोरों के अधिकारों के सामान्य कानून के अनुसार बच्चे का सर्वोत्तम हित सर्वोपरि होना चाहिए।',
+      mx: (state, level) => buildMxLetterLegal('hi', state, level),
       in: () => 'मैं आपको सूचित करता/करती हूँ कि किसी व्यक्ति की तस्वीरें बिना सहमति के साझा करना या बदलना सूचना प्रौद्योगिकी अधिनियम, 2000 की धारा 66E के तहत अपराध हो सकता है और, छात्र/छात्रा नाबालिग होने के कारण, POCSO अधिनियम, 2012 के अंतर्गत भी आ सकता है। बच्चे का सर्वोत्तम हित सर्वोपरि होना चाहिए।',
       us: () => 'मैं आपको सूचित करता/करती हूँ कि किसी नाबालिग की तस्वीरें बिना सहमति के साझा करना या बदलना संघीय कानून (TAKE IT DOWN Act सहित) और लागू राज्य कानूनों का उल्लंघन हो सकता है। छात्र/छात्रा की सुरक्षा और सर्वोत्तम हित को प्राथमिकता मिलनी चाहिए।',
     },
@@ -2015,6 +2304,7 @@ const SL = {
 };
 
 const stateField = document.getElementById('sl-state-field');
+const levelField = document.getElementById('sl-level-field');
 
 function applySchoolLetterStrings() {
   const sl = SL[currentLang];
@@ -2026,6 +2316,7 @@ function updateSchoolLetterVisibility() {
   schoolLetterSection.hidden = false;
   schoolLetterLink.hidden = false;
   stateField.hidden = currentCountry !== 'mx';
+  levelField.hidden = currentCountry !== 'mx';
   applySchoolLetterStrings();
 }
 
@@ -2058,6 +2349,7 @@ function generateSchoolLetter() {
   const school   = val('sl-school');
   const guardian = val('sl-guardian');
   const state    = country === 'mx' ? val('sl-state') : '';
+  const level    = country === 'mx' ? val('sl-level') : ''; // '' falls back to the local-protocol wording
   const incident = isoToDate(val('sl-date'), sl.locale);
   const desc     = val('sl-description').slice(0, 300);
   const now      = new Date();
@@ -2076,7 +2368,7 @@ function generateSchoolLetter() {
   w.text(sl.descLabel + (desc || '_'.repeat(40)), { gap: desc ? 4 : 1, color: ink });
   if (!desc) w.text('_'.repeat(75), { gap: 4, color: ink });
 
-  w.text(sl.legal[country](state && LEY_OLIMPIA_STATES.has(state) ? state : ''), { gap: 4, color: ink });
+  w.text(sl.legal[country](state && LEY_OLIMPIA_STATES.has(state) ? state : '', level), { gap: 4, color: ink });
 
   w.text(sl.requestsIntro, { gap: 2, color: ink });
   sl.requests.forEach((item) => w.text(item, { gap: 2, color: ink }));
@@ -2129,11 +2421,12 @@ slDescription.addEventListener('input', () => {
 });
 
 // Entry point from the upload screen (independent of any analysis result)
-schoolLetterLink.addEventListener('click', () => {
+function openSchoolLetterFromUpload() {
   showDirectCrisisPath();
   schoolLetterDetails.open = true;
   schoolLetterSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-});
+}
+schoolLetterLink.addEventListener('click', openSchoolLetterFromUpload);
 
 // ─── Video mode ──────────────────────────────────────────────────────────────
 // Photo/Video toggle, video upload (file or direct URL) and analysis. The result
@@ -2534,6 +2827,7 @@ async function analyzeVideo() {
     init = { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ videoUrl }) };
   }
 
+  if (!(await ensureContentGuard(selectedVideo || 'url:' + videoUrlInput.value.trim()))) return;
   setLoading(true);
   const controller = new AbortController();
   const timeoutId  = setTimeout(() => controller.abort(), VIDEO_REQUEST_TIMEOUT_MS);
@@ -2570,6 +2864,7 @@ analyzeBtn.addEventListener('click', async () => {
   if (inputMode === 'video') { analyzeVideo(); return; }
   if (!selectedFile) return;
   clearFormError();
+  if (!(await ensureContentGuard(selectedFile))) return;
   setLoading(true);
 
   const formData = new FormData();

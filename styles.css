@@ -575,6 +575,21 @@ summary:focus-visible,
   color: var(--color-text); font-size: 28px; line-height: 1; cursor: pointer;
 }
 
+/* Evidence preservation callout (reuses .no-detection-note) */
+.evidence-note { border-left: 3px solid var(--tint-amber-line); }
+.evidence-title { font-weight: 650; }
+.evidence-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-2); }
+.evidence-warn { color: var(--color-amber); }
+
+/* AlternativeRoute (shown when the content guard blocks the analysis) */
+.alt-route, .alt-route-item { display: flex; flex-direction: column; gap: var(--space-3); }
+.alt-route[hidden] { display: none; }
+.alt-route-item h3 { font-size: var(--text-base); font-weight: 650; }
+
+/* Content guard (blocking confirmation before any upload to an external API) */
+#content-guard-modal .privacy-modal-card h2 { margin-right: 0; line-height: 1.4; }
+.content-guard-actions { display: flex; flex-direction: column; gap: var(--space-2); margin-top: var(--space-4); }
+
 /* Inline form error */
 .form-error {
   font-size: var(--text-sm);

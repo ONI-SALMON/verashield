@@ -94,6 +94,8 @@
       <p class="analyze-hint" id="analyze-hint" data-i18n="analyzeHint"></p>
       <p class="form-error" id="form-error" role="alert" hidden></p>
 
+      <section class="alt-route" id="alternative-route" aria-labelledby="alt-route-title" hidden></section>
+
       <div class="or-divider" role="separator"><span data-i18n="or"></span></div>
 
       <div class="alt-path">
@@ -126,6 +128,12 @@
       </div>
       <p class="score-explanation" id="score-explanation"></p>
       <p class="score-generator" id="score-generator" hidden></p>
+
+      <aside class="no-detection-note evidence-note" id="evidence-note" role="note" aria-labelledby="evidence-note-title">
+        <p class="evidence-title" id="evidence-note-title"></p>
+        <ul class="evidence-list" id="evidence-list"></ul>
+        <p class="evidence-warn" id="evidence-warn"></p>
+      </aside>
 
       <div class="no-detection-note" id="no-detection-note" hidden>
         <p id="no-detection-text"></p>
@@ -193,6 +201,13 @@
                 <small class="sl-counter" id="sl-counter">0 / 300</small></label>
               <label class="sl-field"><span data-sl="guardian"></span>
                 <input type="text" id="sl-guardian" maxlength="100" data-sl-ph="guardianPh"></label>
+              <label class="sl-field" id="sl-level-field"><span data-sl="level"></span>
+                <select id="sl-level">
+                  <option value="" data-sl="levelPh"></option>
+                  <option value="basica" data-sl="levelBasica"></option>
+                  <option value="mediaFederal" data-sl="levelMediaFederal"></option>
+                  <option value="local" data-sl="levelLocal"></option>
+                </select></label>
               <label class="sl-field" id="sl-state-field"><span data-sl="state"></span>
                 <select id="sl-state">
               <option value="" data-sl="statePh"></option>
@@ -249,7 +264,19 @@
     <div id="privacy-modal-body"></div>
   </div>
 </div>
+
+<!-- Blocking content guard: asked before any file is sent to an external API. No close button, no Escape, no click-outside. -->
+<div class="privacy-modal" id="content-guard-modal" hidden>
+  <div class="privacy-modal-card" role="alertdialog" aria-modal="true" aria-labelledby="content-guard-question">
+    <h2 id="content-guard-question"></h2>
+    <div class="content-guard-actions">
+      <button type="button" class="secondary-btn" id="content-guard-no"></button>
+      <button type="button" class="primary-btn" id="content-guard-yes"></button>
+    </div>
+  </div>
+</div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" integrity="sha384-JcnsjUPPylna1s1fvi1u12X5qjY5OL56iySh75FdtrwhO/SWXgMjoVqcKyIIWOLk" crossorigin="anonymous"></script>
+<script src="legal-references.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
