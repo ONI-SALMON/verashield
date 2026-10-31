@@ -2,6 +2,7 @@ import {
   CNDH_NOTE_TEXT, LEGAL_FRAMEWORK_TITLE, LEY_OLIMPIA, MX_CRISIS_LEGAL_NOTE,
   buildMxLetterLegal, getLegalReference,
 } from './lib/legalReferences.js';
+import { SITE_DOMAIN } from './lib/siteConfig.js';
 import { AZURE_PRIVACY_URL, GVISION_TERMS_URL, GVISION_URL, SIGHTENGINE_URL } from './lib/privacyServices.js';
 
 const MAX_FILE_SIZE_BYTES       = 10 * 1024 * 1024; // final cap, matches api/detect.js
@@ -487,7 +488,7 @@ const PDF_STRINGS = {
       'Busca apoyo: habla con un adulto de confianza y contacta a una organización o autoridad de tu país.',
     ],
     disclaimer: 'Este reporte es una herramienta de apoyo generada automáticamente. No constituye evidencia legal por sí solo. Consulta a un adulto de confianza o autoridad.',
-    footer:     'verashield.help',
+    footer:     SITE_DOMAIN,
   },
   en: {
     btn:          'Download PDF report',
@@ -508,7 +509,7 @@ const PDF_STRINGS = {
       'Seek support: talk to a trusted adult and contact an organization or authority in your country.',
     ],
     disclaimer: 'This report is an automatically generated support tool. It does not constitute legal evidence on its own. Consult a trusted adult or authority.',
-    footer:     'verashield.help',
+    footer:     SITE_DOMAIN,
   },
   hi: {
     btn:          'PDF रिपोर्ट डाउनलोड करें',
@@ -529,7 +530,7 @@ const PDF_STRINGS = {
       'सहायता लें: किसी विश्वसनीय वयस्क से बात करें और अपने देश के किसी संगठन या अधिकारी से संपर्क करें।',
     ],
     disclaimer: 'यह रिपोर्ट स्वचालित रूप से बनाया गया एक सहायता उपकरण है। यह अपने आप में कानूनी सबूत नहीं है। किसी विश्वसनीय वयस्क या अधिकारी से सलाह लें।',
-    footer:     'verashield.help',
+    footer:     SITE_DOMAIN,
   },
 };
 
@@ -1232,8 +1233,8 @@ function renderCrisisPathway() {
   // that doesn't mention AI or VeraShield
   whatsappDisclaimer.textContent = t.whatsappDisclaimer;
   whatsappBtn.textContent = t.whatsappBtn;
-  const waMessages = directCrisisActive ? t.whatsappMessageDirect : t.whatsappMessage;
-  whatsappBtn.href = whatsappShareUrl(waMessages[victimMode]);
+  const waMessages = hasAnalysis() ? t.whatsappMessage : t.whatsappMessageDirect;
+  whatsappBtn.href = whatsappShareUrl(buildWhatsappMessage(waMessages[victimMode]));
 
   const crisisTitleEl = document.querySelector('.crisis-title');
   if (crisisTitleEl) crisisTitleEl.textContent = t.crisisTitle;
@@ -1586,6 +1587,39 @@ const ALT_ROUTE_STRINGS = {
 
 const altRouteEl = document.getElementById('alternative-route');
 
+// First line of every WhatsApp message (agreed with SocialTIC, 28 Oct 2026). The site comes from
+// SITE_DOMAIN. If the whole URL would exceed WhatsApp's ~2,000 character limit, the short form is used.
+const WHATSAPP_URL_LIMIT = 2000;
+const WHATSAPP_INTRO = {
+  withAnalysis: {
+    es: 'Este mensaje fue generado con VeraShield ({site}), herramienta de detección de imágenes manipuladas con IA.',
+    en: 'This message was generated with VeraShield ({site}), a tool for detecting AI-manipulated images.',
+    hi: 'यह संदेश VeraShield ({site}) से बनाया गया है, जो AI से बदली गई इमेज पहचानने वाला टूल है।',
+  },
+  plain: {
+    es: 'Este mensaje fue generado con VeraShield ({site}).',
+    en: 'This message was generated with VeraShield ({site}).',
+    hi: 'यह संदेश VeraShield ({site}) से बनाया गया है।',
+  },
+  short: {
+    es: 'Generado con VeraShield ({site}).',
+    en: 'Generated with VeraShield ({site}).',
+    hi: 'VeraShield ({site}) से बनाया गया।',
+  },
+};
+
+// With analysis = there is a score in the shared case data and this is not the direct-crisis path.
+function hasAnalysis() {
+  return caseData.score_analisis !== null && !directCrisisActive;
+}
+
+function buildWhatsappMessage(body) {
+  const intro = (key) => WHATSAPP_INTRO[key][currentLang].replace('{site}', SITE_DOMAIN);
+  let text = intro(hasAnalysis() ? 'withAnalysis' : 'plain') + '\n\n' + body;
+  if (whatsappShareUrl(text).length > WHATSAPP_URL_LIMIT) text = intro('short') + '\n\n' + body;
+  return text;
+}
+
 function whatsappShareUrl(text) {
   return `https://wa.me/?text=${encodeURIComponent(text)}`;
 }
@@ -1617,7 +1651,7 @@ function renderAlternativeRoute(container) {
 
   // WhatsApp: same share link and message as the crisis path without analysis
   const waLink = make('a', 'share-btn whatsapp-btn', t.whatsappBtn);
-  waLink.href = whatsappShareUrl(t.whatsappMessageDirect[victimMode]);
+  waLink.href = whatsappShareUrl(buildWhatsappMessage(t.whatsappMessageDirect[victimMode]));
   waLink.target = '_blank';
   waLink.rel = 'noopener';
 
@@ -1841,7 +1875,7 @@ function buildFindLinksStep() {
 const TECH_STRINGS = {
   es: {
     title: 'Análisis técnico adjunto:',
-    tool: 'Herramienta utilizada: VeraShield (verashield.help)',
+    tool: `Herramienta utilizada: VeraShield (${SITE_DOMAIN})`,
     api: (a) => `API de detección: ${a}`,
     score: (n) => `Puntuación de detección: ${n}% de probabilidad de contenido generado con IA`,
     when: (d) => `Fecha y hora del análisis: ${d}`,
@@ -1849,7 +1883,7 @@ const TECH_STRINGS = {
   },
   en: {
     title: 'Technical analysis included:',
-    tool: 'Tool used: VeraShield (verashield.help)',
+    tool: `Tool used: VeraShield (${SITE_DOMAIN})`,
     api: (a) => `Detection API: ${a}`,
     score: (n) => `Detection score: ${n}% probability of AI-generated content`,
     when: (d) => `Date and time of analysis: ${d}`,
@@ -1857,7 +1891,7 @@ const TECH_STRINGS = {
   },
   hi: {
     title: 'तकनीकी विश्लेषण:',
-    tool: 'उपयोग किया गया टूल: VeraShield (verashield.help)',
+    tool: `उपयोग किया गया टूल: VeraShield (${SITE_DOMAIN})`,
     api: (a) => `डिटेक्शन API: ${a}`,
     score: (n) => `स्कोर: ${n}% संभावना कि यह AI-generated है`,
     when: (d) => `विश्लेषण की तारीख और समय: ${d}`,
@@ -1867,13 +1901,13 @@ const TECH_STRINGS = {
 const DETECTION_API_NAMES = { sightengine: 'Sightengine', azure: 'Azure AI Content Safety', mock: 'Sightengine' };
 
 function writeTechnicalBlock(w, lang, locale) {
-  if (!currentResult) return;
+  if (caseData.score_analisis === null) return;
   const tc = TECH_STRINGS[lang];
-  const api = DETECTION_API_NAMES[currentResult.source] || currentResult.source || 'N/A';
+  const api = caseData.fuente_analisis;
   const when = (analyzedAt || new Date()).toLocaleString(locale, { dateStyle: 'long', timeStyle: 'short' });
   w.rule(PDF_COLORS.muted, 0.2);
   w.text(tc.title, { size: 11, bold: true, gap: 2 });
-  [tc.tool, tc.api(api), tc.score(Math.round(currentResult.score_percent)), tc.when(when)]
+  [tc.tool, tc.api(api), tc.score(caseData.score_analisis), tc.when(when)]
     .forEach((line) => w.text('- ' + line, { size: 10.5, gap: 1.5 }));
   const links = foundLinks();
   if (links.length) {
@@ -2015,6 +2049,32 @@ function createPdfWriter(doc, lang) {
   };
 }
 
+const CASE_STRINGS = {
+  es: { title: 'Datos del caso', student: 'Alumno/a', school: 'Escuela', level: 'Nivel educativo', state: 'Estado', date: 'Fecha del incidente',
+        ph: { student: '[nombre del alumno/a]', school: '[nombre de la escuela]', level: '[nivel educativo]', state: '[estado]', date: '[fecha del incidente]' } },
+  en: { title: 'Case details', student: 'Student', school: 'School', level: 'School level', state: 'State', date: 'Date of the incident',
+        ph: { student: '[student name]', school: '[school name]', level: '[school level]', state: '[state]', date: '[date of the incident]' } },
+  hi: { title: 'मामले का विवरण', student: 'छात्र/छात्रा', school: 'विद्यालय', level: 'शिक्षा स्तर', state: 'राज्य', date: 'घटना की तारीख',
+        ph: { student: '[छात्र/छात्रा का नाम]', school: '[विद्यालय का नाम]', level: '[शिक्षा स्तर]', state: '[राज्य]', date: '[घटना की तारीख]' } },
+};
+const LEVEL_KEYS = { basica: 'levelBasica', mediaFederal: 'levelMediaFederal', local: 'levelLocal' };
+
+// Reads the shared case data; a missing value prints its placeholder and never blocks generation.
+function caseDataLines(lang) {
+  const c = CASE_STRINGS[lang];
+  const sl = SL[lang];
+  const lines = [
+    [c.student, caseData.nombre_victima || c.ph.student],
+    [c.school, caseData.nombre_escuela || c.ph.school],
+  ];
+  if (currentCountry === 'mx') {
+    lines.push([c.level, caseData.nivel_escolar ? sl[LEVEL_KEYS[caseData.nivel_escolar]] : c.ph.level]);
+    lines.push([c.state, caseData.estado || c.ph.state]);
+  }
+  lines.push([c.date, caseData.fecha_incidente ? isoToDate(caseData.fecha_incidente, sl.locale) : c.ph.date]);
+  return lines;
+}
+
 function generateEvidencePdf() {
   if (!currentResult || !window.jspdf?.jsPDF) return;
   if (!requireState()) return;
@@ -2033,6 +2093,12 @@ function generateEvidencePdf() {
     { size: 10, color: PDF_COLORS.muted, gap: 2 });
   w.rule();
   w.space(4);
+
+  // 1b. Case data (shared state)
+  w.callout([
+    { str: CASE_STRINGS[lang].title, bold: true, size: 11.5, gap: 2.5 },
+    ...caseDataLines(lang).map(([label, value], i, all) => ({ str: `- ${label}: ${value}`, gap: i === all.length - 1 ? 0 : 1.5 })),
+  ], { bar: PDF_COLORS.accent });
 
   // 2. Result: manipulation probability + plain-language interpretation
   w.text(p.resultTitle, { size: 15, bold: true, gap: 3 });
@@ -2062,10 +2128,10 @@ function generateEvidencePdf() {
 
   // 4a. Legal framework for the selected state (Mexico only)
   if (currentCountry === 'mx') {
-    const ref = getLegalReference(selectedState, lang);
+    const ref = getLegalReference(caseData.estado, lang);
     w.callout([
       { str: LEGAL_FRAMEWORK_TITLE[lang], bold: true, size: 11.5, gap: 2.5 },
-      { str: selectedState + ': ' + ref.estatuto, gap: ref.nota ? 1.5 : 0 },
+      { str: caseData.estado + ': ' + ref.estatuto, gap: ref.nota ? 1.5 : 0 },
       ...(ref.nota ? [{ str: ref.nota, italic: true, size: 10, color: PDF_COLORS.muted, gap: 0 }] : []),
     ], { bar: PDF_COLORS.accent });
   }
@@ -2122,6 +2188,7 @@ function renderResultDetails() {
 // ─── Show result ─────────────────────────────────────────────────────────────
 function showResult(data, image = null) {
   currentResult = data;
+  setAnalysis(data);
   analyzedImage = image;
   findState = { status: 'idle', data: null };
   analyzedAt = new Date();
@@ -2129,7 +2196,7 @@ function showResult(data, image = null) {
 
   downloadPdfBtn.hidden = !window.jspdf?.jsPDF; // hide if the CDN script failed to load
 
-  mountStateField('result');
+  mountCaseFields('result');
   uploadScreen.hidden = true;
   resultScreen.hidden = false;
   scoreDisplay.hidden = false;
@@ -2173,10 +2240,11 @@ function revealCrisisResources() {
 
 function showDirectCrisisPath() {
   currentResult = null;
+  setAnalysis(null);
   analyzedImage = null;
   findState = { status: 'idle', data: null };
   downloadPdfBtn.hidden = true;
-  mountStateField('result');
+  mountCaseFields('result');
   uploadScreen.hidden = true;
   resultScreen.hidden = false;
   scoreDisplay.hidden = true;
@@ -2197,6 +2265,7 @@ function resetToUpload() {
   selectedFile = null;
   contentGuardConfirmed = null;
   currentResult = null;
+  setAnalysis(null);
   analyzedImage = null;
   findState = { status: 'idle', data: null };
   directCrisisActive = false;
@@ -2213,7 +2282,7 @@ function resetToUpload() {
   noDetectionNote.hidden = true;
   scoreGenerator.hidden = true;
   schoolLetterDetails.open = false;
-  mountStateField('upload');
+  mountCaseFields('upload');
   resultScreen.hidden = true;
   uploadScreen.hidden = false;
   enterScreen(heroTitle);
@@ -2244,6 +2313,8 @@ const SL = {
     desc: 'Descripción breve del incidente', descPh: 'Describe brevemente qué pasó, sin datos que no quieras compartir con la escuela.',
     guardian: 'Nombre del tutor o tutora legal', guardianPh: 'Ej. Ana López Ramírez',
     state: 'Estado', statePh: 'Selecciona tu estado',
+    docsSummary: '¿Quieres preparar tus documentos? (opcional)',
+    docsNote: 'Estos datos se quedan en tu dispositivo. Se usan solo para llenar la carta y el PDF; no se envían a ningún servicio.',
     level: 'Nivel educativo', levelPh: 'Selecciona el nivel',
     levelBasica: 'Educación básica (preescolar, primaria o secundaria)',
     levelMediaFederal: 'Bachillerato federal',
@@ -2277,7 +2348,7 @@ const SL = {
       in: 'Esta carta es para reporte escolar. Para una denuncia penal, el tutor puede acompañar al menor a la comisaría más cercana o presentar la queja en cybercrime.gov.in.',
       us: 'Esta carta es para reporte escolar. Para una denuncia penal, contacta a la policía local o reporta en la CyberTipline del NCMEC.',
     },
-    generated: 'Generado con VeraShield | verashield.help',
+    generated: `Generado con VeraShield | ${SITE_DOMAIN}`,
   },
   en: {
     locale: 'en-US',
@@ -2290,6 +2361,8 @@ const SL = {
     desc: 'Short description of the incident', descPh: 'Briefly describe what happened. Leave out anything you do not want the school to know.',
     guardian: 'Name of parent or legal guardian', guardianPh: 'e.g. Ana Lopez Ramirez',
     state: 'State', statePh: 'Select your state',
+    docsSummary: 'Want to prepare your documents? (optional)',
+    docsNote: 'This information stays on your device. It is only used to fill in the letter and the PDF; it is not sent to any service.',
     level: 'School level', levelPh: 'Select the level',
     levelBasica: 'Basic education (preschool, primary or lower secondary)',
     levelMediaFederal: 'Federal upper secondary (bachillerato)',
@@ -2323,7 +2396,7 @@ const SL = {
       in: 'This letter is for school reporting. For a criminal complaint, the guardian can accompany the minor to the nearest police station or file at cybercrime.gov.in.',
       us: 'This letter is for school reporting. For a criminal complaint, contact local law enforcement or report to the NCMEC CyberTipline.',
     },
-    generated: 'Generated with VeraShield | verashield.help',
+    generated: `Generated with VeraShield | ${SITE_DOMAIN}`,
   },
   hi: {
     locale: 'hi-IN',
@@ -2336,6 +2409,8 @@ const SL = {
     desc: 'घटना का संक्षिप्त विवरण', descPh: 'संक्षेप में बताएँ क्या हुआ। ऐसी बातें न लिखें जो आप स्कूल को नहीं बताना चाहते।',
     guardian: 'अभिभावक का नाम', guardianPh: 'जैसे: सुनीता शर्मा',
     state: 'राज्य', statePh: 'अपना राज्य चुनें',
+    docsSummary: 'क्या आप अपने दस्तावेज़ तैयार करना चाहते हैं? (वैकल्पिक)',
+    docsNote: 'यह जानकारी आपके डिवाइस पर रहती है। इसका उपयोग केवल पत्र और PDF भरने के लिए होता है; इसे किसी सेवा को नहीं भेजा जाता।',
     level: 'शिक्षा स्तर', levelPh: 'स्तर चुनें',
     levelBasica: 'बुनियादी शिक्षा (प्रीस्कूल, प्राथमिक या माध्यमिक)',
     levelMediaFederal: 'संघीय बाचिलेराटो (उच्च माध्यमिक)',
@@ -2369,7 +2444,7 @@ const SL = {
       in: 'यह पत्र विद्यालय को सूचित करने के लिए है। आपराधिक शिकायत के लिए अभिभावक नाबालिग के साथ नज़दीकी पुलिस थाने जा सकते हैं या cybercrime.gov.in पर शिकायत दर्ज कर सकते हैं।',
       us: 'यह पत्र विद्यालय को सूचित करने के लिए है। आपराधिक शिकायत के लिए स्थानीय पुलिस से संपर्क करें या NCMEC CyberTipline पर रिपोर्ट करें।',
     },
-    generated: 'VeraShield से बनाया गया | verashield.help',
+    generated: `VeraShield से बनाया गया | ${SITE_DOMAIN}`,
   },
 };
 
@@ -2385,7 +2460,37 @@ const STATE_FIELD_STRINGS = {
 const stateField  = document.getElementById('state-field');
 const stateSelect = document.getElementById('state-select');
 const stateError  = document.getElementById('state-error');
-let selectedState = '';
+// Shared case data: captured once, read by the letter, the evidence PDF and the WhatsApp message.
+const caseData = {
+  nombre_victima: '',
+  nombre_escuela: '',
+  nivel_escolar: '',      // '' | basica | mediaFederal | local
+  estado: '',
+  fecha_incidente: '',    // yyyy-mm-dd
+  score_analisis: null,   // rounded %, null while there is no analysis
+  fuente_analisis: 'ninguno',
+};
+const caseFields = document.getElementById('case-fields');
+const caseInputs = {
+  nombre_victima: document.getElementById('sl-student'),
+  nombre_escuela: document.getElementById('sl-school'),
+  nivel_escolar: document.getElementById('sl-level'),
+  fecha_incidente: document.getElementById('sl-date'),
+};
+Object.entries(caseInputs).forEach(([key, input]) => {
+  input.addEventListener(input.tagName === 'SELECT' || input.type === 'date' ? 'change' : 'input', () => { caseData[key] = input.value.trim(); });
+});
+
+function clearCaseData() {
+  Object.assign(caseData, { nombre_victima: '', nombre_escuela: '', nivel_escolar: '', estado: '', fecha_incidente: '' });
+  Object.values(caseInputs).forEach((input) => { input.value = ''; });
+  stateSelect.value = '';
+}
+
+function setAnalysis(result) {
+  caseData.score_analisis = result ? Math.round(result.score_percent) : null;
+  caseData.fuente_analisis = result ? (DETECTION_API_NAMES[result.source] || result.source || 'N/A') : 'ninguno';
+}
 
 function renderStateField() {
   document.getElementById('state-label').textContent = STATE_FIELD_STRINGS[currentLang].label;
@@ -2393,18 +2498,18 @@ function renderStateField() {
   stateField.hidden = currentCountry !== 'mx';
 }
 
-function mountStateField(where) {
-  document.getElementById('state-host-' + where).appendChild(stateField);
+function mountCaseFields(where) {
+  document.getElementById('state-host-' + where).appendChild(caseFields); // same nodes, one value
 }
 
 stateSelect.addEventListener('change', () => {
-  selectedState = stateSelect.value;
-  if (selectedState) stateError.hidden = true;
+  caseData.estado = stateSelect.value;
+  if (caseData.estado) stateError.hidden = true;
 });
 
 // True when a Mexican document can be generated; otherwise shows the error and focuses the field.
 function requireState() {
-  if (currentCountry !== 'mx' || selectedState) return true;
+  if (currentCountry !== 'mx' || caseData.estado) return true;
   stateError.textContent = STATE_FIELD_STRINGS[currentLang].error;
   stateError.hidden = false;
   stateField.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -2453,13 +2558,13 @@ function generateSchoolLetter() {
   const val = (id) => document.getElementById(id).value.trim();
   const blank = (v, n = 18) => v || '_'.repeat(n);
   const country  = currentCountry;
-  const student  = val('sl-student');
+  const student  = caseData.nombre_victima;
   const grade    = val('sl-grade');
-  const school   = val('sl-school');
+  const school   = caseData.nombre_escuela;
   const guardian = val('sl-guardian');
-  const state    = country === 'mx' ? selectedState : '';
-  const level    = country === 'mx' ? val('sl-level') : ''; // '' falls back to the local-protocol wording
-  const incident = isoToDate(val('sl-date'), sl.locale);
+  const state    = country === 'mx' ? caseData.estado : '';
+  const level    = country === 'mx' ? caseData.nivel_escolar : ''; // '' falls back to the local-protocol wording
+  const incident = isoToDate(caseData.fecha_incidente, sl.locale);
   const desc     = val('sl-description').slice(0, 300);
   const now      = new Date();
   const today    = now.toLocaleDateString(sl.locale, { dateStyle: 'long' });
@@ -2523,6 +2628,7 @@ schoolLetterForm.addEventListener('submit', (e) => {
 
 document.getElementById('sl-clear').addEventListener('click', () => {
   schoolLetterForm.reset();
+  clearCaseData(); // the shared fields live outside the letter form
   slCounter.textContent = '0 / 300';
   slError.hidden = true;
 });

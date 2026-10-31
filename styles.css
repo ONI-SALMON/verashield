@@ -1088,3 +1088,18 @@ summary:focus-visible,
 .privacy-nots { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-2); }
 .privacy-nots li::before { content: "\2717"; margin-right: var(--space-2); color: var(--color-accent); font-weight: 700; }
 .privacy-table td:last-child { min-width: 200px; }
+
+/* Case data shared by the letter, the evidence PDF and the WhatsApp message */
+#case-fields { display: flex; flex-direction: column; gap: var(--space-3); }
+.docs-data { border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-3) var(--space-4); }
+.docs-data summary { cursor: pointer; font-weight: 600; font-size: var(--text-sm); color: var(--color-text); }
+.docs-data[open] summary { margin-bottom: var(--space-3); }
+.docs-data .sl-field + .sl-field { margin-top: var(--space-3); }
+.docs-data-note { margin: 0 0 var(--space-3); font-size: var(--text-sm); line-height: 1.5; color: var(--color-muted); }
+#state-host-result #case-fields { margin-bottom: var(--space-4); }
+
+/* Phones: the upload form comes first; headline and reassurance follow it */
+@media (max-width: 767px) {
+  #upload-screen { grid-template-areas: "panel" "intro" "trust" "foot"; }
+  .panel { width: 100%; }
+}
