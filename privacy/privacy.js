@@ -1,5 +1,5 @@
 import {
-  AZURE_PRIVACY_URL, GVISION_TERMS_URL, NCMEC_CYBERTIPLINE_URL, SIGHTENGINE_URL, TE_PROTEJO_URL,
+  AZURE_PRIVACY_URL, NCMEC_CYBERTIPLINE_URL, SIGHTENGINE_URL, TE_PROTEJO_URL,
 } from '/lib/privacyServices.js';
 
 // TODO: replace with VeraShield's real privacy contact. No address exists in the repo, so the page
@@ -8,7 +8,6 @@ const CONTACT_EMAIL = null;
 
 const SERVICES = [
   { name: 'sightengine', url: SIGHTENGINE_URL },
-  { name: 'google', url: GVISION_TERMS_URL },
   { name: 'azure', url: AZURE_PRIVACY_URL },
 ];
 
@@ -23,7 +22,7 @@ const STRINGS = {
       'Tú subes la imagen.',
       'VeraShield la recibe de forma temporal en su servidor, solo para enviarla al análisis.',
       'Antes de enviarla, te preguntamos si muestra desnudez o contenido sexual de alguien menor de 18 años. Si respondes que sí, el análisis se detiene y la imagen no se envía a ningún servicio.',
-      'Si respondes que no, se envía a Sightengine para el análisis y, solo si presionas «Buscar ahora», a Google Cloud Vision. Si Sightengine falla, puede usarse Azure AI Content Safety como respaldo.',
+      'Si respondes que no, se envía a Sightengine para el análisis. Si Sightengine falla, puede usarse Azure AI Content Safety como respaldo.',
       'El resultado regresa a tu pantalla.',
       'VeraShield no conserva tu imagen: no tiene ninguna base de datos de imágenes.',
     ],
@@ -32,7 +31,6 @@ const STRINGS = {
     th: ['Servicio', 'Para qué', 'Su política de privacidad'],
     services: {
       sightengine: ['Sightengine (Kozelo SAS, París, Francia)', 'Detectar si la imagen fue manipulada con IA'],
-      google: ['Google Cloud Vision API', 'Búsqueda inversa de la imagen en la web (solo si presionas «Buscar ahora»)'],
       azure: ['Microsoft Azure AI Content Safety', 'Detección de respaldo, solo si Sightengine no responde'],
     },
     s2note: 'Estos servicios reciben la imagen temporalmente para procesarla. Tienen sus propias políticas de datos, que puedes revisar en los links.',
@@ -61,7 +59,7 @@ const STRINGS = {
       'You upload the image.',
       'VeraShield receives it temporarily on its server, only to send it for analysis.',
       'Before sending it, we ask whether it shows nudity or sexual content of someone under 18. If you answer yes, the analysis stops and the image is not sent to any service.',
-      'If you answer no, it is sent to Sightengine for analysis and, only if you press "Search now", to Google Cloud Vision. If Sightengine fails, Azure AI Content Safety may be used as a backup.',
+      'If you answer no, it is sent to Sightengine for analysis. If Sightengine fails, Azure AI Content Safety may be used as a backup.',
       'The result comes back to your screen.',
       'VeraShield does not keep your image: it has no image database.',
     ],
@@ -70,7 +68,6 @@ const STRINGS = {
     th: ['Service', 'What for', 'Their privacy policy'],
     services: {
       sightengine: ['Sightengine (Kozelo SAS, Paris, France)', 'Detect whether the image was manipulated with AI'],
-      google: ['Google Cloud Vision API', 'Reverse image search on the web (only if you press "Search now")'],
       azure: ['Microsoft Azure AI Content Safety', 'Backup detection, only if Sightengine does not respond'],
     },
     s2note: 'These services receive the image temporarily to process it. They have their own data policies, which you can review at the links.',
@@ -99,7 +96,7 @@ const STRINGS = {
       'आप इमेज अपलोड करते हैं।',
       'VeraShield इसे अस्थायी रूप से अपने सर्वर पर प्राप्त करता है, केवल विश्लेषण के लिए भेजने हेतु।',
       'भेजने से पहले हम पूछते हैं कि क्या इसमें 18 वर्ष से कम उम्र के किसी व्यक्ति की नग्नता या यौन सामग्री है। अगर आप "हाँ" कहते हैं, तो विश्लेषण रुक जाता है और इमेज किसी सेवा को नहीं भेजी जाती।',
-      'अगर आप "नहीं" कहते हैं, तो इमेज विश्लेषण के लिए Sightengine को और, केवल "अभी खोजें" दबाने पर, Google Cloud Vision को भेजी जाती है। Sightengine विफल हो तो बैकअप के रूप में Azure AI Content Safety इस्तेमाल हो सकता है।',
+      'अगर आप "नहीं" कहते हैं, तो इमेज विश्लेषण के लिए Sightengine को भेजी जाती है। Sightengine विफल हो तो बैकअप के रूप में Azure AI Content Safety इस्तेमाल हो सकता है।',
       'नतीजा आपकी स्क्रीन पर लौट आता है।',
       'VeraShield आपकी इमेज नहीं रखता: उसके पास इमेज का कोई डेटाबेस नहीं है।',
     ],
@@ -108,7 +105,6 @@ const STRINGS = {
     th: ['सेवा', 'किसलिए', 'उनकी गोपनीयता नीति'],
     services: {
       sightengine: ['Sightengine (Kozelo SAS, पेरिस, फ़्रांस)', 'यह पहचानना कि इमेज AI से बदली गई है या नहीं'],
-      google: ['Google Cloud Vision API', 'वेब पर इमेज की रिवर्स खोज (केवल "अभी खोजें" दबाने पर)'],
       azure: ['Microsoft Azure AI Content Safety', 'बैकअप पहचान, केवल तब जब Sightengine जवाब न दे'],
     },
     s2note: 'ये सेवाएँ इमेज को प्रोसेस करने के लिए अस्थायी रूप से प्राप्त करती हैं। उनकी अपनी डेटा नीतियाँ हैं, जिन्हें आप लिंक पर देख सकते हैं।',

@@ -3,7 +3,7 @@ import {
   buildMxLetterLegal, getLegalReference,
 } from './lib/legalReferences.js';
 import { SITE_DOMAIN } from './lib/siteConfig.js';
-import { AZURE_PRIVACY_URL, GVISION_TERMS_URL, GVISION_URL, SIGHTENGINE_URL } from './lib/privacyServices.js';
+import { AZURE_PRIVACY_URL, SIGHTENGINE_URL } from './lib/privacyServices.js';
 
 const MAX_FILE_SIZE_BYTES       = 10 * 1024 * 1024; // final cap, matches api/detect.js
 const COMPRESSION_MIN_BYTES     = 800 * 1024;        // below this, skip compression
@@ -1244,7 +1244,6 @@ function renderCrisisPathway() {
     const li = document.createElement('li');
     li.textContent = text;
     crisisSteps.appendChild(li);
-    if (i === 0) crisisSteps.appendChild(buildFindLinksStep());
   });
 
   ngoCard.innerHTML = '';
@@ -1305,7 +1304,6 @@ const PRIVACY_STRINGS = {
     sections: [
       { h: 'VeraShield no almacena tu imagen', p: 'Cuando subes una imagen, la analizamos y la descartamos de inmediato. No creamos cuentas, no pedimos datos personales y no guardamos ningún archivo tuyo.' },
       { h: 'Detección de IA — Sightengine', p: 'Tu imagen se envía a Sightengine para determinar si fue generada o manipulada con IA. Sightengine la procesa bajo su propia política de privacidad y no la usa para entrenar modelos sin tu consentimiento explícito.', a: 'Ver política de Sightengine →', url: SIGHTENGINE_URL },
-      { h: "Búsqueda inversa — Google Cloud Vision (solo si usas esta función)", p: "Si presionas 'Buscar ahora', tu imagen se envía a Google Cloud Vision para detectar si aparece en páginas públicas. Google la procesa en memoria y no la guarda en disco ni la usa para entrenar modelos.", a: 'Ver política de Google Cloud Vision →', url: GVISION_URL },
     ],
   },
   en: {
@@ -1315,7 +1313,6 @@ const PRIVACY_STRINGS = {
     sections: [
       { h: 'VeraShield does not store your image', p: "When you upload an image, we analyze it and discard it immediately. We don't create accounts, we don't ask for personal data, and we don't keep any of your files." },
       { h: 'AI Detection — Sightengine', p: 'Your image is sent to Sightengine to determine whether it was AI-generated or manipulated. Sightengine processes it under their own privacy policy and does not use it to train models without your explicit consent.', a: "View Sightengine's policy →", url: SIGHTENGINE_URL },
-      { h: 'Reverse Search — Google Cloud Vision (only if you use this feature)', p: "If you press 'Search now', your image is sent to Google Cloud Vision to detect whether it appears on public pages. Google processes it in memory and does not save it to disk or use it to train models.", a: "View Google Cloud Vision's policy →", url: GVISION_URL },
     ],
   },
   hi: {
@@ -1325,7 +1322,6 @@ const PRIVACY_STRINGS = {
     sections: [
       { h: 'VeraShield आपकी इमेज स्टोर नहीं करता', p: 'जब आप इमेज अपलोड करते हैं, हम उसका विश्लेषण करके तुरंत हटा देते हैं। हम कोई अकाउंट नहीं बनाते, कोई व्यक्तिगत डेटा नहीं मांगते और आपकी कोई फ़ाइल नहीं रखते।' },
       { h: 'AI डिटेक्शन — Sightengine', p: 'यह जांचने के लिए कि इमेज AI-generated या manipulated है या नहीं, आपकी इमेज Sightengine को भेजी जाती है। Sightengine इसे अपनी privacy policy के तहत process करता है और बिना आपकी सहमति के इसे model training के लिए उपयोग नहीं करता।', a: 'Sightengine की policy देखें →', url: SIGHTENGINE_URL },
-      { h: "Reverse Search — Google Cloud Vision (केवल तभी जब आप यह फ़ीचर उपयोग करें)", p: "अगर आप 'अभी खोजें' दबाते हैं, तो आपकी इमेज Google Cloud Vision को भेजी जाती है ताकि पता चल सके कि यह सार्वजनिक पेजों पर है या नहीं। Google इसे memory में process करता है और इसे disk पर save नहीं करता।", a: 'Google Cloud Vision की policy देखें →', url: GVISION_URL },
     ],
   },
 };
@@ -1372,7 +1368,7 @@ function closePrivacyModal() {
   if (privacyLastFocus && privacyLastFocus.focus) privacyLastFocus.focus();
 }
 
-// Zero-storage panel shown next to Analyze (open) and next to "Search now" (folded).
+// Zero-storage panel shown next to Analyze on the upload screen.
 // Replaces the old one-line disclaimers. Texts requested by SocialTIC.
 // VERIFICAR: the Hindi text has not been checked (URLs live in lib/privacyServices.js).
 const PRIVACY_PANEL_STRINGS = {
@@ -1383,7 +1379,6 @@ const PRIVACY_PANEL_STRINGS = {
     sent: 'Se envía temporalmente a servicios de IA para el análisis:',
     services: [
       { name: 'Sightengine (Kozelo SAS, París)', url: SIGHTENGINE_URL },
-      { name: 'Google Cloud Vision', url: GVISION_TERMS_URL },
       { name: 'Microsoft Azure AI Content Safety (solo si el servicio principal falla)', url: AZURE_PRIVACY_URL },
     ],
     after: 'Después del análisis, VeraShield no conserva ninguna copia.',
@@ -1396,7 +1391,6 @@ const PRIVACY_PANEL_STRINGS = {
     sent: 'Temporarily sent to AI services for analysis:',
     services: [
       { name: 'Sightengine (Kozelo SAS, Paris)', url: SIGHTENGINE_URL },
-      { name: 'Google Cloud Vision', url: GVISION_TERMS_URL },
       { name: 'Microsoft Azure AI Content Safety (only if the main service fails)', url: AZURE_PRIVACY_URL },
     ],
     after: 'After analysis, VeraShield keeps no copy.',
@@ -1409,7 +1403,6 @@ const PRIVACY_PANEL_STRINGS = {
     sent: 'विश्लेषण के लिए इसे अस्थायी रूप से AI सेवाओं को भेजा जाता है:',
     services: [
       { name: 'Sightengine (Kozelo SAS, पेरिस)', url: SIGHTENGINE_URL },
-      { name: 'Google Cloud Vision', url: GVISION_TERMS_URL },
       { name: 'Microsoft Azure AI Content Safety (केवल तब जब मुख्य सेवा विफल हो)', url: AZURE_PRIVACY_URL },
     ],
     after: 'विश्लेषण के बाद VeraShield इसकी कोई प्रति नहीं रखता।',
@@ -1470,7 +1463,7 @@ document.addEventListener('keydown', (e) => {
 });
 
 // ─── Content guard ───────────────────────────────────────────────────────────
-// Blocking question asked BEFORE any file leaves the browser (Sightengine, Google Vision).
+// Blocking question asked BEFORE any file leaves the browser (Sightengine, Azure).
 // Art. 202 CPF (MX) punishes "transmitting" sexual material involving minors, so sending it to
 // a third-party API is itself the offence. Nothing is logged externally; only console.warn.
 const CONTENT_GUARD_STRINGS = {
@@ -1689,187 +1682,6 @@ async function ensureContentGuard(key) {
   return false;
 }
 
-// ─── Find where the image was shared (Google Vision web detection) ──────────
-const FIND_STRINGS = {
-  es: {
-    step: 'Busca dónde se compartió: identifica en qué plataformas apareció tu imagen.',
-    btn: 'Buscar ahora',
-    needAnalysis: 'Para usar esta función, analiza primero tu imagen.',
-    results: 'Si la imagen aparece en otros sitios, solo te mostramos los links que Google Vision devuelve. VeraShield no guarda esos resultados ni entra a esos sitios; tú decides si los visitas o los reportas.',
-    searching: 'Buscando…',
-    none: 'No encontramos esta imagen en sitios públicos indexados. Esto no significa que no haya sido compartida en mensajes privados.',
-    error: 'No se pudo completar la búsqueda. Inténtalo de nuevo en unos minutos.',
-    report: (p) => `Reportar en ${p}`,
-    saveNote: 'Guarda capturas de pantalla de estos links como evidencia antes de reportar.',
-    letterTitle: 'Plataformas donde se encontró la imagen:',
-  },
-  en: {
-    step: 'Find where it was shared: identify which platforms your image appeared on.',
-    btn: 'Search now',
-    needAnalysis: 'To use this feature, analyze your image first.',
-    results: 'If the image appears on other sites, we only show you the links Google Vision returns. VeraShield does not store those results or visit those sites; you decide whether to visit or report them.',
-    searching: 'Searching…',
-    none: "We didn't find this image on public indexed sites. This doesn't mean it hasn't been shared in private messages.",
-    error: 'The search could not be completed. Please try again in a few minutes.',
-    report: (p) => `Report on ${p}`,
-    saveNote: 'Save screenshots of these links as evidence before reporting.',
-    letterTitle: 'Platforms where the image was found:',
-  },
-  hi: {
-    step: 'पता करें कहाँ शेयर हुआ: किन प्लेटफ़ॉर्म पर आपकी इमेज दिखी।',
-    btn: 'अभी खोजें',
-    needAnalysis: 'यह फ़ीचर उपयोग करने के लिए पहले अपनी इमेज का विश्लेषण करें।',
-    results: 'अगर इमेज दूसरी साइटों पर मिलती है, तो हम सिर्फ़ वही लिंक दिखाते हैं जो Google Vision लौटाता है। VeraShield न इन नतीजों को सेव करता है और न इन साइटों पर जाता है; इन्हें खोलना या रिपोर्ट करना आप तय करें।',
-    searching: 'खोज रहे हैं…',
-    none: 'हमें यह इमेज सार्वजनिक रूप से इंडेक्स की गई साइटों पर नहीं मिली। इसका मतलब यह नहीं कि यह निजी संदेशों में शेयर नहीं हुई।',
-    error: 'खोज पूरी नहीं हो सकी। कुछ मिनट बाद दोबारा कोशिश करें।',
-    report: (p) => `${p} पर रिपोर्ट करें`,
-    saveNote: 'रिपोर्ट करने से पहले इन लिंक्स के स्क्रीनशॉट सेव कर लें।',
-    letterTitle: 'जिन प्लेटफ़ॉर्म पर इमेज मिली:',
-  },
-};
-
-const PLATFORM_REPORT_URLS = {
-  'Instagram': 'https://help.instagram.com/contact/1141853830778488',
-  'TikTok': 'https://www.tiktok.com/legal/report/privacy',
-  'Twitter/X': 'https://help.twitter.com/forms/private_information',
-  'Facebook': 'https://www.facebook.com/help/contact/1361707013596961',
-};
-
-let analyzedImage = null;                       // the image behind currentResult (photo mode only)
-let findState = { status: 'idle', data: null }; // idle | loading | done | error
-
-function canSearchLinks() {
-  return !directCrisisActive && !!analyzedImage && !!currentResult && currentResult.bucket !== 'low';
-}
-
-function fileToBase64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result).split(',')[1] || '');
-    reader.onerror = () => reject(reader.error);
-    reader.readAsDataURL(file);
-  });
-}
-
-async function runFindLinks() {
-  if (!canSearchLinks() || findState.status === 'loading') return;
-  if (!(await ensureContentGuard(analyzedImage))) return; // already confirmed for this file in the normal flow
-  findState = { status: 'loading', data: null };
-  renderCrisisPathway();
-  try {
-    const image = await fileToBase64(analyzedImage);
-    if (image.length > 4_200_000) throw new Error('image too large for request'); // Vercel body limit ~4.5MB
-    const response = await fetch('/api/find-links', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ image }),
-    });
-    if (!response.ok) throw new Error('HTTP ' + response.status);
-    const data = await response.json();
-    findState = { status: 'done', data: { found: !!data.found, matchingUrls: data.matchingUrls || [] } };
-  } catch (err) {
-    console.warn('[find-links]', err);
-    findState = { status: 'error', data: null };
-  }
-  renderCrisisPathway();
-}
-
-function foundLinks() {
-  return findState.status === 'done' && findState.data.found ? findState.data.matchingUrls : [];
-}
-
-function buildFindLinksStep() {
-  const f = FIND_STRINGS[currentLang];
-  const li = document.createElement('li');
-  li.className = 'find-step';
-  const body = document.createElement('div');
-  body.className = 'find-body';
-  li.appendChild(body);
-
-  const text = document.createElement('p');
-  text.textContent = f.step;
-  body.appendChild(text);
-
-  const addNote = (msg, cls = 'find-note') => {
-    const p = document.createElement('p');
-    p.className = cls;
-    p.textContent = msg;
-    body.appendChild(p);
-    return p;
-  };
-
-  if (!canSearchLinks()) {
-    addNote(f.needAnalysis);
-    return li;
-  }
-
-  if (findState.status === 'idle' || findState.status === 'error') {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'secondary-btn find-btn';
-    btn.textContent = f.btn;
-    btn.addEventListener('click', runFindLinks);
-    body.appendChild(btn);
-    body.appendChild(buildPrivacyPanel(false));
-    addNote(f.results);
-    if (findState.status === 'error') addNote(f.error, 'find-note find-error');
-    return li;
-  }
-
-  if (findState.status === 'loading') {
-    const p = addNote(f.searching, 'find-note find-loading');
-    p.setAttribute('role', 'status');
-    const spin = document.createElement('span');
-    spin.className = 'find-spinner';
-    spin.setAttribute('aria-hidden', 'true');
-    p.prepend(spin);
-    return li;
-  }
-
-  const { found, matchingUrls } = findState.data;
-  if (!found || !matchingUrls.length) {
-    addNote(f.none);
-    return li;
-  }
-
-  const groups = new Map();
-  matchingUrls.forEach(({ url, platform }) => {
-    if (!groups.has(platform)) groups.set(platform, []);
-    groups.get(platform).push(url);
-  });
-  groups.forEach((urls, platform) => {
-    const group = document.createElement('div');
-    group.className = 'find-group';
-    const name = document.createElement('p');
-    name.className = 'find-platform';
-    name.textContent = platform;
-    group.appendChild(name);
-    urls.forEach((url) => {
-      const a = document.createElement('a');
-      a.className = 'find-url';
-      a.href = url;
-      a.target = '_blank';
-      a.rel = 'noopener';
-      a.textContent = url;
-      group.appendChild(a);
-    });
-    const reportUrl = PLATFORM_REPORT_URLS[platform];
-    if (reportUrl) {
-      const r = document.createElement('a');
-      r.className = 'secondary-btn find-report';
-      r.href = reportUrl;
-      r.target = '_blank';
-      r.rel = 'noopener';
-      r.textContent = f.report(platform);
-      group.appendChild(r);
-    }
-    body.appendChild(group);
-  });
-  addNote(f.saveNote);
-  return li;
-}
-
 // Technical-analysis block shared by the evidence PDF and the school letter.
 // Only written when an analysis result exists in state.
 const TECH_STRINGS = {
@@ -1909,12 +1721,6 @@ function writeTechnicalBlock(w, lang, locale) {
   w.text(tc.title, { size: 11, bold: true, gap: 2 });
   [tc.tool, tc.api(api), tc.score(caseData.score_analisis), tc.when(when)]
     .forEach((line) => w.text('- ' + line, { size: 10.5, gap: 1.5 }));
-  const links = foundLinks();
-  if (links.length) {
-    w.space(2);
-    w.text(FIND_STRINGS[lang].letterTitle, { size: 10.5, bold: true, gap: 1.5 });
-    links.forEach(({ platform, url }) => w.text(`- ${platform}: ${url}`, { size: 10, gap: 1.5 }));
-  }
   w.text(tc.note, { size: 9.5, color: PDF_COLORS.muted, gap: 4 });
 }
 
@@ -2186,11 +1992,9 @@ function renderResultDetails() {
 }
 
 // ─── Show result ─────────────────────────────────────────────────────────────
-function showResult(data, image = null) {
+function showResult(data) {
   currentResult = data;
   setAnalysis(data);
-  analyzedImage = image;
-  findState = { status: 'idle', data: null };
   analyzedAt = new Date();
   directCrisisActive = false;
 
@@ -2241,8 +2045,6 @@ function revealCrisisResources() {
 function showDirectCrisisPath() {
   currentResult = null;
   setAnalysis(null);
-  analyzedImage = null;
-  findState = { status: 'idle', data: null };
   downloadPdfBtn.hidden = true;
   mountCaseFields('result');
   uploadScreen.hidden = true;
@@ -2266,8 +2068,6 @@ function resetToUpload() {
   contentGuardConfirmed = null;
   currentResult = null;
   setAnalysis(null);
-  analyzedImage = null;
-  findState = { status: 'idle', data: null };
   directCrisisActive = false;
   fileInput.value = '';
   clearVideoInputs();
@@ -3104,7 +2904,7 @@ analyzeBtn.addEventListener('click', async () => {
     const data     = await response.json();
     if (data.error) { showError(data.code); return; }
     setLoading(false);
-    showResult(data, selectedFile);
+    showResult(data);
   } catch (error) {
     showError(error.name === 'AbortError' ? 'TIMEOUT' : 'NETWORK');
   } finally {
