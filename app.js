@@ -1297,9 +1297,9 @@ document.querySelectorAll('.country-btn').forEach(btn => {
 // ─── Privacy disclaimer + "how it works" modal ──────────────────────────────
 const SIGHTENGINE_URL = 'https://sightengine.com/policies/privacy';
 const GVISION_URL = 'https://cloud.google.com/vision/docs/data-usage';
+const GVISION_TERMS_URL = 'https://cloud.google.com/terms/service';
 const PRIVACY_STRINGS = {
   es: {
-    disclaimer: 'Tu imagen se envía a un servicio externo de IA solo para el análisis. Ni VeraShield ni ese servicio la almacenan de forma permanente. ',
     link: '¿Cómo funciona?',
     close: 'Cerrar',
     title: 'Cómo funciona VeraShield',
@@ -1310,7 +1310,6 @@ const PRIVACY_STRINGS = {
     ],
   },
   en: {
-    disclaimer: 'Your image is sent to an external AI service for analysis only. Neither VeraShield nor that service stores it permanently. ',
     link: 'How does it work?',
     close: 'Close',
     title: 'How VeraShield Works',
@@ -1321,7 +1320,6 @@ const PRIVACY_STRINGS = {
     ],
   },
   hi: {
-    disclaimer: 'आपकी इमेज केवल विश्लेषण के लिए एक बाहरी AI सेवा को भेजी जाती है। न VeraShield और न वह सेवा इसे स्थायी रूप से संग्रहीत करती है। ',
     link: 'यह कैसे काम करता है?',
     close: 'बंद करें',
     title: 'VeraShield कैसे काम करता है',
@@ -1375,11 +1373,92 @@ function closePrivacyModal() {
   if (privacyLastFocus && privacyLastFocus.focus) privacyLastFocus.focus();
 }
 
+// Zero-storage panel shown next to Analyze (open) and next to "Search now" (folded).
+// Replaces the old one-line disclaimers. Texts requested by SocialTIC.
+// VERIFICAR: the Azure policy URL and the Hindi text have not been checked.
+const AZURE_PRIVACY_URL = 'https://learn.microsoft.com/legal/cognitive-services/content-safety/data-privacy';
+const PRIVACY_PANEL_STRINGS = {
+  es: {
+    summary: '🔒 Tu imagen es privada',
+    title: '¿Qué pasa con tu imagen?',
+    memory: 'Se procesa en memoria. VeraShield no la guarda en ningún servidor.',
+    sent: 'Se envía temporalmente a servicios de IA para el análisis:',
+    services: [
+      { name: 'Sightengine (Kozelo SAS, París)', url: SIGHTENGINE_URL },
+      { name: 'Google Cloud Vision', url: GVISION_TERMS_URL },
+      { name: 'Microsoft Azure AI Content Safety (solo si el servicio principal falla)', url: AZURE_PRIVACY_URL },
+    ],
+    after: 'Después del análisis, VeraShield no conserva ninguna copia.',
+    more: '¿Cómo funciona esto?',
+  },
+  en: {
+    summary: '🔒 Your image is private',
+    title: 'What happens to your image?',
+    memory: 'Processed in memory. VeraShield does not store it on any server.',
+    sent: 'Temporarily sent to AI services for analysis:',
+    services: [
+      { name: 'Sightengine (Kozelo SAS, Paris)', url: SIGHTENGINE_URL },
+      { name: 'Google Cloud Vision', url: GVISION_TERMS_URL },
+      { name: 'Microsoft Azure AI Content Safety (only if the main service fails)', url: AZURE_PRIVACY_URL },
+    ],
+    after: 'After analysis, VeraShield keeps no copy.',
+    more: 'How does this work?',
+  },
+  hi: {
+    summary: '🔒 आपकी इमेज निजी है',
+    title: 'आपकी इमेज का क्या होता है?',
+    memory: 'इसे मेमोरी में प्रोसेस किया जाता है। VeraShield इसे किसी भी सर्वर पर सेव नहीं करता।',
+    sent: 'विश्लेषण के लिए इसे अस्थायी रूप से AI सेवाओं को भेजा जाता है:',
+    services: [
+      { name: 'Sightengine (Kozelo SAS, पेरिस)', url: SIGHTENGINE_URL },
+      { name: 'Google Cloud Vision', url: GVISION_TERMS_URL },
+      { name: 'Microsoft Azure AI Content Safety (केवल तब जब मुख्य सेवा विफल हो)', url: AZURE_PRIVACY_URL },
+    ],
+    after: 'विश्लेषण के बाद VeraShield इसकी कोई प्रति नहीं रखता।',
+    more: 'यह कैसे काम करता है?',
+  },
+};
+
+function buildPrivacyPanel(open) {
+  const s = PRIVACY_PANEL_STRINGS[currentLang];
+  const el = (tag, text) => { const n = document.createElement(tag); if (text) n.textContent = text; return n; };
+  const link = (href, text) => {
+    const a = el('a', text);
+    a.href = href;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    return a;
+  };
+
+  const details = el('details');
+  details.className = 'privacy-panel';
+  details.open = open;
+  details.appendChild(el('summary', s.summary));
+
+  const services = el('ul');
+  s.services.forEach(({ name, url }) => {
+    const li = el('li', name + ' → ');
+    li.appendChild(link(url, url.replace(/^https:\/\//, '')));
+    services.appendChild(li);
+  });
+  const sent = el('li', s.sent);
+  sent.appendChild(services);
+
+  const list = el('ul');
+  list.append(el('li', s.memory), sent, el('li', s.after));
+
+  const more = el('p');
+  more.appendChild(link('/privacy', s.more + ' →'));
+  const title = el('p', s.title);
+  title.className = 'privacy-panel-title';
+  details.append(title, list, more);
+  return details;
+}
+
 function renderPrivacyUi() {
-  const s = PRIVACY_STRINGS[currentLang];
-  const text = document.getElementById('upload-disclaimer-text');
-  if (text) text.textContent = s.disclaimer;
-  document.querySelectorAll('.upload-disclaimer .privacy-link').forEach(b => { b.textContent = s.link; });
+  const host = document.getElementById('privacy-panel-upload');
+  const prev = host.querySelector('details');
+  host.replaceChildren(buildPrivacyPanel(prev ? prev.open : true)); // open by default, keeps the user's choice
   if (!privacyModal.hidden) renderPrivacyModal();
 }
 
@@ -1585,7 +1664,6 @@ const FIND_STRINGS = {
     step: 'Busca dónde se compartió: identifica en qué plataformas apareció tu imagen.',
     btn: 'Buscar ahora',
     needAnalysis: 'Para usar esta función, analiza primero tu imagen.',
-    privacy: 'Al buscar, tu imagen se envía a Google Vision para compararla con sitios públicos. No la guardamos.',
     results: 'Si la imagen aparece en otros sitios, solo te mostramos los links que Google Vision devuelve. VeraShield no guarda esos resultados ni entra a esos sitios; tú decides si los visitas o los reportas.',
     searching: 'Buscando…',
     none: 'No encontramos esta imagen en sitios públicos indexados. Esto no significa que no haya sido compartida en mensajes privados.',
@@ -1598,7 +1676,6 @@ const FIND_STRINGS = {
     step: 'Find where it was shared: identify which platforms your image appeared on.',
     btn: 'Search now',
     needAnalysis: 'To use this feature, analyze your image first.',
-    privacy: 'When you search, your image is sent to Google Vision to compare it with public sites. We do not store it.',
     results: 'If the image appears on other sites, we only show you the links Google Vision returns. VeraShield does not store those results or visit those sites; you decide whether to visit or report them.',
     searching: 'Searching…',
     none: "We didn't find this image on public indexed sites. This doesn't mean it hasn't been shared in private messages.",
@@ -1611,7 +1688,6 @@ const FIND_STRINGS = {
     step: 'पता करें कहाँ शेयर हुआ: किन प्लेटफ़ॉर्म पर आपकी इमेज दिखी।',
     btn: 'अभी खोजें',
     needAnalysis: 'यह फ़ीचर उपयोग करने के लिए पहले अपनी इमेज का विश्लेषण करें।',
-    privacy: 'खोज करने पर आपकी इमेज सार्वजनिक साइटों से मिलान के लिए Google Vision को भेजी जाती है। हम इसे सेव नहीं करते।',
     results: 'अगर इमेज दूसरी साइटों पर मिलती है, तो हम सिर्फ़ वही लिंक दिखाते हैं जो Google Vision लौटाता है। VeraShield न इन नतीजों को सेव करता है और न इन साइटों पर जाता है; इन्हें खोलना या रिपोर्ट करना आप तय करें।',
     searching: 'खोज रहे हैं…',
     none: 'हमें यह इमेज सार्वजनिक रूप से इंडेक्स की गई साइटों पर नहीं मिली। इसका मतलब यह नहीं कि यह निजी संदेशों में शेयर नहीं हुई।',
@@ -1704,14 +1780,7 @@ function buildFindLinksStep() {
     btn.textContent = f.btn;
     btn.addEventListener('click', runFindLinks);
     body.appendChild(btn);
-    const privacyP = addNote(f.privacy);
-    privacyP.append(' ');
-    const privacyBtn = document.createElement('button');
-    privacyBtn.type = 'button';
-    privacyBtn.className = 'privacy-link';
-    privacyBtn.dataset.privacyOpen = '';
-    privacyBtn.textContent = PRIVACY_STRINGS[currentLang].link;
-    privacyP.appendChild(privacyBtn);
+    body.appendChild(buildPrivacyPanel(false));
     addNote(f.results);
     if (findState.status === 'error') addNote(f.error, 'find-note find-error');
     return li;

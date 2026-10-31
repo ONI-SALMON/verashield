@@ -549,7 +549,20 @@ summary:focus-visible,
 .privacy-note { font-size: var(--text-sm); color: var(--color-muted); }
 
 /* Upload privacy disclaimer + "how it works" modal */
-.upload-disclaimer { font-size: var(--text-sm); color: var(--color-muted); margin-top: 10px; }
+/* Zero-storage privacy panel (calm: neutral surface, muted text, no alert colors) */
+#privacy-panel-upload { margin-top: 10px; }
+.privacy-panel {
+  background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4); font-size: var(--text-sm); line-height: 1.5; color: var(--color-muted);
+  text-align: left;
+}
+.privacy-panel summary { cursor: pointer; font-weight: 600; color: var(--color-text); }
+.privacy-panel[open] summary { margin-bottom: var(--space-2); }
+.privacy-panel p { margin: 0 0 var(--space-2); }
+.privacy-panel .privacy-panel-title { font-weight: 600; color: var(--color-text); }
+.privacy-panel ul { margin: 0 0 var(--space-2); padding-left: 1.2em; }
+.privacy-panel li { margin-bottom: 4px; }
+.privacy-panel a { color: var(--color-accent); overflow-wrap: anywhere; }
 .privacy-link {
   background: none; border: 0; padding: 0; font: inherit;
   color: var(--color-accent); text-decoration: underline; cursor: pointer;
