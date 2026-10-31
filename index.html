@@ -134,13 +134,13 @@
           <summary data-sl="docsSummary"></summary>
           <p class="docs-data-note" data-sl="docsNote"></p>
           <label class="sl-field"><span data-sl="student"></span>
-                <input type="text" id="sl-student" maxlength="100" data-sl-ph="studentPh"></label>
+                <input type="text" id="docs-student" maxlength="100" data-sl-ph="studentPh"></label>
           <label class="sl-field"><span data-sl="school"></span>
-                <input type="text" id="sl-school" maxlength="120" data-sl-ph="schoolPh"></label>
+                <input type="text" id="docs-school" maxlength="120" data-sl-ph="schoolPh"></label>
           <label class="sl-field"><span data-sl="date"></span>
-                <input type="date" id="sl-date"></label>
-          <label class="sl-field" id="sl-level-field"><span data-sl="level"></span>
-                <select id="sl-level">
+                <input type="date" id="docs-date"></label>
+          <label class="sl-field" id="docs-level-field" data-level-field><span data-sl="level"></span>
+                <select id="docs-level">
                   <option value="" data-sl="levelPh"></option>
                   <option value="basica" data-sl="levelBasica"></option>
                   <option value="mediaFederal" data-sl="levelMediaFederal"></option>
@@ -250,13 +250,26 @@
             <summary id="school-letter-title" data-sl="title"></summary>
             <p class="school-letter-intro" data-sl="intro"></p>
             <form class="school-letter-form" id="school-letter-form" autocomplete="off" novalidate>
+              <label class="sl-field"><span data-sl="student"></span>
+                <input type="text" id="sl-student" maxlength="100" data-sl-ph="studentPh"></label>
               <label class="sl-field"><span data-sl="grade"></span>
                 <input type="text" id="sl-grade" maxlength="40" data-sl-ph="gradePh"></label>
+              <label class="sl-field"><span data-sl="school"></span>
+                <input type="text" id="sl-school" maxlength="120" data-sl-ph="schoolPh"></label>
+              <label class="sl-field"><span data-sl="date"></span>
+                <input type="date" id="sl-date"></label>
               <label class="sl-field"><span data-sl="desc"></span>
                 <textarea id="sl-description" maxlength="300" rows="4" data-sl-ph="descPh"></textarea>
                 <small class="sl-counter" id="sl-counter">0 / 300</small></label>
               <label class="sl-field"><span data-sl="guardian"></span>
                 <input type="text" id="sl-guardian" maxlength="100" data-sl-ph="guardianPh"></label>
+              <label class="sl-field" id="sl-level-field" data-level-field><span data-sl="level"></span>
+                <select id="sl-level">
+                  <option value="" data-sl="levelPh"></option>
+                  <option value="basica" data-sl="levelBasica"></option>
+                  <option value="mediaFederal" data-sl="levelMediaFederal"></option>
+                  <option value="local" data-sl="levelLocal"></option>
+                </select></label>
               <p class="form-error" id="sl-error" role="alert" hidden></p>
               <div class="sl-actions">
                 <button type="submit" class="sl-generate-btn" id="sl-generate" data-sl="generate"></button>

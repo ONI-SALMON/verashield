@@ -2471,19 +2471,26 @@ const caseData = {
   fuente_analisis: 'ninguno',
 };
 const caseFields = document.getElementById('case-fields');
+// Each field exists twice (letter form + the folded shortcut on the upload screen); both copies
+// always show the same value and write to the one caseData.
 const caseInputs = {
-  nombre_victima: document.getElementById('sl-student'),
-  nombre_escuela: document.getElementById('sl-school'),
-  nivel_escolar: document.getElementById('sl-level'),
-  fecha_incidente: document.getElementById('sl-date'),
+  nombre_victima: ['sl-student', 'docs-student'].map((id) => document.getElementById(id)),
+  nombre_escuela: ['sl-school', 'docs-school'].map((id) => document.getElementById(id)),
+  nivel_escolar: ['sl-level', 'docs-level'].map((id) => document.getElementById(id)),
+  fecha_incidente: ['sl-date', 'docs-date'].map((id) => document.getElementById(id)),
 };
-Object.entries(caseInputs).forEach(([key, input]) => {
-  input.addEventListener(input.tagName === 'SELECT' || input.type === 'date' ? 'change' : 'input', () => { caseData[key] = input.value.trim(); });
+Object.entries(caseInputs).forEach(([key, inputs]) => {
+  inputs.forEach((input) => {
+    input.addEventListener(input.tagName === 'SELECT' || input.type === 'date' ? 'change' : 'input', () => {
+      caseData[key] = input.value.trim();
+      inputs.forEach((other) => { if (other !== input) other.value = input.value; });
+    });
+  });
 });
 
 function clearCaseData() {
   Object.assign(caseData, { nombre_victima: '', nombre_escuela: '', nivel_escolar: '', estado: '', fecha_incidente: '' });
-  Object.values(caseInputs).forEach((input) => { input.value = ''; });
+  Object.values(caseInputs).flat().forEach((input) => { input.value = ''; });
   stateSelect.value = '';
 }
 
@@ -2517,7 +2524,7 @@ function requireState() {
   return false;
 }
 
-const levelField = document.getElementById('sl-level-field');
+const levelFields = document.querySelectorAll('[data-level-field]');
 
 function applySchoolLetterStrings() {
   const sl = SL[currentLang];
@@ -2529,7 +2536,7 @@ function updateSchoolLetterVisibility() {
   schoolLetterSection.hidden = false;
   schoolLetterLink.hidden = false;
   renderStateField();
-  levelField.hidden = currentCountry !== 'mx';
+  levelFields.forEach((f) => { f.hidden = currentCountry !== 'mx'; });
   applySchoolLetterStrings();
 }
 
