@@ -1068,3 +1068,23 @@ summary:focus-visible,
 .video-soon-icon { color: var(--color-accent); }
 .video-soon-title { font-size: var(--text-lg); font-weight: 600; margin: 0; }
 .video-soon-body { font-size: var(--text-sm); color: var(--color-muted); margin: 0; max-width: 42ch; }
+
+/* /privacy page */
+.privacy-page { display: flex; flex-direction: column; gap: var(--space-6); padding-bottom: var(--space-8); }
+.privacy-section { display: flex; flex-direction: column; gap: var(--space-3); }
+.privacy-section p, .privacy-section li { font-size: var(--text-base); line-height: 1.6; color: var(--color-muted); }
+.privacy-section a { color: var(--color-accent); overflow-wrap: anywhere; }
+.privacy-note-box { padding: var(--space-3) var(--space-4); border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); }
+.flow-steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-3); counter-reset: flow; }
+.flow-steps li { position: relative; counter-increment: flow; padding: var(--space-3) var(--space-4) var(--space-3) 52px; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); color: var(--color-text); }
+.flow-steps li::before { content: counter(flow); position: absolute; left: var(--space-3); top: var(--space-3); width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-size: var(--text-sm); font-weight: 700; background: var(--color-accent); color: var(--color-on-accent); }
+.flow-steps li:not(:last-child)::after { content: "\2193"; position: absolute; left: 22px; bottom: calc(-1 * var(--space-3) - 2px); transform: translateY(50%); font-size: var(--text-sm); color: var(--color-accent); background: var(--color-bg); line-height: 1; }
+.privacy-table-wrap { overflow-x: auto; border: 1px solid var(--color-border); border-radius: var(--radius-md); }
+.privacy-table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); }
+.privacy-table th, .privacy-table td { text-align: left; vertical-align: top; padding: var(--space-3); border-bottom: 1px solid var(--color-border); line-height: 1.5; }
+.privacy-table th { color: var(--color-text); font-weight: 600; background: var(--color-surface); }
+.privacy-table tbody tr:last-child td { border-bottom: 0; }
+.privacy-table td { color: var(--color-muted); min-width: 140px; }
+.privacy-nots { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-2); }
+.privacy-nots li::before { content: "\2717"; margin-right: var(--space-2); color: var(--color-accent); font-weight: 700; }
+.privacy-table td:last-child { min-width: 200px; }

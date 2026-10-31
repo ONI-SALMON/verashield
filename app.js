@@ -1,3 +1,9 @@
+import {
+  CNDH_NOTE_TEXT, LEGAL_FRAMEWORK_TITLE, LEY_OLIMPIA, MX_CRISIS_LEGAL_NOTE,
+  buildMxLetterLegal, getLegalReference,
+} from './lib/legalReferences.js';
+import { AZURE_PRIVACY_URL, GVISION_TERMS_URL, GVISION_URL, SIGHTENGINE_URL } from './lib/privacyServices.js';
+
 const MAX_FILE_SIZE_BYTES       = 10 * 1024 * 1024; // final cap, matches api/detect.js
 const COMPRESSION_MIN_BYTES     = 800 * 1024;        // below this, skip compression
 const MAX_UPLOAD_DIMENSION_PX   = 1920;              // cap longest side
@@ -181,7 +187,7 @@ const T = {
       me:    'Mamá/Papá, necesito tu ayuda. Encontré una imagen que parece ser yo, y una app llamada VeraShield la marcó como posiblemente generada con IA. No sé qué hacer. ¿Podemos hablar hoy?',
       other: 'Mamá/Papá, mi amigo/a necesita ayuda. Vi una imagen suya que puede haber sido creada por IA. ¿Podemos ayudarle?',
     },
-    legalNote: 'Esta situación puede estar protegida por la <a href="https://www.gob.mx/conavim/articulos/ley-olimpia" target="_blank" rel="noopener">Ley Olimpia</a>.',
+    legalNote: `Esta situación puede estar protegida por la <a href="${LEY_OLIMPIA.url}" target="_blank" rel="noopener">${LEY_OLIMPIA.nombre}</a>.`,
     takedownBtn: 'Solicitar eliminación de la imagen (NCMEC)',
     crisisIntro_mx: 'Esto no es tu culpa. En México existen leyes y organizaciones que pueden ayudarte a resolver esta situación. No estás solo/a.',
     crisisIntro_in: 'Esto no es tu culpa. En India existen leyes y organizaciones que pueden ayudarte a resolver esta situación. No estás solo/a.',
@@ -847,7 +853,7 @@ const CRISIS_RESOURCES = {
       },
       {
         name: "CNDH: Comisión Nacional de los Derechos Humanos",
-        description: "Denuncia violaciones a derechos humanos, incluyendo violencia digital. " + LEGAL_REFS.cndhNote.es,
+        description: "Denuncia violaciones a derechos humanos, incluyendo violencia digital. " + CNDH_NOTE_TEXT.es,
         contact: "800 715 2000",
         url: "https://www.cndh.org.mx/programas/contacto-1",
         type: "legal",
@@ -869,12 +875,7 @@ const CRISIS_RESOURCES = {
         type: "ngo",
       },
     ],
-    legalNote:
-      "En México, la Ley Olimpia penaliza la difusión no consentida de " +
-      "imágenes íntimas entre adultos. Para menores de edad, aplica la Ley " +
-      "General de los Derechos de Niñas, Niños y Adolescentes (LGDNNA) y " +
-      "el Código Penal Federal. Tienes derecho a denunciar aunque la imagen " +
-      "sea real y no un deepfake.",
+    legalNote: MX_CRISIS_LEGAL_NOTE,
   },
 };
 
@@ -1295,9 +1296,6 @@ document.querySelectorAll('.country-btn').forEach(btn => {
 });
 
 // ─── Privacy disclaimer + "how it works" modal ──────────────────────────────
-const SIGHTENGINE_URL = 'https://sightengine.com/policies/privacy';
-const GVISION_URL = 'https://cloud.google.com/vision/docs/data-usage';
-const GVISION_TERMS_URL = 'https://cloud.google.com/terms/service';
 const PRIVACY_STRINGS = {
   es: {
     link: '¿Cómo funciona?',
@@ -1375,8 +1373,7 @@ function closePrivacyModal() {
 
 // Zero-storage panel shown next to Analyze (open) and next to "Search now" (folded).
 // Replaces the old one-line disclaimers. Texts requested by SocialTIC.
-// VERIFICAR: the Azure policy URL and the Hindi text have not been checked.
-const AZURE_PRIVACY_URL = 'https://learn.microsoft.com/legal/cognitive-services/content-safety/data-privacy';
+// VERIFICAR: the Hindi text has not been checked (URLs live in lib/privacyServices.js).
 const PRIVACY_PANEL_STRINGS = {
   es: {
     summary: '🔒 Tu imagen es privada',
@@ -1448,7 +1445,7 @@ function buildPrivacyPanel(open) {
   list.append(el('li', s.memory), sent, el('li', s.after));
 
   const more = el('p');
-  more.appendChild(link('/privacy', s.more + ' →'));
+  more.appendChild(link('/privacy?lang=' + currentLang, s.more + ' →'));
   const title = el('p', s.title);
   title.className = 'privacy-panel-title';
   details.append(title, list, more);
@@ -2260,7 +2257,7 @@ const SL = {
     body: (g, st, gr, inc) => 'Por medio de la presente, yo, ' + g + ', en mi carácter de tutor(a) legal del/de la alumno/a ' + st + ', quien cursa ' + gr + ' en esa institución, me dirijo a usted para hacer de su conocimiento un incidente de difusión o manipulación de contenido digital (imágenes o video) sin consentimiento, ocurrido ' + (inc ? 'el ' + inc : 'en fecha ____________________') + ', que afecta al/a la alumno/a.',
     descLabel: 'Descripción de los hechos: ',
     legal: {
-      mx: (state, level) => buildMxLetterLegal('es', state, level), // text lives in legal-references.js
+      mx: (state, level) => buildMxLetterLegal('es', state, level), // text lives in lib/legalReferences.js
       in: () => 'Hago de su conocimiento que difundir o manipular imágenes de una persona sin su consentimiento puede constituir un delito conforme a la Sección 66E de la Ley de Tecnología de la Información de 2000 y, al tratarse de una persona menor de edad, también puede estar comprendido en la Ley POCSO de 2012. Debe prevalecer el interés superior de la niñez.',
       us: () => 'Hago de su conocimiento que difundir o manipular imágenes de una persona menor de edad sin su consentimiento puede violar la ley federal (incluida la ley TAKE IT DOWN) y las leyes estatales aplicables. La seguridad y el interés superior del alumno/a deben ser la prioridad.',
     },
