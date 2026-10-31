@@ -586,6 +586,11 @@ summary:focus-visible,
 .alt-route[hidden] { display: none; }
 .alt-route-item h3 { font-size: var(--text-base); font-weight: 650; }
 
+/* State selector (shared by the school letter and the evidence PDF) */
+.state-field[hidden] { display: none; }
+#state-host-upload .state-field { margin-bottom: var(--space-4); }
+#state-host-result .state-field { margin-bottom: var(--space-4); }
+
 /* Content guard (blocking confirmation before any upload to an external API) */
 #content-guard-modal .privacy-modal-card h2 { margin-right: 0; line-height: 1.4; }
 .content-guard-actions { display: flex; flex-direction: column; gap: var(--space-2); margin-top: var(--space-4); }

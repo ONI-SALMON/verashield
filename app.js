@@ -963,6 +963,7 @@ function applyLanguage(lang) {
     currentCountry = getDefaultCountry(lang, navigator.language);
     syncCountryButtons();
   }
+  renderStateField(); // after the country is known: the selector is Mexico-only
 
   // re-render result if visible
   if (currentResult) {
@@ -1861,27 +1862,29 @@ function createPdfWriter(doc, lang) {
   let y = PDF_MARGIN_MM;
   doc.setLineHeightFactor(PDF_LINE_H);
 
-  function layout(str, size, bold, width) {
+  const fontStyle = (bold, italic) => (bold ? (italic ? 'bolditalic' : 'bold') : italic ? 'italic' : 'normal');
+
+  function layout(str, size, bold, width, italic = false) {
     const lineH = size * PDF_PT_TO_MM * PDF_LINE_H;
     if (useCanvas) {
       pdfMeasureCtx = pdfMeasureCtx || document.createElement('canvas').getContext('2d');
-      pdfMeasureCtx.font = pdfCanvasFont(size, bold);
+      pdfMeasureCtx.font = (italic ? 'italic ' : '') + pdfCanvasFont(size, bold);
       const lines = pdfWrapCanvas(pdfMeasureCtx, str, width * PDF_CANVAS_PX_PER_MM);
       return { lines, h: lines.length * lineH, lineH };
     }
-    doc.setFont('helvetica', bold ? 'bold' : 'normal');
+    doc.setFont('helvetica', fontStyle(bold, italic));
     doc.setFontSize(size);
     const lines = doc.splitTextToSize(str, width);
     return { lines, h: lines.length * lineH, lineH };
   }
 
-  function draw({ lines, h, lineH }, str, x, top, { size, bold, color, align }, width) {
+  function draw({ lines, h, lineH }, str, x, top, { size, bold, color, align, italic }, width) {
     if (useCanvas) {
       const canvas = document.createElement('canvas');
       canvas.width  = Math.ceil(width * PDF_CANVAS_PX_PER_MM);
       canvas.height = Math.ceil(h * PDF_CANVAS_PX_PER_MM);
       const ctx = canvas.getContext('2d');
-      ctx.font = pdfCanvasFont(size, bold);
+      ctx.font = (italic ? 'italic ' : '') + pdfCanvasFont(size, bold);
       ctx.fillStyle = `rgb(${color.join(',')})`;
       ctx.textBaseline = 'top';
       ctx.textAlign = align;
@@ -1889,7 +1892,7 @@ function createPdfWriter(doc, lang) {
       lines.forEach((l, i) => ctx.fillText(l, px, i * lineH * PDF_CANVAS_PX_PER_MM));
       doc.addImage(canvas.toDataURL('image/png'), 'PNG', x, top, width, h);
     } else {
-      doc.setFont('helvetica', bold ? 'bold' : 'normal');
+      doc.setFont('helvetica', fontStyle(bold, italic));
       doc.setFontSize(size);
       doc.setTextColor(...color);
       const tx = align === 'right' ? x + width : align === 'center' ? x + width / 2 : x;
@@ -1909,10 +1912,10 @@ function createPdfWriter(doc, lang) {
       doc.line(PDF_MARGIN_MM, y, PDF_PAGE_W_MM - PDF_MARGIN_MM, y);
       y += 3;
     },
-    text(str, { size = 11, bold = false, color = PDF_COLORS.ink, align = 'left', gap = 3 } = {}) {
-      const box = layout(str, size, bold, contentW);
+    text(str, { size = 11, bold = false, italic = false, color = PDF_COLORS.ink, align = 'left', gap = 3 } = {}) {
+      const box = layout(str, size, bold, contentW, italic);
       if (y + box.h > pageLimit) { doc.addPage(); y = PDF_MARGIN_MM; }
-      draw(box, str, PDF_MARGIN_MM, y, { size, bold, color, align }, contentW);
+      draw(box, str, PDF_MARGIN_MM, y, { size, bold, color, align, italic }, contentW);
       y += box.h + gap;
     },
     // Light-gray box with a colored left border; `blocks` are text() options plus `str`.
@@ -1920,8 +1923,8 @@ function createPdfWriter(doc, lang) {
       const pad = 4;
       const innerW = contentW - 2 * pad;
       const boxes = blocks.map((b) => {
-        const opts = { size: 10.5, bold: false, color: PDF_COLORS.ink, align: 'left', gap: 1.5, ...b };
-        return { opts, box: layout(opts.str, opts.size, opts.bold, innerW) };
+        const opts = { size: 10.5, bold: false, italic: false, color: PDF_COLORS.ink, align: 'left', gap: 1.5, ...b };
+        return { opts, box: layout(opts.str, opts.size, opts.bold, innerW, opts.italic) };
       });
       const total = boxes.reduce((sum, { box, opts }) => sum + box.h + opts.gap, 0) + 2 * pad - boxes[boxes.length - 1].opts.gap;
       if (y + total > pageLimit) { doc.addPage(); y = PDF_MARGIN_MM; }
@@ -1948,6 +1951,7 @@ function createPdfWriter(doc, lang) {
 
 function generateEvidencePdf() {
   if (!currentResult || !window.jspdf?.jsPDF) return;
+  if (!requireState()) return;
   const lang = currentLang;
   const t    = T[lang];
   const p    = PDF_STRINGS[lang];
@@ -1989,6 +1993,16 @@ function generateEvidencePdf() {
   w.text(p.stepsTitle, { size: 15, bold: true, gap: 3 });
   p.steps.forEach((step, i) => w.text(`${i + 1}. ${step}`, { size: 11, gap: 3 }));
   w.space(4);
+
+  // 4a. Legal framework for the selected state (Mexico only)
+  if (currentCountry === 'mx') {
+    const ref = getLegalReference(selectedState, lang);
+    w.callout([
+      { str: LEGAL_FRAMEWORK_TITLE[lang], bold: true, size: 11.5, gap: 2.5 },
+      { str: selectedState + ': ' + ref.estatuto, gap: ref.nota ? 1.5 : 0 },
+      ...(ref.nota ? [{ str: ref.nota, italic: true, size: 10, color: PDF_COLORS.muted, gap: 0 }] : []),
+    ], { bar: PDF_COLORS.accent });
+  }
 
   // 4b. Technical analysis (tool, API, score, timestamp, found links)
   writeTechnicalBlock(w, lang, p.locale);
@@ -2049,6 +2063,7 @@ function showResult(data, image = null) {
 
   downloadPdfBtn.hidden = !window.jspdf?.jsPDF; // hide if the CDN script failed to load
 
+  mountStateField('result');
   uploadScreen.hidden = true;
   resultScreen.hidden = false;
   scoreDisplay.hidden = false;
@@ -2095,6 +2110,7 @@ function showDirectCrisisPath() {
   analyzedImage = null;
   findState = { status: 'idle', data: null };
   downloadPdfBtn.hidden = true;
+  mountStateField('result');
   uploadScreen.hidden = true;
   resultScreen.hidden = false;
   scoreDisplay.hidden = true;
@@ -2131,6 +2147,7 @@ function resetToUpload() {
   noDetectionNote.hidden = true;
   scoreGenerator.hidden = true;
   schoolLetterDetails.open = false;
+  mountStateField('upload');
   resultScreen.hidden = true;
   uploadScreen.hidden = false;
   enterScreen(heroTitle);
@@ -2140,19 +2157,6 @@ backToUploadBtn.addEventListener('click', resetToUpload);
 // ─── School letter (MX / ES only) ────────────────────────────────────────────
 // 100% client-side: form values never leave the browser. Reuses the jsPDF
 // build already loaded in index.html.
-
-// Entidades con Ley Olimpia adoptada (reformas al código penal estatal).
-// NOTE: lista pendiente de verificación contra fuente oficial; se asumen los
-// 32 estados. Para quitar uno, borrarlo de este Set: la carta citará
-// entonces solo el marco federal.
-const LEY_OLIMPIA_STATES = new Set([
-  'Aguascalientes', 'Baja California', 'Baja California Sur', 'Campeche',
-  'Chiapas', 'Chihuahua', 'Ciudad de México', 'Coahuila', 'Colima', 'Durango',
-  'Estado de México', 'Guanajuato', 'Guerrero', 'Hidalgo', 'Jalisco',
-  'Michoacán', 'Morelos', 'Nayarit', 'Nuevo León', 'Oaxaca', 'Puebla',
-  'Querétaro', 'Quintana Roo', 'San Luis Potosí', 'Sinaloa', 'Sonora',
-  'Tabasco', 'Tamaulipas', 'Tlaxcala', 'Veracruz', 'Yucatán', 'Zacatecas',
-]);
 
 const schoolLetterLink    = document.getElementById('school-letter-link');
 const schoolLetterSection = document.getElementById('school-letter');
@@ -2303,7 +2307,45 @@ const SL = {
   },
 };
 
-const stateField = document.getElementById('sl-state-field');
+// ─── State (entidad federativa) selector ─────────────────────────────────────
+// One control, one value, shared by the school letter and the evidence PDF. It starts on the
+// upload screen and is moved (same DOM node) to the result screen, where both documents are
+// generated. Purely local: nothing is sent anywhere.
+const STATE_FIELD_STRINGS = {
+  es: { label: '¿En qué estado está la escuela o donde ocurrió esto?', error: 'Selecciona un estado para generar este documento.' },
+  en: { label: 'In which state is the school, or where did this happen?', error: 'Select a state to generate this document.' },
+  hi: { label: 'स्कूल किस राज्य में है, या यह कहाँ हुआ?', error: 'यह दस्तावेज़ बनाने के लिए एक राज्य चुनें।' },
+};
+const stateField  = document.getElementById('state-field');
+const stateSelect = document.getElementById('state-select');
+const stateError  = document.getElementById('state-error');
+let selectedState = '';
+
+function renderStateField() {
+  document.getElementById('state-label').textContent = STATE_FIELD_STRINGS[currentLang].label;
+  if (!stateError.hidden) stateError.textContent = STATE_FIELD_STRINGS[currentLang].error;
+  stateField.hidden = currentCountry !== 'mx';
+}
+
+function mountStateField(where) {
+  document.getElementById('state-host-' + where).appendChild(stateField);
+}
+
+stateSelect.addEventListener('change', () => {
+  selectedState = stateSelect.value;
+  if (selectedState) stateError.hidden = true;
+});
+
+// True when a Mexican document can be generated; otherwise shows the error and focuses the field.
+function requireState() {
+  if (currentCountry !== 'mx' || selectedState) return true;
+  stateError.textContent = STATE_FIELD_STRINGS[currentLang].error;
+  stateError.hidden = false;
+  stateField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  stateSelect.focus({ preventScroll: true });
+  return false;
+}
+
 const levelField = document.getElementById('sl-level-field');
 
 function applySchoolLetterStrings() {
@@ -2315,7 +2357,7 @@ function applySchoolLetterStrings() {
 function updateSchoolLetterVisibility() {
   schoolLetterSection.hidden = false;
   schoolLetterLink.hidden = false;
-  stateField.hidden = currentCountry !== 'mx';
+  renderStateField();
   levelField.hidden = currentCountry !== 'mx';
   applySchoolLetterStrings();
 }
@@ -2333,6 +2375,7 @@ function todayStamp(d) {
 
 function generateSchoolLetter() {
   slError.hidden = true;
+  if (!requireState()) return;
   const sl = SL[currentLang];
   const jsPDFCtor = window.jspdf && window.jspdf.jsPDF;
   if (!jsPDFCtor) {
@@ -2348,7 +2391,7 @@ function generateSchoolLetter() {
   const grade    = val('sl-grade');
   const school   = val('sl-school');
   const guardian = val('sl-guardian');
-  const state    = country === 'mx' ? val('sl-state') : '';
+  const state    = country === 'mx' ? selectedState : '';
   const level    = country === 'mx' ? val('sl-level') : ''; // '' falls back to the local-protocol wording
   const incident = isoToDate(val('sl-date'), sl.locale);
   const desc     = val('sl-description').slice(0, 300);
@@ -2368,7 +2411,9 @@ function generateSchoolLetter() {
   w.text(sl.descLabel + (desc || '_'.repeat(40)), { gap: desc ? 4 : 1, color: ink });
   if (!desc) w.text('_'.repeat(75), { gap: 4, color: ink });
 
-  w.text(sl.legal[country](state && LEY_OLIMPIA_STATES.has(state) ? state : '', level), { gap: 4, color: ink });
+  w.text(sl.legal[country](state, level), { gap: 4, color: ink });
+  const legalNote = country === 'mx' ? getLegalReference(state, currentLang).nota : null;
+  if (legalNote) w.text(legalNote, { size: 10, italic: true, gap: 4, color: PDF_COLORS.muted });
 
   w.text(sl.requestsIntro, { gap: 2, color: ink });
   sl.requests.forEach((item) => w.text(item, { gap: 2, color: ink }));
