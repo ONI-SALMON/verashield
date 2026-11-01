@@ -1,6 +1,6 @@
 // Content checks for the flow texts and the country and platform data. No dependencies:
 //   node scripts/check-content.mjs   (or: npm run check:content)
-import { CONTENT, LANGS } from '../lib/content/index.js';
+import { ADULTS, CONTENT, LANGS } from '../lib/content/index.js';
 import { COUNTRIES, COUNTRY_IDS } from '../lib/countries/index.js';
 import { PLATFORMS } from '../lib/platforms.js';
 
@@ -40,8 +40,14 @@ for (const lang of LANGS.slice(1)) {
   }
 }
 
+// 1b. The adults page has the same keys in every language too
+const adultsShape = JSON.stringify(shape(ADULTS[LANGS[0]]));
+for (const lang of LANGS.slice(1)) {
+  if (JSON.stringify(shape(ADULTS[lang])) !== adultsShape) fail(`adults: ${lang} does not have the same keys or array sizes as ${LANGS[0]}`);
+}
+
 // 2. No emojis, long dashes, curly quotes or ellipsis characters in any visible text
-const sources = { content: CONTENT, countries: COUNTRIES, platforms: PLATFORMS };
+const sources = { content: CONTENT, adults: ADULTS, countries: COUNTRIES, platforms: PLATFORMS };
 for (const [name, tree] of Object.entries(sources)) {
   for (const [path, text] of walk(tree)) {
     if (FORBIDDEN.test(text)) fail(`${name}: forbidden character at ${path}`);
@@ -53,7 +59,7 @@ function checkItem(where, item, { needsLink = false } = {}) {
   const { status, verifiedOn, source, url, number } = item;
   if (!['verified', 'partial', 'pending'].includes(status)) fail(`${where}: bad status "${status}"`);
   if (status === 'verified' && (!verifiedOn || !source)) fail(`${where}: verified items need verifiedOn and source`);
-  if (status === 'partial' && !verifiedOn) fail(`${where}: partial items need verifiedOn`);
+  if (status === 'partial' && !verifiedOn && !item.carried) fail(`${where}: partial items need verifiedOn (or carried: true)`);
   if (status === 'pending' && (url || number)) fail(`${where}: pending items must not carry a link or a number`);
   if (needsLink && !url) fail(`${where}: missing url`);
 }

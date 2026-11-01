@@ -1,7 +1,4 @@
-import {
-  LEGAL_FRAMEWORK_TITLE, LEY_OLIMPIA,
-  buildMxLetterLegal, getLegalReference,
-} from './lib/legalReferences.js';
+import { LEGAL_FRAMEWORK_TITLE, buildMxLetterLegal, getLegalReference } from './lib/countries/mx.legal.js';
 import { initFlow } from './lib/flow/index.js';
 import { flow } from './lib/flow/session.js';
 import { renderCurrent } from './lib/flow/router.js';
@@ -45,92 +42,51 @@ const scoreMeterFill = document.getElementById('score-meter-fill');
 // Extra UI strings (labels, hints, orientation copy)
 const UI = {
   es: {
-    skipLink:     'Saltar al contenido',
-    eyebrow:      'Gratis y en tu idioma',
-    trust1:       'Sin cuenta ni registro',
-    trust2:       'Tu imagen no se guarda',
-    trust3:       'Te mostramos qué hacer después del resultado',
-    scopeLead:    'VeraShield detecta imágenes generadas o alteradas con IA, incluido el contenido íntimo compartido sin consentimiento. Si esto te pasó a ti o a alguien cercano, aquí puedes pedir ayuda: no tienes la culpa.',
-    scopeNot:     'Si solo quieres saber si una imagen cualquiera fue hecha con IA, esta no es la herramienta indicada; busca un verificador general.',
     stepUpload:   'Elige la imagen',
     stepAnalyze:  'Revisa si fue creada por IA',
     uploadHint:   'JPG, PNG o WebP. Máximo 10 MB.',
     analyzeHint:  'Elige una imagen para activar este botón.',
     changeImage:  'Toca para cambiar la imagen',
     or:           'o',
-    altLead:      '¿Tu foto es real y alguien la compartió sin tu permiso? No necesitas analizarla para recibir ayuda.',
     resultHeading:'Resultado',
-    directHeading:'Tus derechos y recursos de apoyo',
     scoreCaption: 'Probabilidad de creada por IA',
     generatorLabel: 'Posible generador: ',
     faceSwapExplanation: 'Parece una manipulación del rostro (face swap), no una imagen creada por completo con IA.',
-    countryLabel: 'Mostrar ayuda en',
-    whatsappSub:  'Se abre WhatsApp con el mensaje listo. Tú decides si lo envías.',
-    schoolLetter: 'Generar carta para mi escuela',
   },
   en: {
-    skipLink:     'Skip to content',
-    eyebrow:      'Free and in your language',
-    trust1:       'No account or sign-up',
-    trust2:       'Your image is not saved',
-    trust3:       'We show you what to do after the result',
-    scopeLead:    'VeraShield detects images generated or altered with AI, including intimate content shared without consent. If this happened to you or someone close to you, you can ask for help here: it is not your fault.',
-    scopeNot:     'If you only want to know whether any random image was made with AI, this is not the right tool; please look for a general image checker.',
     stepUpload:   'Choose the image',
     stepAnalyze:  'Check if it was created by AI',
     uploadHint:   'JPG, PNG or WebP. Max 10 MB.',
     analyzeHint:  'Choose an image to enable this button.',
     changeImage:  'Tap to change the image',
     or:           'or',
-    altLead:      'Is your photo real and someone shared it without your permission? You do not need to analyze it to get help.',
     resultHeading:'Result',
-    directHeading:'Your rights and support resources',
     scoreCaption: 'Chance it was created by AI',
     generatorLabel: 'Possible generator: ',
     faceSwapExplanation: 'This looks like a face manipulation (face swap), not an image created entirely by AI.',
-    countryLabel: 'Show help in',
-    whatsappSub:  'Opens WhatsApp with the message ready. You decide whether to send it.',
-    schoolLetter: 'Generate a letter for my school',
   },
   hi: {
-    skipLink:     'सामग्री पर जाएँ',
-    eyebrow:      'निःशुल्क और आपकी भाषा में',
-    trust1:       'कोई खाता या साइन-अप नहीं',
-    trust2:       'आपकी तस्वीर सेव नहीं होती',
-    trust3:       'परिणाम के बाद क्या करना है, हम बताते हैं',
-    scopeLead:    'VeraShield AI से बनी या बदली गई तस्वीरों का पता लगाता है, जिनमें बिना सहमति के साझा की गई निजी तस्वीरें भी शामिल हैं। अगर यह आपके या किसी करीबी के साथ हुआ है, तो यहाँ मदद माँग सकते हैं: इसमें आपकी कोई गलती नहीं है।',
-    scopeNot:     'अगर आप बस यह जानना चाहते हैं कि कोई भी आम तस्वीर AI से बनी है या नहीं, तो यह सही टूल नहीं है; कृपया कोई सामान्य इमेज चेकर खोजें।',
     stepUpload:   'तस्वीर चुनें',
     stepAnalyze:  'जाँचें कि वह AI से बनी है या नहीं',
     uploadHint:   'JPG, PNG या WebP। अधिकतम 10 MB।',
     analyzeHint:  'इस बटन को चालू करने के लिए तस्वीर चुनें।',
     changeImage:  'तस्वीर बदलने के लिए टैप करें',
     or:           'या',
-    altLead:      'क्या आपकी असली फ़ोटो बिना अनुमति के साझा की गई? मदद पाने के लिए उसे जाँचना ज़रूरी नहीं है।',
     resultHeading:'परिणाम',
-    directHeading:'आपके अधिकार और सहायता संसाधन',
     scoreCaption: 'AI से बनी होने की संभावना',
     generatorLabel: 'संभावित जनरेटर: ',
     faceSwapExplanation: 'यह चेहरे में हेरफेर (फेस स्वैप) लगता है, पूरी तरह AI से बनी तस्वीर नहीं।',
-    countryLabel: 'इस देश की मदद दिखाएँ',
-    whatsappSub:  'WhatsApp खुलेगा तैयार संदेश के साथ। भेजना है या नहीं, यह आप तय करें।',
-    schoolLetter: 'स्कूल के लिए पत्र बनाएँ',
   },
 };
 
 // Translations
 const T = {
   es: {
-    heroTitle:       '¿Esta imagen es real?',
-    heroSubtitle:    'Herramienta de respuesta a abuso de imagen para adolescentes.',
     uploadPrompt:    'Toca para subir o arrastra una imagen aquí',
     preparingImage:  'Preparando imagen...',
     analyzeBtn:      'Analizar',
     analyzingBtn:    'Analizando...',
     resetBtn:        'Analizar otra imagen',
-    privacyNote:     'No guardamos tu imagen ni ningún dato personal.',
-    disclaimer:      'Recuerda: ante cualquier situación, tu primer paso siempre es hablar con un adulto de confianza o una autoridad. Esta herramienta es un apoyo, no un sustituto.',
-    crisisTitle:     '¿Qué puedes hacer?',
     labels: {
       likely_real:   'Probablemente real',
       uncertain:     'No podemos determinarlo con certeza',
@@ -151,83 +107,14 @@ const T = {
       DETECTION_UNAVAILABLE: 'Detección temporalmente no disponible. Intenta en unos minutos.',
       DETECTION_NOT_CONFIGURED: 'El servicio de análisis no está configurado todavía. No se generó ningún resultado. Inténtalo más tarde.',
     },
-    crisisSteps: [
-      'Guarda evidencia: toma una captura de pantalla con la URL visible.',
-      'No compartas el contenido: reportarlo a quienes necesitan verlo es suficiente.',
-      'Contacta a una organización de apoyo:',
-    ],
-    victimToggle: {
-      me:    'Esto me pasó a mí',
-      other: 'Le pasó a alguien que conozco',
-    },
-    crisisIntro: {
-      me:    'Esto no es tu culpa. Lo que ves tiene solución y no estás solo/a.',
-      other: 'Tu amigo/a necesita ayuda. Lo más importante ahora es que un adulto de confianza lo sepa.',
-    },
-    whatsappDisclaimer: 'Lo primero es hablar con un adulto de confianza. No tienes que enfrentar esto solo/a.',
-    whatsappBtn: 'Enviar mensaje a mis papás por WhatsApp',
-    whatsappMessageDirect: {
-      me:    'Mamá/Papá, necesito tu ayuda. Encontré una imagen mía que está siendo compartida sin mi permiso. ¿Podemos hablar hoy?',
-      other: 'Mamá/Papá, mi amigo/a necesita ayuda. Encontré una imagen suya que está siendo compartida sin su permiso. ¿Podemos ayudarle?',
-    },
-    whatsappMessage: {
-      me:    'Mamá/Papá, necesito tu ayuda. Encontré una imagen que parece ser yo, y una app llamada VeraShield la marcó como posiblemente generada con IA. No sé qué hacer. ¿Podemos hablar hoy?',
-      other: 'Mamá/Papá, mi amigo/a necesita ayuda. Vi una imagen suya que puede haber sido creada por IA. ¿Podemos ayudarle?',
-    },
-    legalNote: `Esta situación puede estar protegida por la <a href="${LEY_OLIMPIA.url}" target="_blank" rel="noopener">${LEY_OLIMPIA.nombre}</a>.`,
-    takedownBtn: 'Solicitar eliminación de la imagen (NCMEC)',
-    crisisIntro_mx: 'Esto no es tu culpa. En México existen leyes y organizaciones que pueden ayudarte a resolver esta situación. No estás solo/a.',
-    crisisIntro_in: 'Esto no es tu culpa. En India existen leyes y organizaciones que pueden ayudarte a resolver esta situación. No estás solo/a.',
-    crisisIntro_us: 'Esto no es tu culpa. En Estados Unidos existen leyes y organizaciones que pueden ayudarte a resolver esta situación. No estás solo/a.',
-    legalNote_in: 'En India, la Sección 66E de la Ley de TI protege a las víctimas de la difusión no consensuada de imágenes.',
-    ngoTitle_mx: 'Organizaciones que pueden ayudarte (México)',
-    ngoTitle_in: 'Organizaciones que pueden ayudarte (India)',
-    ngoTitle_us: 'Organizaciones que pueden ayudarte (Estados Unidos)',
-    ngosIndia: [
-      {
-        name: 'iCall (TISS)',
-        description: 'Apoyo psicológico gratuito para jóvenes: llamada o chat',
-        phone: '9152987821',
-        url: 'https://icallhelpline.org',
-      },
-      {
-        name: 'Vandrevala Foundation',
-        description: 'Línea de crisis de salud mental 24/7: llamada y WhatsApp',
-        phone: '1860-2662-345',
-        url: 'https://www.vandrevalafoundation.com',
-      },
-      {
-        name: 'Childline India',
-        description: 'Línea de emergencia gratuita para niños y adolescentes en riesgo',
-        phone: '1098',
-        url: 'https://www.childlineindia.org',
-      },
-      {
-        name: 'Cyber Crime Portal',
-        description: 'Portal oficial del gobierno para reportar delitos digitales en India',
-        phone: null,
-        url: 'https://cybercrime.gov.in',
-      },
-      {
-        name: 'CyberPeace Foundation',
-        description: 'ONG especializada en seguridad digital y abuso de imagen en menores',
-        phone: null,
-        url: 'https://cyberpeace.org',
-      },
-    ],
   },
 
   en: {
-    heroTitle:       'Is this image real?',
-    heroSubtitle:    'Image abuse response tool for teens aged 13 to 17.',
     uploadPrompt:    'Tap to upload or drag an image here',
     preparingImage:  'Preparing image...',
     analyzeBtn:      'Analyze',
     analyzingBtn:    'Analyzing...',
     resetBtn:        'Analyze another image',
-    privacyNote:     "We don't save your image or any personal data.",
-    disclaimer:      'Remember: in any situation, your first step is always to talk to a trusted adult or authority. This tool is a support, not a substitute.',
-    crisisTitle:     'What can you do?',
     labels: {
       likely_real:   'Probably real',
       uncertain:     "We can't determine this with certainty",
@@ -248,83 +135,14 @@ const T = {
       DETECTION_UNAVAILABLE: 'Detection temporarily unavailable. Try again in a few minutes.',
       DETECTION_NOT_CONFIGURED: 'The analysis service is not set up yet. No result was generated. Please try again later.',
     },
-    crisisSteps: [
-      'Save evidence: take a screenshot showing the URL.',
-      'Do not share the content: reporting it to the right people is enough.',
-      'Contact a support organization:',
-    ],
-    victimToggle: {
-      me:    'This happened to me',
-      other: 'This happened to someone I know',
-    },
-    crisisIntro: {
-      me:    "This is not your fault. What you're seeing has a solution and you're not alone.",
-      other: 'Your friend needs help. The most important thing now is that a trusted adult knows.',
-    },
-    whatsappDisclaimer: "First, talk to a trusted adult. You don't have to face this alone.",
-    whatsappBtn: 'Send message to a parent via WhatsApp',
-    whatsappMessageDirect: {
-      me:    'Mom/Dad, I need your help. I found an image of me being shared without my permission. Can we talk today?',
-      other: 'Mom/Dad, my friend needs help. I found an image of them being shared without their permission. Can we help them?',
-    },
-    whatsappMessage: {
-      me:    "Mom/Dad, I need your help with something. I found an image that looks like me, and an app called VeraShield flagged it as possibly AI-generated. I don't know what to do. Can we talk today?",
-      other: 'Mom/Dad, my friend needs help. I saw an image of them that may have been created by AI. Can we help them?',
-    },
-    legalNote: 'This situation may be covered under the <a href="https://takeitdown.ncmec.org" target="_blank" rel="noopener">TAKE IT DOWN Act</a>.',
-    takedownBtn: 'Request image removal (NCMEC)',
-    crisisIntro_mx: "This is not your fault. In Mexico, there are laws and organizations that can help you resolve this. You're not alone.",
-    crisisIntro_in: "This is not your fault. In India, there are laws and organizations that can help you resolve this. You're not alone.",
-    crisisIntro_us: "This is not your fault. In the United States, there are laws and organizations that can help you resolve this. You're not alone.",
-    legalNote_in: 'In India, IT Act Section 66E protects victims of non-consensual image sharing.',
-    ngoTitle_mx: 'Organizations that can help you (Mexico)',
-    ngoTitle_in: 'Organizations that can help you (India)',
-    ngoTitle_us: 'Organizations that can help you (United States)',
-    ngosIndia: [
-      {
-        name: 'iCall (TISS)',
-        description: 'Free psychological support for young people: call or chat',
-        phone: '9152987821',
-        url: 'https://icallhelpline.org',
-      },
-      {
-        name: 'Vandrevala Foundation',
-        description: '24/7 mental health crisis helpline: call and WhatsApp',
-        phone: '1860-2662-345',
-        url: 'https://www.vandrevalafoundation.com',
-      },
-      {
-        name: 'Childline India',
-        description: 'Free emergency helpline for children and teens at risk',
-        phone: '1098',
-        url: 'https://www.childlineindia.org',
-      },
-      {
-        name: 'Cyber Crime Portal',
-        description: 'Official government portal to report cybercrimes in India',
-        phone: null,
-        url: 'https://cybercrime.gov.in',
-      },
-      {
-        name: 'CyberPeace Foundation',
-        description: 'NGO specializing in digital safety and image abuse for minors',
-        phone: null,
-        url: 'https://cyberpeace.org',
-      },
-    ],
   },
 
   hi: {
-    heroTitle:       'क्या यह तस्वीर असली है?',
-    heroSubtitle:    '13 से 17 वर्ष के किशोरों के लिए छवि दुर्व्यवहार प्रतिक्रिया उपकरण।',
     uploadPrompt:    'यहाँ टैप करें या तस्वीर खींचकर डालें',
     preparingImage:  'इमेज तैयार हो रही है...',
     analyzeBtn:      'जाँचें',
     analyzingBtn:    'जाँच हो रही है...',
     resetBtn:        'दूसरी तस्वीर जाँचें',
-    privacyNote:     'हम आपकी तस्वीर या कोई भी व्यक्तिगत डेटा सेव नहीं करते।',
-    disclaimer:      'याद रखें: किसी भी स्थिति में, आपका पहला कदम हमेशा किसी विश्वसनीय वयस्क या अधिकारी से बात करना है। यह टूल एक सहायता है, विकल्प नहीं।',
-    crisisTitle:     'आप क्या कर सकते हैं?',
     labels: {
       likely_real:   'संभवतः असली',
       uncertain:     'हम निश्चित नहीं हैं',
@@ -345,70 +163,6 @@ const T = {
       DETECTION_UNAVAILABLE: 'जाँच अस्थायी रूप से उपलब्ध नहीं है। कुछ मिनट बाद कोशिश करें।',
       DETECTION_NOT_CONFIGURED: 'विश्लेषण सेवा अभी सेट अप नहीं है। कोई नतीजा नहीं बना। कृपया बाद में कोशिश करें।',
     },
-    crisisSteps: [
-      'सबूत सेव करें: URL दिखाते हुए स्क्रीनशॉट लें।',
-      'सामग्री साझा न करें: सही लोगों को रिपोर्ट करना पर्याप्त है।',
-      'एक सहायता संगठन से संपर्क करें:',
-    ],
-    victimToggle: {
-      me:    'यह मेरे साथ हुआ',
-      other: 'यह किसी और के साथ हुआ',
-    },
-    crisisIntro: {
-      me:    'यह आपकी गलती नहीं है। इसका समाधान है और आप अकेले नहीं हैं।',
-      other: 'आपके मित्र को मदद चाहिए। अभी सबसे जरूरी है कि कोई विश्वसनीय वयस्क इसे जाने।',
-    },
-    whatsappDisclaimer: 'पहला कदम: किसी विश्वसनीय वयस्क से बात करें। आपको यह अकेले नहीं सहना है।',
-    whatsappBtn: 'WhatsApp पर माता-पिता को संदेश भेजें',
-    whatsappMessageDirect: {
-      me:    'माँ/पापा, मुझे आपकी मदद चाहिए। मेरी एक तस्वीर बिना अनुमति के शेयर हो रही है। क्या आज हम बात कर सकते हैं?',
-      other: 'माँ/पापा, मेरे दोस्त को मदद चाहिए। उनकी एक तस्वीर बिना अनुमति के शेयर हो रही है। क्या हम उनकी मदद कर सकते हैं?',
-    },
-    whatsappMessage: {
-      me:    'माँ/पापा, मुझे आपकी मदद चाहिए। मुझे एक ऐसी तस्वीर मिली जो मेरी लगती है और VeraShield ऐप ने इसे AI-generated बताया। मुझे नहीं पता क्या करूँ। क्या आज हम बात कर सकते हैं?',
-      other: 'मम्मी/पापा, मेरे दोस्त को मदद चाहिए। मैंने उनकी एक तस्वीर देखी जो AI से बनी हो सकती है। क्या हम उनकी मदद कर सकते हैं?',
-    },
-    legalNote: 'यह स्थिति <a href="https://wcd.nic.in/act/protection-children-sexual-offences-pocso-act-2012" target="_blank" rel="noopener">POCSO Act</a> के तहत संरक्षित हो सकती है।',
-    takedownBtn: 'तस्वीर हटाने का अनुरोध करें (NCMEC)',
-    crisisIntro_mx: 'यह आपकी गलती नहीं है। मेक्सिको में ऐसे कानून और संगठन हैं जो इस स्थिति में आपकी मदद कर सकते हैं। आप अकेले नहीं हैं।',
-    crisisIntro_in: 'यह आपकी गलती नहीं है। भारत में ऐसे कानून और संगठन हैं जो इस स्थिति में आपकी मदद कर सकते हैं। आप अकेले नहीं हैं।',
-    crisisIntro_us: 'यह आपकी गलती नहीं है। संयुक्त राज्य अमेरिका में ऐसे कानून और संगठन हैं जो इस स्थिति में आपकी मदद कर सकते हैं। आप अकेले नहीं हैं।',
-    legalNote_in: 'भारत में, आईटी अधिनियम की धारा 66E सहमति के बिना तस्वीरें साझा किए जाने के पीड़ितों की रक्षा करती है।',
-    ngoTitle_mx: 'संगठन जो आपकी मदद कर सकते हैं (मेक्सिको)',
-    ngoTitle_in: 'संगठन जो आपकी मदद कर सकते हैं (भारत)',
-    ngoTitle_us: 'संगठन जो आपकी मदद कर सकते हैं (संयुक्त राज्य अमेरिका)',
-    ngosIndia: [
-      {
-        name: 'iCall (TISS)',
-        description: 'युवाओं के लिए निःशुल्क मनोवैज्ञानिक सहायता: कॉल या चैट',
-        phone: '9152987821',
-        url: 'https://icallhelpline.org',
-      },
-      {
-        name: 'Vandrevala Foundation',
-        description: '24/7 मानसिक स्वास्थ्य संकट हेल्पलाइन: कॉल और व्हाट्सएप',
-        phone: '1860-2662-345',
-        url: 'https://www.vandrevalafoundation.com',
-      },
-      {
-        name: 'Childline India',
-        description: 'जोखिम में बच्चों और किशोरों के लिए निःशुल्क आपातकालीन हेल्पलाइन',
-        phone: '1098',
-        url: 'https://www.childlineindia.org',
-      },
-      {
-        name: 'Cyber Crime Portal',
-        description: 'भारत में साइबर अपराध रिपोर्ट करने का आधिकारिक सरकारी पोर्टल',
-        phone: null,
-        url: 'https://cybercrime.gov.in',
-      },
-      {
-        name: 'CyberPeace Foundation',
-        description: 'डिजिटल सुरक्षा और बाल छवि दुरुपयोग में विशेषज्ञ NGO',
-        phone: null,
-        url: 'https://cyberpeace.org',
-      },
-    ],
   },
 };
 
@@ -430,7 +184,7 @@ const PDF_STRINGS = {
     },
     stepsTitle: 'Pasos recomendados',
     steps: [
-      'Documenta: guarda capturas de pantalla con la URL, el nombre de usuario y la fecha visibles. No reenvíes ni compartas la imagen.',
+      'Documenta: guarda el enlace, el nombre de usuario, la fecha y la hora. No guardes ni reenvíes la imagen.',
       'Reporta a la plataforma: usa la opción de reporte de la red social o app donde aparece la imagen y pide que la eliminen.',
       'Busca apoyo: habla con un adulto de confianza y contacta a una organización o autoridad de tu país.',
     ],
@@ -453,7 +207,7 @@ const PDF_STRINGS = {
     },
     stepsTitle: 'Recommended steps',
     steps: [
-      'Document: save screenshots with the URL, username and date visible. Do not forward or share the image.',
+      'Document: save the link, the username, the date and the time. Do not save or forward the image.',
       'Report to the platform: use the report option on the social network or app where the image appears and ask for its removal.',
       'Seek support: talk to a trusted adult and contact an organization or authority in your country.',
     ],
@@ -476,7 +230,7 @@ const PDF_STRINGS = {
     },
     stepsTitle: 'सुझाए गए कदम',
     steps: [
-      'दस्तावेज़ बनाएँ: URL, यूज़रनेम और तारीख दिखाते हुए स्क्रीनशॉट सेव करें। तस्वीर को फॉरवर्ड या साझा न करें।',
+      'दस्तावेज़ बनाएँ: लिंक, यूज़रनेम, तारीख और समय सेव करें। तस्वीर को सेव या फ़ॉरवर्ड न करें।',
       'प्लेटफ़ॉर्म को रिपोर्ट करें: जिस सोशल नेटवर्क या ऐप पर तस्वीर है, वहाँ रिपोर्ट विकल्प का उपयोग करें और उसे हटाने का अनुरोध करें।',
       'सहायता लें: किसी विश्वसनीय वयस्क से बात करें और अपने देश के किसी संगठन या अधिकारी से संपर्क करें।',
     ],
@@ -1369,8 +1123,6 @@ const SL = {
     descLabel: 'Descripción de los hechos: ',
     legal: {
       mx: (state, level) => buildMxLetterLegal('es', state, level), // text lives in lib/legalReferences.js
-      in: () => 'Hago de su conocimiento que difundir o manipular imágenes de una persona sin su consentimiento puede constituir un delito conforme a la Sección 66E de la Ley de Tecnología de la Información de 2000 y, al tratarse de una persona menor de edad, también puede estar comprendido en la Ley POCSO de 2012. Debe prevalecer el interés superior de la niñez.',
-      us: () => 'Hago de su conocimiento que difundir o manipular imágenes de una persona menor de edad sin su consentimiento puede violar la ley federal (incluida la ley TAKE IT DOWN) y las leyes estatales aplicables. La seguridad y el interés superior del alumno/a deben ser la prioridad.',
     },
     requestsIntro: 'Por lo anterior, solicito respetuosamente a esa dirección:',
     requests: [
@@ -1386,8 +1138,6 @@ const SL = {
     stampLine: 'Recibido por: ____________________   Fecha: ______________   Folio: ______________',
     footer: {
       mx: 'Esta carta es para reporte escolar. Para denuncia penal, el tutor debe acompañar al menor al Ministerio Público.',
-      in: 'Esta carta es para reporte escolar. Para una denuncia penal, el tutor puede acompañar al menor a la comisaría más cercana o presentar la queja en cybercrime.gov.in.',
-      us: 'Esta carta es para reporte escolar. Para una denuncia penal, contacta a la policía local o reporta en la CyberTipline del NCMEC.',
     },
     generated: `Generado con VeraShield | ${SITE_DOMAIN}`,
   },
@@ -1418,8 +1168,6 @@ const SL = {
     descLabel: 'Description of events: ',
     legal: {
       mx: (state, level) => buildMxLetterLegal('en', state, level),
-      in: () => 'Please be advised that sharing or manipulating a person\'s images without consent may be an offence under Section 66E of the Information Technology Act, 2000 and, because the student is a minor, may also fall under the POCSO Act, 2012. The best interests of the child must prevail.',
-      us: () => 'Please be advised that sharing or manipulating images of a minor without consent may violate federal law (including the TAKE IT DOWN Act) and applicable state law. The student\'s safety and best interests must come first.',
     },
     requestsIntro: 'For these reasons, I respectfully ask the school to:',
     requests: [
@@ -1435,8 +1183,6 @@ const SL = {
     stampLine: 'Received by: ____________________   Date: ______________   Ref. no.: ______________',
     footer: {
       mx: 'This letter is for school reporting. For a criminal complaint, the guardian should accompany the minor to the Public Prosecutor\'s Office (Ministerio Publico).',
-      in: 'This letter is for school reporting. For a criminal complaint, the guardian can accompany the minor to the nearest police station or file at cybercrime.gov.in.',
-      us: 'This letter is for school reporting. For a criminal complaint, contact local law enforcement or report to the NCMEC CyberTipline.',
     },
     generated: `Generated with VeraShield | ${SITE_DOMAIN}`,
   },
@@ -1467,8 +1213,6 @@ const SL = {
     descLabel: 'घटना का विवरण: ',
     legal: {
       mx: (state, level) => buildMxLetterLegal('hi', state, level),
-      in: () => 'मैं आपको सूचित करता/करती हूँ कि किसी व्यक्ति की तस्वीरें बिना सहमति के साझा करना या बदलना सूचना प्रौद्योगिकी अधिनियम, 2000 की धारा 66E के तहत अपराध हो सकता है और, छात्र/छात्रा नाबालिग होने के कारण, POCSO अधिनियम, 2012 के अंतर्गत भी आ सकता है। बच्चे का सर्वोत्तम हित सर्वोपरि होना चाहिए।',
-      us: () => 'मैं आपको सूचित करता/करती हूँ कि किसी नाबालिग की तस्वीरें बिना सहमति के साझा करना या बदलना संघीय कानून (TAKE IT DOWN Act सहित) और लागू राज्य कानूनों का उल्लंघन हो सकता है। छात्र/छात्रा की सुरक्षा और सर्वोत्तम हित को प्राथमिकता मिलनी चाहिए।',
     },
     requestsIntro: 'इसलिए मैं विद्यालय से विनम्र अनुरोध करता/करती हूँ कि:',
     requests: [
@@ -1484,8 +1228,6 @@ const SL = {
     stampLine: 'प्राप्तकर्ता: ____________________   तारीख: ______________   संदर्भ संख्या: ______________',
     footer: {
       mx: 'यह पत्र विद्यालय को सूचित करने के लिए है। आपराधिक शिकायत के लिए अभिभावक नाबालिग के साथ लोक अभियोजक कार्यालय (Ministerio Publico) जाएँ।',
-      in: 'यह पत्र विद्यालय को सूचित करने के लिए है। आपराधिक शिकायत के लिए अभिभावक नाबालिग के साथ नज़दीकी पुलिस थाने जा सकते हैं या cybercrime.gov.in पर शिकायत दर्ज कर सकते हैं।',
-      us: 'यह पत्र विद्यालय को सूचित करने के लिए है। आपराधिक शिकायत के लिए स्थानीय पुलिस से संपर्क करें या NCMEC CyberTipline पर रिपोर्ट करें।',
     },
     generated: `VeraShield से बनाया गया | ${SITE_DOMAIN}`,
   },
@@ -1652,7 +1394,7 @@ function generateSchoolLetter() {
     doc.setDrawColor(...PDF_COLORS.muted);
     doc.setLineWidth(0.2);
     doc.line(PDF_MARGIN_MM, PDF_PAGE_H_MM - 20, PDF_PAGE_W_MM - PDF_MARGIN_MM, PDF_PAGE_H_MM - 20);
-    w.textAt(sl.footer[country] + ' ' + sl.generated, PDF_PAGE_H_MM - 18, { size: 8, bold: false, color: PDF_COLORS.muted, align: 'left' });
+    w.textAt(sl.footer.mx + ' ' + sl.generated, PDF_PAGE_H_MM - 18, { size: 8, bold: false, color: PDF_COLORS.muted, align: 'left' });
   }
 
   doc.save(sl.file + '-' + todayStamp(now) + '.pdf');
