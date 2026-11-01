@@ -549,7 +549,20 @@ summary:focus-visible,
 .privacy-note { font-size: var(--text-sm); color: var(--color-muted); }
 
 /* Upload privacy disclaimer + "how it works" modal */
-.upload-disclaimer { font-size: var(--text-sm); color: var(--color-muted); margin-top: 10px; }
+/* Zero-storage privacy panel (calm: neutral surface, muted text, no alert colors) */
+#privacy-panel-upload { margin-top: 10px; }
+.privacy-panel {
+  background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4); font-size: var(--text-sm); line-height: 1.5; color: var(--color-muted);
+  text-align: left;
+}
+.privacy-panel summary { cursor: pointer; font-weight: 600; color: var(--color-text); }
+.privacy-panel[open] summary { margin-bottom: var(--space-2); }
+.privacy-panel p { margin: 0 0 var(--space-2); }
+.privacy-panel .privacy-panel-title { font-weight: 600; color: var(--color-text); }
+.privacy-panel ul { margin: 0 0 var(--space-2); padding-left: 1.2em; }
+.privacy-panel li { margin-bottom: 4px; }
+.privacy-panel a { color: var(--color-accent); overflow-wrap: anywhere; }
 .privacy-link {
   background: none; border: 0; padding: 0; font: inherit;
   color: var(--color-accent); text-decoration: underline; cursor: pointer;
@@ -574,6 +587,26 @@ summary:focus-visible,
   position: absolute; top: 10px; right: 12px; background: none; border: 0;
   color: var(--color-text); font-size: 28px; line-height: 1; cursor: pointer;
 }
+
+/* Evidence preservation callout (reuses .no-detection-note) */
+.evidence-note { border-left: 3px solid var(--tint-amber-line); }
+.evidence-title { font-weight: 650; }
+.evidence-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-2); }
+.evidence-warn { color: var(--color-amber); }
+
+/* AlternativeRoute (shown when the content guard blocks the analysis) */
+.alt-route, .alt-route-item { display: flex; flex-direction: column; gap: var(--space-3); }
+.alt-route[hidden] { display: none; }
+.alt-route-item h3 { font-size: var(--text-base); font-weight: 650; }
+
+/* State selector (shared by the school letter and the evidence PDF) */
+.state-field[hidden] { display: none; }
+#state-host-upload .state-field { margin-bottom: var(--space-4); }
+#state-host-result .state-field { margin-bottom: var(--space-4); }
+
+/* Content guard (blocking confirmation before any upload to an external API) */
+#content-guard-modal .privacy-modal-card h2 { margin-right: 0; line-height: 1.4; }
+.content-guard-actions { display: flex; flex-direction: column; gap: var(--space-2); margin-top: var(--space-4); }
 
 /* Inline form error */
 .form-error {
@@ -1007,24 +1040,6 @@ summary:focus-visible,
   }
 }
 
-/* Find where the image was shared */
-.find-body { display: flex; flex-direction: column; gap: var(--space-2); flex: 1; min-width: 0; }
-.find-note { font-size: var(--text-sm); color: var(--color-muted); }
-.find-error { color: var(--color-red); }
-.find-loading { display: flex; align-items: center; gap: var(--space-2); }
-.find-spinner {
-  width: 16px; height: 16px; flex-shrink: 0;
-  border: 2px solid var(--color-border-strong);
-  border-top-color: var(--color-accent);
-  border-radius: 50%;
-  animation: find-spin 0.8s linear infinite;
-}
-@keyframes find-spin { to { transform: rotate(360deg); } }
-@media (prefers-reduced-motion: reduce) { .find-spinner { animation-duration: 2.4s; } }
-.find-group { display: flex; flex-direction: column; gap: var(--space-2); padding-top: var(--space-2); }
-.find-platform { font-weight: 650; }
-.find-url { font-size: var(--text-sm); color: var(--color-accent); overflow-wrap: anywhere; }
-
 /* Video tab: coming-soon card */
 .video-soon {
   display: flex; flex-direction: column; align-items: center; text-align: center;
@@ -1035,3 +1050,38 @@ summary:focus-visible,
 .video-soon-icon { color: var(--color-accent); }
 .video-soon-title { font-size: var(--text-lg); font-weight: 600; margin: 0; }
 .video-soon-body { font-size: var(--text-sm); color: var(--color-muted); margin: 0; max-width: 42ch; }
+
+/* /privacy page */
+.privacy-page { display: flex; flex-direction: column; gap: var(--space-6); padding-bottom: var(--space-8); }
+.privacy-section { display: flex; flex-direction: column; gap: var(--space-3); }
+.privacy-section p, .privacy-section li { font-size: var(--text-base); line-height: 1.6; color: var(--color-muted); }
+.privacy-section a { color: var(--color-accent); overflow-wrap: anywhere; }
+.privacy-note-box { padding: var(--space-3) var(--space-4); border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); }
+.flow-steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-3); counter-reset: flow; }
+.flow-steps li { position: relative; counter-increment: flow; padding: var(--space-3) var(--space-4) var(--space-3) 52px; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); color: var(--color-text); }
+.flow-steps li::before { content: counter(flow); position: absolute; left: var(--space-3); top: var(--space-3); width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-size: var(--text-sm); font-weight: 700; background: var(--color-accent); color: var(--color-on-accent); }
+.flow-steps li:not(:last-child)::after { content: "\2193"; position: absolute; left: 22px; bottom: calc(-1 * var(--space-3) - 2px); transform: translateY(50%); font-size: var(--text-sm); color: var(--color-accent); background: var(--color-bg); line-height: 1; }
+.privacy-table-wrap { overflow-x: auto; border: 1px solid var(--color-border); border-radius: var(--radius-md); }
+.privacy-table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); }
+.privacy-table th, .privacy-table td { text-align: left; vertical-align: top; padding: var(--space-3); border-bottom: 1px solid var(--color-border); line-height: 1.5; }
+.privacy-table th { color: var(--color-text); font-weight: 600; background: var(--color-surface); }
+.privacy-table tbody tr:last-child td { border-bottom: 0; }
+.privacy-table td { color: var(--color-muted); min-width: 140px; }
+.privacy-nots { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-2); }
+.privacy-nots li::before { content: "\2717"; margin-right: var(--space-2); color: var(--color-accent); font-weight: 700; }
+.privacy-table td:last-child { min-width: 200px; }
+
+/* Case data shared by the letter, the evidence PDF and the WhatsApp message */
+#case-fields { display: flex; flex-direction: column; gap: var(--space-3); }
+.docs-data { border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-3) var(--space-4); }
+.docs-data summary { cursor: pointer; font-weight: 600; font-size: var(--text-sm); color: var(--color-text); }
+.docs-data[open] summary { margin-bottom: var(--space-3); }
+.docs-data .sl-field + .sl-field { margin-top: var(--space-3); }
+.docs-data-note { margin: 0 0 var(--space-3); font-size: var(--text-sm); line-height: 1.5; color: var(--color-muted); }
+#state-host-result #case-fields { margin-bottom: var(--space-4); }
+
+/* Phones: the upload form comes first; headline and reassurance follow it */
+@media (max-width: 767px) {
+  #upload-screen { grid-template-areas: "panel" "intro" "trust" "foot"; }
+  .panel { width: 100%; }
+}

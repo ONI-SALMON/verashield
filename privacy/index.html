@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacidad | VeraShield</title>
+<meta name="robots" content="index,follow">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<a class="skip-link" href="#main" id="skip-link"></a>
+<!-- Same header markup as the app (index.html); the app has no shared layout component. -->
+<header class="site-header">
+  <div class="site-header-inner">
+    <a class="brand" href="/" aria-label="VeraShield">
+      <svg class="brand-mark" width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M12 2.5 4.5 5.5v5.8c0 4.5 3.1 8.2 7.5 10.2 4.4-2 7.5-5.7 7.5-10.2V5.5L12 2.5Z" fill="currentColor"/>
+        <path d="m8.8 12.2 2.3 2.3 4.2-4.6" stroke="#0B1220" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span class="wordmark">VeraShield</span>
+    </a>
+    <div class="lang-toggle" role="group" aria-label="Language">
+      <button type="button" class="lang-btn active" data-lang="es" lang="es" aria-pressed="true">Español</button>
+      <button type="button" class="lang-btn" data-lang="en" lang="en" aria-pressed="false">English</button>
+      <button type="button" class="lang-btn" data-lang="hi" lang="hi" aria-pressed="false">हिन्दी</button>
+    </div>
+  </div>
+</header>
+
+<main class="page" id="main">
+  <article class="privacy-page" id="privacy-page"></article>
+</main>
+<script type="module" src="/privacy/privacy.js"></script>
+</body>
+</html>

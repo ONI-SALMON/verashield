@@ -61,7 +61,7 @@
           <span class="upload-hint" id="upload-hint" data-i18n="uploadHint"></span>
         </label>
         <input type="file" id="file-input" accept="image/*" hidden>
-        <p class="upload-disclaimer" id="upload-disclaimer"><span id="upload-disclaimer-text"></span><button type="button" class="privacy-link" data-privacy-open></button></p>
+        <div id="privacy-panel-upload"></div>
       </div>
 
       <div class="input-block" id="video-input-block" hidden>
@@ -89,10 +89,73 @@
         <p class="video-soon-body" id="video-soon-body"></p>
       </div>
 
+      <div id="state-host-upload">
+       <div id="case-fields">
+        <div class="sl-field state-field" id="state-field" hidden>
+          <label for="state-select" id="state-label"></label>
+          <select id="state-select" aria-describedby="state-error" aria-required="true" required>
+            <option value="" data-sl="statePh"></option>
+            <option value="Aguascalientes">Aguascalientes</option>
+            <option value="Baja California">Baja California</option>
+            <option value="Baja California Sur">Baja California Sur</option>
+            <option value="Campeche">Campeche</option>
+            <option value="Chiapas">Chiapas</option>
+            <option value="Chihuahua">Chihuahua</option>
+            <option value="Ciudad de México">Ciudad de México</option>
+            <option value="Coahuila">Coahuila</option>
+            <option value="Colima">Colima</option>
+            <option value="Durango">Durango</option>
+            <option value="Estado de México">Estado de México</option>
+            <option value="Guanajuato">Guanajuato</option>
+            <option value="Guerrero">Guerrero</option>
+            <option value="Hidalgo">Hidalgo</option>
+            <option value="Jalisco">Jalisco</option>
+            <option value="Michoacán">Michoacán</option>
+            <option value="Morelos">Morelos</option>
+            <option value="Nayarit">Nayarit</option>
+            <option value="Nuevo León">Nuevo León</option>
+            <option value="Oaxaca">Oaxaca</option>
+            <option value="Puebla">Puebla</option>
+            <option value="Querétaro">Querétaro</option>
+            <option value="Quintana Roo">Quintana Roo</option>
+            <option value="San Luis Potosí">San Luis Potosí</option>
+            <option value="Sinaloa">Sinaloa</option>
+            <option value="Sonora">Sonora</option>
+            <option value="Tabasco">Tabasco</option>
+            <option value="Tamaulipas">Tamaulipas</option>
+            <option value="Tlaxcala">Tlaxcala</option>
+            <option value="Veracruz">Veracruz</option>
+            <option value="Yucatán">Yucatán</option>
+            <option value="Zacatecas">Zacatecas</option>
+          </select>
+          <p class="form-error" id="state-error" role="alert" hidden></p>
+        </div>
+        <details class="docs-data" id="docs-data">
+          <summary data-sl="docsSummary"></summary>
+          <p class="docs-data-note" data-sl="docsNote"></p>
+          <label class="sl-field"><span data-sl="student"></span>
+                <input type="text" id="docs-student" maxlength="100" data-sl-ph="studentPh"></label>
+          <label class="sl-field"><span data-sl="school"></span>
+                <input type="text" id="docs-school" maxlength="120" data-sl-ph="schoolPh"></label>
+          <label class="sl-field"><span data-sl="date"></span>
+                <input type="date" id="docs-date"></label>
+          <label class="sl-field" id="docs-level-field" data-level-field><span data-sl="level"></span>
+                <select id="docs-level">
+                  <option value="" data-sl="levelPh"></option>
+                  <option value="basica" data-sl="levelBasica"></option>
+                  <option value="mediaFederal" data-sl="levelMediaFederal"></option>
+                  <option value="local" data-sl="levelLocal"></option>
+                </select></label>
+        </details>
+       </div>
+      </div>
+
       <p class="step-label" id="step-analyze-label"><span class="step-num">2</span><span data-i18n="stepAnalyze"></span></p>
       <button type="button" id="analyze-btn" disabled></button>
       <p class="analyze-hint" id="analyze-hint" data-i18n="analyzeHint"></p>
       <p class="form-error" id="form-error" role="alert" hidden></p>
+
+      <section class="alt-route" id="alternative-route" aria-labelledby="alt-route-title" hidden></section>
 
       <div class="or-divider" role="separator"><span data-i18n="or"></span></div>
 
@@ -127,6 +190,12 @@
       <p class="score-explanation" id="score-explanation"></p>
       <p class="score-generator" id="score-generator" hidden></p>
 
+      <aside class="no-detection-note evidence-note" id="evidence-note" role="note" aria-labelledby="evidence-note-title">
+        <p class="evidence-title" id="evidence-note-title"></p>
+        <ul class="evidence-list" id="evidence-list"></ul>
+        <p class="evidence-warn" id="evidence-warn"></p>
+      </aside>
+
       <div class="no-detection-note" id="no-detection-note" hidden>
         <p id="no-detection-text"></p>
         <button type="button" id="no-detection-link" class="primary-btn"></button>
@@ -140,6 +209,7 @@
     </div>
 
     <div class="result-detail">
+      <div id="state-host-result"></div>
       <div class="country-selector-wrap" id="country-selector" hidden>
         <p class="field-label" id="country-label"></p>
         <div class="country-selector" role="group" aria-labelledby="country-label">
@@ -193,41 +263,12 @@
                 <small class="sl-counter" id="sl-counter">0 / 300</small></label>
               <label class="sl-field"><span data-sl="guardian"></span>
                 <input type="text" id="sl-guardian" maxlength="100" data-sl-ph="guardianPh"></label>
-              <label class="sl-field" id="sl-state-field"><span data-sl="state"></span>
-                <select id="sl-state">
-              <option value="" data-sl="statePh"></option>
-              <option value="Aguascalientes">Aguascalientes</option>
-              <option value="Baja California">Baja California</option>
-              <option value="Baja California Sur">Baja California Sur</option>
-              <option value="Campeche">Campeche</option>
-              <option value="Chiapas">Chiapas</option>
-              <option value="Chihuahua">Chihuahua</option>
-              <option value="Ciudad de México">Ciudad de México</option>
-              <option value="Coahuila">Coahuila</option>
-              <option value="Colima">Colima</option>
-              <option value="Durango">Durango</option>
-              <option value="Estado de México">Estado de México</option>
-              <option value="Guanajuato">Guanajuato</option>
-              <option value="Guerrero">Guerrero</option>
-              <option value="Hidalgo">Hidalgo</option>
-              <option value="Jalisco">Jalisco</option>
-              <option value="Michoacán">Michoacán</option>
-              <option value="Morelos">Morelos</option>
-              <option value="Nayarit">Nayarit</option>
-              <option value="Nuevo León">Nuevo León</option>
-              <option value="Oaxaca">Oaxaca</option>
-              <option value="Puebla">Puebla</option>
-              <option value="Querétaro">Querétaro</option>
-              <option value="Quintana Roo">Quintana Roo</option>
-              <option value="San Luis Potosí">San Luis Potosí</option>
-              <option value="Sinaloa">Sinaloa</option>
-              <option value="Sonora">Sonora</option>
-              <option value="Tabasco">Tabasco</option>
-              <option value="Tamaulipas">Tamaulipas</option>
-              <option value="Tlaxcala">Tlaxcala</option>
-              <option value="Veracruz">Veracruz</option>
-              <option value="Yucatán">Yucatán</option>
-              <option value="Zacatecas">Zacatecas</option>
+              <label class="sl-field" id="sl-level-field" data-level-field><span data-sl="level"></span>
+                <select id="sl-level">
+                  <option value="" data-sl="levelPh"></option>
+                  <option value="basica" data-sl="levelBasica"></option>
+                  <option value="mediaFederal" data-sl="levelMediaFederal"></option>
+                  <option value="local" data-sl="levelLocal"></option>
                 </select></label>
               <p class="form-error" id="sl-error" role="alert" hidden></p>
               <div class="sl-actions">
@@ -249,7 +290,18 @@
     <div id="privacy-modal-body"></div>
   </div>
 </div>
+
+<!-- Blocking content guard: asked before any file is sent to an external API. No close button, no Escape, no click-outside. -->
+<div class="privacy-modal" id="content-guard-modal" hidden>
+  <div class="privacy-modal-card" role="alertdialog" aria-modal="true" aria-labelledby="content-guard-question">
+    <h2 id="content-guard-question"></h2>
+    <div class="content-guard-actions">
+      <button type="button" class="secondary-btn" id="content-guard-no"></button>
+      <button type="button" class="primary-btn" id="content-guard-yes"></button>
+    </div>
+  </div>
+</div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" integrity="sha384-JcnsjUPPylna1s1fvi1u12X5qjY5OL56iySh75FdtrwhO/SWXgMjoVqcKyIIWOLk" crossorigin="anonymous"></script>
-<script src="app.js"></script>
+<script type="module" src="app.js"></script>
 </body>
 </html>

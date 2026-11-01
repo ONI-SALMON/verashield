@@ -1,3 +1,10 @@
+import {
+  CNDH_NOTE_TEXT, LEGAL_FRAMEWORK_TITLE, LEY_OLIMPIA, MX_CRISIS_LEGAL_NOTE,
+  buildMxLetterLegal, getLegalReference,
+} from './lib/legalReferences.js';
+import { SITE_DOMAIN } from './lib/siteConfig.js';
+import { AZURE_PRIVACY_URL, SIGHTENGINE_URL } from './lib/privacyServices.js';
+
 const MAX_FILE_SIZE_BYTES       = 10 * 1024 * 1024; // final cap, matches api/detect.js
 const COMPRESSION_MIN_BYTES     = 800 * 1024;        // below this, skip compression
 const MAX_UPLOAD_DIMENSION_PX   = 1920;              // cap longest side
@@ -181,7 +188,7 @@ const T = {
       me:    'Mamá/Papá, necesito tu ayuda. Encontré una imagen que parece ser yo, y una app llamada VeraShield la marcó como posiblemente generada con IA. No sé qué hacer. ¿Podemos hablar hoy?',
       other: 'Mamá/Papá, mi amigo/a necesita ayuda. Vi una imagen suya que puede haber sido creada por IA. ¿Podemos ayudarle?',
     },
-    legalNote: 'Esta situación puede estar protegida por la <a href="https://www.gob.mx/conavim/articulos/ley-olimpia" target="_blank" rel="noopener">Ley Olimpia</a>.',
+    legalNote: `Esta situación puede estar protegida por la <a href="${LEY_OLIMPIA.url}" target="_blank" rel="noopener">${LEY_OLIMPIA.nombre}</a>.`,
     takedownBtn: 'Solicitar eliminación de la imagen (NCMEC)',
     crisisIntro_mx: 'Esto no es tu culpa. En México existen leyes y organizaciones que pueden ayudarte a resolver esta situación. No estás solo/a.',
     crisisIntro_in: 'Esto no es tu culpa. En India existen leyes y organizaciones que pueden ayudarte a resolver esta situación. No estás solo/a.',
@@ -481,7 +488,7 @@ const PDF_STRINGS = {
       'Busca apoyo: habla con un adulto de confianza y contacta a una organización o autoridad de tu país.',
     ],
     disclaimer: 'Este reporte es una herramienta de apoyo generada automáticamente. No constituye evidencia legal por sí solo. Consulta a un adulto de confianza o autoridad.',
-    footer:     'verashield.help',
+    footer:     SITE_DOMAIN,
   },
   en: {
     btn:          'Download PDF report',
@@ -502,7 +509,7 @@ const PDF_STRINGS = {
       'Seek support: talk to a trusted adult and contact an organization or authority in your country.',
     ],
     disclaimer: 'This report is an automatically generated support tool. It does not constitute legal evidence on its own. Consult a trusted adult or authority.',
-    footer:     'verashield.help',
+    footer:     SITE_DOMAIN,
   },
   hi: {
     btn:          'PDF रिपोर्ट डाउनलोड करें',
@@ -523,9 +530,61 @@ const PDF_STRINGS = {
       'सहायता लें: किसी विश्वसनीय वयस्क से बात करें और अपने देश के किसी संगठन या अधिकारी से संपर्क करें।',
     ],
     disclaimer: 'यह रिपोर्ट स्वचालित रूप से बनाया गया एक सहायता उपकरण है। यह अपने आप में कानूनी सबूत नहीं है। किसी विश्वसनीय वयस्क या अधिकारी से सलाह लें।',
-    footer:     'verashield.help',
+    footer:     SITE_DOMAIN,
   },
 };
+
+// ─── Evidence preservation (UI callout + PDF section; text only, no inputs) ──
+// Art. 20 Sexies LGAMVLV: the authority safeguards the reported content, so the victim must
+// document it first and must not download or forward it (art. 202 CPF).
+const EVIDENCE_STRINGS = {
+  es: {
+    title: 'Antes de pedir que lo eliminen, guarda esta evidencia:',
+    items: [
+      'URL completa donde aparece el contenido',
+      'Captura de pantalla del perfil o cuenta que lo publicó',
+      'Fecha y hora en que lo viste por primera vez',
+      'Nombre de usuario o identificador visible',
+    ],
+    warn: 'No descargues ni reenvíes la imagen o video.',
+    warnBody: 'Eso puede tener consecuencias legales. La autoridad es quien debe resguardar el contenido.',
+  },
+  en: {
+    title: 'Before requesting removal, preserve this evidence:',
+    items: [
+      'Full URL where the content appears',
+      'Screenshot of the profile or account that posted it',
+      'Date and time you first saw it',
+      'Visible username or identifier',
+    ],
+    warn: 'Do not download or forward the image or video.',
+    warnBody: 'That may have legal consequences. The authority is responsible for preserving the content.',
+  },
+  hi: {
+    title: 'हटाने का अनुरोध करने से पहले यह सबूत सुरक्षित रखें:',
+    items: [
+      'वह पूरा URL जहाँ सामग्री दिखती है',
+      'उस प्रोफ़ाइल या अकाउंट का स्क्रीनशॉट जिसने इसे पोस्ट किया',
+      'वह तारीख और समय जब आपने इसे पहली बार देखा',
+      'दिखाई देने वाला यूज़रनेम या पहचान',
+    ],
+    warn: 'तस्वीर या वीडियो को डाउनलोड या फ़ॉरवर्ड न करें।',
+    warnBody: 'इसके कानूनी परिणाम हो सकते हैं। सामग्री को सुरक्षित रखना अधिकारियों की ज़िम्मेदारी है।',
+  },
+};
+
+function renderEvidenceNote() {
+  const s = EVIDENCE_STRINGS[currentLang];
+  document.getElementById('evidence-note-title').textContent = '📋 ' + s.title;
+  document.getElementById('evidence-list').replaceChildren(...s.items.map((text) => {
+    const li = document.createElement('li');
+    li.textContent = '✓ ' + text;
+    return li;
+  }));
+  const warn = document.createElement('strong');
+  warn.textContent = '⚠️ ' + s.warn;
+  document.getElementById('evidence-warn').replaceChildren(warn, document.createTextNode(' ' + s.warnBody));
+}
 
 // ─── Action resources: copy-only email templates ────────────────────────────
 // Text is only ever copied to the user's clipboard: nothing is sent or stored.
@@ -795,7 +854,7 @@ const CRISIS_RESOURCES = {
       },
       {
         name: "CNDH: Comisión Nacional de los Derechos Humanos",
-        description: "Denuncia violaciones a derechos humanos, incluyendo violencia digital",
+        description: "Denuncia violaciones a derechos humanos, incluyendo violencia digital. " + CNDH_NOTE_TEXT.es,
         contact: "800 715 2000",
         url: "https://www.cndh.org.mx/programas/contacto-1",
         type: "legal",
@@ -817,12 +876,7 @@ const CRISIS_RESOURCES = {
         type: "ngo",
       },
     ],
-    legalNote:
-      "En México, la Ley Olimpia penaliza la difusión no consentida de " +
-      "imágenes íntimas entre adultos. Para menores de edad, aplica la Ley " +
-      "General de los Derechos de Niñas, Niños y Adolescentes (LGDNNA) y " +
-      "el Código Penal Federal. Tienes derecho a denunciar aunque la imagen " +
-      "sea real y no un deepfake.",
+    legalNote: MX_CRISIS_LEGAL_NOTE,
   },
 };
 
@@ -894,6 +948,9 @@ function applyLanguage(lang) {
   if (selectedFile) uploadHint.textContent = ui.changeImage;
   updateAnalyzeHint();
   renderPrivacyUi();
+  renderContentGuard();
+  renderEvidenceNote();
+  if (!altRouteEl.hidden) renderAlternativeRoute(altRouteEl);
 
   // toggle active state on ALL lang buttons
   langBtns.forEach(btn => {
@@ -908,6 +965,7 @@ function applyLanguage(lang) {
     currentCountry = getDefaultCountry(lang, navigator.language);
     syncCountryButtons();
   }
+  renderStateField(); // after the country is known: the selector is Mexico-only
 
   // re-render result if visible
   if (currentResult) {
@@ -993,6 +1051,7 @@ function setPreview(file) {
 
 async function handleFile(file) {
   clearFormError();
+  hideAlternativeRoute();
   const t = T[currentLang];
   const myToken = ++handleFileToken;
 
@@ -1174,8 +1233,8 @@ function renderCrisisPathway() {
   // that doesn't mention AI or VeraShield
   whatsappDisclaimer.textContent = t.whatsappDisclaimer;
   whatsappBtn.textContent = t.whatsappBtn;
-  const waMessages = directCrisisActive ? t.whatsappMessageDirect : t.whatsappMessage;
-  whatsappBtn.href = `https://wa.me/?text=${encodeURIComponent(waMessages[victimMode])}`;
+  const waMessages = hasAnalysis() ? t.whatsappMessage : t.whatsappMessageDirect;
+  whatsappBtn.href = whatsappShareUrl(buildWhatsappMessage(waMessages[victimMode]));
 
   const crisisTitleEl = document.querySelector('.crisis-title');
   if (crisisTitleEl) crisisTitleEl.textContent = t.crisisTitle;
@@ -1185,7 +1244,6 @@ function renderCrisisPathway() {
     const li = document.createElement('li');
     li.textContent = text;
     crisisSteps.appendChild(li);
-    if (i === 0) crisisSteps.appendChild(buildFindLinksStep());
   });
 
   ngoCard.innerHTML = '';
@@ -1238,40 +1296,32 @@ document.querySelectorAll('.country-btn').forEach(btn => {
 });
 
 // ─── Privacy disclaimer + "how it works" modal ──────────────────────────────
-const SIGHTENGINE_URL = 'https://sightengine.com/policies/privacy';
-const GVISION_URL = 'https://cloud.google.com/vision/docs/data-usage';
 const PRIVACY_STRINGS = {
   es: {
-    disclaimer: 'Tu imagen se envía a un servicio externo de IA solo para el análisis. Ni VeraShield ni ese servicio la almacenan de forma permanente. ',
     link: '¿Cómo funciona?',
     close: 'Cerrar',
     title: 'Cómo funciona VeraShield',
     sections: [
       { h: 'VeraShield no almacena tu imagen', p: 'Cuando subes una imagen, la analizamos y la descartamos de inmediato. No creamos cuentas, no pedimos datos personales y no guardamos ningún archivo tuyo.' },
       { h: 'Detección de IA — Sightengine', p: 'Tu imagen se envía a Sightengine para determinar si fue generada o manipulada con IA. Sightengine la procesa bajo su propia política de privacidad y no la usa para entrenar modelos sin tu consentimiento explícito.', a: 'Ver política de Sightengine →', url: SIGHTENGINE_URL },
-      { h: "Búsqueda inversa — Google Cloud Vision (solo si usas esta función)", p: "Si presionas 'Buscar ahora', tu imagen se envía a Google Cloud Vision para detectar si aparece en páginas públicas. Google la procesa en memoria y no la guarda en disco ni la usa para entrenar modelos.", a: 'Ver política de Google Cloud Vision →', url: GVISION_URL },
     ],
   },
   en: {
-    disclaimer: 'Your image is sent to an external AI service for analysis only. Neither VeraShield nor that service stores it permanently. ',
     link: 'How does it work?',
     close: 'Close',
     title: 'How VeraShield Works',
     sections: [
       { h: 'VeraShield does not store your image', p: "When you upload an image, we analyze it and discard it immediately. We don't create accounts, we don't ask for personal data, and we don't keep any of your files." },
       { h: 'AI Detection — Sightengine', p: 'Your image is sent to Sightengine to determine whether it was AI-generated or manipulated. Sightengine processes it under their own privacy policy and does not use it to train models without your explicit consent.', a: "View Sightengine's policy →", url: SIGHTENGINE_URL },
-      { h: 'Reverse Search — Google Cloud Vision (only if you use this feature)', p: "If you press 'Search now', your image is sent to Google Cloud Vision to detect whether it appears on public pages. Google processes it in memory and does not save it to disk or use it to train models.", a: "View Google Cloud Vision's policy →", url: GVISION_URL },
     ],
   },
   hi: {
-    disclaimer: 'आपकी इमेज केवल विश्लेषण के लिए एक बाहरी AI सेवा को भेजी जाती है। न VeraShield और न वह सेवा इसे स्थायी रूप से संग्रहीत करती है। ',
     link: 'यह कैसे काम करता है?',
     close: 'बंद करें',
     title: 'VeraShield कैसे काम करता है',
     sections: [
       { h: 'VeraShield आपकी इमेज स्टोर नहीं करता', p: 'जब आप इमेज अपलोड करते हैं, हम उसका विश्लेषण करके तुरंत हटा देते हैं। हम कोई अकाउंट नहीं बनाते, कोई व्यक्तिगत डेटा नहीं मांगते और आपकी कोई फ़ाइल नहीं रखते।' },
       { h: 'AI डिटेक्शन — Sightengine', p: 'यह जांचने के लिए कि इमेज AI-generated या manipulated है या नहीं, आपकी इमेज Sightengine को भेजी जाती है। Sightengine इसे अपनी privacy policy के तहत process करता है और बिना आपकी सहमति के इसे model training के लिए उपयोग नहीं करता।', a: 'Sightengine की policy देखें →', url: SIGHTENGINE_URL },
-      { h: "Reverse Search — Google Cloud Vision (केवल तभी जब आप यह फ़ीचर उपयोग करें)", p: "अगर आप 'अभी खोजें' दबाते हैं, तो आपकी इमेज Google Cloud Vision को भेजी जाती है ताकि पता चल सके कि यह सार्वजनिक पेजों पर है या नहीं। Google इसे memory में process करता है और इसे disk पर save नहीं करता।", a: 'Google Cloud Vision की policy देखें →', url: GVISION_URL },
     ],
   },
 };
@@ -1318,11 +1368,88 @@ function closePrivacyModal() {
   if (privacyLastFocus && privacyLastFocus.focus) privacyLastFocus.focus();
 }
 
+// Zero-storage panel shown next to Analyze on the upload screen.
+// Replaces the old one-line disclaimers. Texts requested by SocialTIC.
+// VERIFICAR: the Hindi text has not been checked (URLs live in lib/privacyServices.js).
+const PRIVACY_PANEL_STRINGS = {
+  es: {
+    summary: '🔒 Tu imagen es privada',
+    title: '¿Qué pasa con tu imagen?',
+    memory: 'Se procesa en memoria. VeraShield no la guarda en ningún servidor.',
+    sent: 'Se envía temporalmente a servicios de IA para el análisis:',
+    services: [
+      { name: 'Sightengine (Kozelo SAS, París)', url: SIGHTENGINE_URL },
+      { name: 'Microsoft Azure AI Content Safety (solo si el servicio principal falla)', url: AZURE_PRIVACY_URL },
+    ],
+    after: 'Después del análisis, VeraShield no conserva ninguna copia.',
+    more: '¿Cómo funciona esto?',
+  },
+  en: {
+    summary: '🔒 Your image is private',
+    title: 'What happens to your image?',
+    memory: 'Processed in memory. VeraShield does not store it on any server.',
+    sent: 'Temporarily sent to AI services for analysis:',
+    services: [
+      { name: 'Sightengine (Kozelo SAS, Paris)', url: SIGHTENGINE_URL },
+      { name: 'Microsoft Azure AI Content Safety (only if the main service fails)', url: AZURE_PRIVACY_URL },
+    ],
+    after: 'After analysis, VeraShield keeps no copy.',
+    more: 'How does this work?',
+  },
+  hi: {
+    summary: '🔒 आपकी इमेज निजी है',
+    title: 'आपकी इमेज का क्या होता है?',
+    memory: 'इसे मेमोरी में प्रोसेस किया जाता है। VeraShield इसे किसी भी सर्वर पर सेव नहीं करता।',
+    sent: 'विश्लेषण के लिए इसे अस्थायी रूप से AI सेवाओं को भेजा जाता है:',
+    services: [
+      { name: 'Sightengine (Kozelo SAS, पेरिस)', url: SIGHTENGINE_URL },
+      { name: 'Microsoft Azure AI Content Safety (केवल तब जब मुख्य सेवा विफल हो)', url: AZURE_PRIVACY_URL },
+    ],
+    after: 'विश्लेषण के बाद VeraShield इसकी कोई प्रति नहीं रखता।',
+    more: 'यह कैसे काम करता है?',
+  },
+};
+
+function buildPrivacyPanel(open) {
+  const s = PRIVACY_PANEL_STRINGS[currentLang];
+  const el = (tag, text) => { const n = document.createElement(tag); if (text) n.textContent = text; return n; };
+  const link = (href, text) => {
+    const a = el('a', text);
+    a.href = href;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    return a;
+  };
+
+  const details = el('details');
+  details.className = 'privacy-panel';
+  details.open = open;
+  details.appendChild(el('summary', s.summary));
+
+  const services = el('ul');
+  s.services.forEach(({ name, url }) => {
+    const li = el('li', name + ' → ');
+    li.appendChild(link(url, url.replace(/^https:\/\//, '')));
+    services.appendChild(li);
+  });
+  const sent = el('li', s.sent);
+  sent.appendChild(services);
+
+  const list = el('ul');
+  list.append(el('li', s.memory), sent, el('li', s.after));
+
+  const more = el('p');
+  more.appendChild(link('/privacy?lang=' + currentLang, s.more + ' →'));
+  const title = el('p', s.title);
+  title.className = 'privacy-panel-title';
+  details.append(title, list, more);
+  return details;
+}
+
 function renderPrivacyUi() {
-  const s = PRIVACY_STRINGS[currentLang];
-  const text = document.getElementById('upload-disclaimer-text');
-  if (text) text.textContent = s.disclaimer;
-  document.querySelectorAll('.upload-disclaimer .privacy-link').forEach(b => { b.textContent = s.link; });
+  const host = document.getElementById('privacy-panel-upload');
+  const prev = host.querySelector('details');
+  host.replaceChildren(buildPrivacyPanel(prev ? prev.open : true)); // open by default, keeps the user's choice
   if (!privacyModal.hidden) renderPrivacyModal();
 }
 
@@ -1335,194 +1462,224 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && !privacyModal.hidden) closePrivacyModal();
 });
 
-// ─── Find where the image was shared (Google Vision web detection) ──────────
-const FIND_STRINGS = {
+// ─── Content guard ───────────────────────────────────────────────────────────
+// Blocking question asked BEFORE any file leaves the browser (Sightengine, Azure).
+// Art. 202 CPF (MX) punishes "transmitting" sexual material involving minors, so sending it to
+// a third-party API is itself the offence. Nothing is logged externally; only console.warn.
+const CONTENT_GUARD_STRINGS = {
   es: {
-    step: 'Busca dónde se compartió: identifica en qué plataformas apareció tu imagen.',
-    btn: 'Buscar ahora',
-    needAnalysis: 'Para usar esta función, analiza primero tu imagen.',
-    privacy: 'Al buscar, tu imagen se envía a Google Vision para compararla con sitios públicos. No la guardamos.',
-    results: 'Si la imagen aparece en otros sitios, solo te mostramos los links que Google Vision devuelve. VeraShield no guarda esos resultados ni entra a esos sitios; tú decides si los visitas o los reportas.',
-    searching: 'Buscando…',
-    none: 'No encontramos esta imagen en sitios públicos indexados. Esto no significa que no haya sido compartida en mensajes privados.',
-    error: 'No se pudo completar la búsqueda. Inténtalo de nuevo en unos minutos.',
-    report: (p) => `Reportar en ${p}`,
-    saveNote: 'Guarda capturas de pantalla de estos links como evidencia antes de reportar.',
-    letterTitle: 'Plataformas donde se encontró la imagen:',
+    question: 'Antes de continuar: ¿La imagen o video que vas a analizar muestra desnudez o contenido sexual de alguien menor de 18 años?',
+    no: 'No, continuar',
+    yes: 'Sí, detener el análisis',
   },
   en: {
-    step: 'Find where it was shared: identify which platforms your image appeared on.',
-    btn: 'Search now',
-    needAnalysis: 'To use this feature, analyze your image first.',
-    privacy: 'When you search, your image is sent to Google Vision to compare it with public sites. We do not store it.',
-    results: 'If the image appears on other sites, we only show you the links Google Vision returns. VeraShield does not store those results or visit those sites; you decide whether to visit or report them.',
-    searching: 'Searching…',
-    none: "We didn't find this image on public indexed sites. This doesn't mean it hasn't been shared in private messages.",
-    error: 'The search could not be completed. Please try again in a few minutes.',
-    report: (p) => `Report on ${p}`,
-    saveNote: 'Save screenshots of these links as evidence before reporting.',
-    letterTitle: 'Platforms where the image was found:',
+    question: "Before continuing: Does the image or video you're uploading contain nudity or sexual content of someone under 18?",
+    no: 'No, continue',
+    yes: 'Yes, stop the analysis',
   },
   hi: {
-    step: 'पता करें कहाँ शेयर हुआ: किन प्लेटफ़ॉर्म पर आपकी इमेज दिखी।',
-    btn: 'अभी खोजें',
-    needAnalysis: 'यह फ़ीचर उपयोग करने के लिए पहले अपनी इमेज का विश्लेषण करें।',
-    privacy: 'खोज करने पर आपकी इमेज सार्वजनिक साइटों से मिलान के लिए Google Vision को भेजी जाती है। हम इसे सेव नहीं करते।',
-    results: 'अगर इमेज दूसरी साइटों पर मिलती है, तो हम सिर्फ़ वही लिंक दिखाते हैं जो Google Vision लौटाता है। VeraShield न इन नतीजों को सेव करता है और न इन साइटों पर जाता है; इन्हें खोलना या रिपोर्ट करना आप तय करें।',
-    searching: 'खोज रहे हैं…',
-    none: 'हमें यह इमेज सार्वजनिक रूप से इंडेक्स की गई साइटों पर नहीं मिली। इसका मतलब यह नहीं कि यह निजी संदेशों में शेयर नहीं हुई।',
-    error: 'खोज पूरी नहीं हो सकी। कुछ मिनट बाद दोबारा कोशिश करें।',
-    report: (p) => `${p} पर रिपोर्ट करें`,
-    saveNote: 'रिपोर्ट करने से पहले इन लिंक्स के स्क्रीनशॉट सेव कर लें।',
-    letterTitle: 'जिन प्लेटफ़ॉर्म पर इमेज मिली:',
+    question: 'जारी रखने से पहले: क्या जिस फ़ोटो या वीडियो का आप विश्लेषण करने जा रहे हैं, उसमें 18 वर्ष से कम उम्र के किसी व्यक्ति की नग्नता या यौन सामग्री है?',
+    no: 'नहीं, जारी रखें',
+    yes: 'हाँ, विश्लेषण रोकें',
   },
 };
 
-const PLATFORM_REPORT_URLS = {
-  'Instagram': 'https://help.instagram.com/contact/1141853830778488',
-  'TikTok': 'https://www.tiktok.com/legal/report/privacy',
-  'Twitter/X': 'https://help.twitter.com/forms/private_information',
-  'Facebook': 'https://www.facebook.com/help/contact/1361707013596961',
+const contentGuardModal    = document.getElementById('content-guard-modal');
+const contentGuardQuestion = document.getElementById('content-guard-question');
+const contentGuardNo       = document.getElementById('content-guard-no');
+const contentGuardYes      = document.getElementById('content-guard-yes');
+let contentGuardResolve   = null;  // pending answer while the modal is open
+let contentGuardConfirmed = null;  // File (or 'url:…' key) the user already answered "No" for
+let contentGuardLastFocus = null;
+
+function renderContentGuard() {
+  const s = CONTENT_GUARD_STRINGS[currentLang];
+  contentGuardQuestion.textContent = s.question;
+  contentGuardNo.textContent = s.no;
+  contentGuardYes.textContent = s.yes;
+}
+
+function askContentGuard() {
+  if (contentGuardResolve) return Promise.resolve(false);
+  contentGuardLastFocus = document.activeElement;
+  renderContentGuard();
+  contentGuardModal.hidden = false;
+  contentGuardYes.focus(); // safe default: stopping is the focused action
+  return new Promise(resolve => { contentGuardResolve = resolve; });
+}
+
+function answerContentGuard(continueAnalysis) {
+  const resolve = contentGuardResolve;
+  if (!resolve) return;
+  contentGuardResolve = null;
+  contentGuardModal.hidden = true;
+  if (contentGuardLastFocus && contentGuardLastFocus.focus) contentGuardLastFocus.focus();
+  resolve(continueAnalysis);
+}
+
+contentGuardNo.addEventListener('click', () => answerContentGuard(true));
+contentGuardYes.addEventListener('click', () => answerContentGuard(false));
+// Blocking: Escape never dismisses it, and Tab stays inside the dialog.
+document.addEventListener('keydown', (e) => {
+  if (contentGuardModal.hidden) return;
+  if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); return; }
+  if (e.key !== 'Tab') return;
+  const [first, last] = [contentGuardNo, contentGuardYes];
+  if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  else if (document.activeElement !== first && document.activeElement !== last) { e.preventDefault(); last.focus(); }
+}, true);
+
+function blockAnalysis() {
+  console.warn('[VeraShield] Análisis bloqueado: el usuario indicó posible desnudez/contenido sexual de un menor de 18 años. No se envió ningún archivo a APIs externas.');
+  resetToUpload();
+  showAlternativeRoute();
+}
+
+// ─── AlternativeRoute ────────────────────────────────────────────────────────
+// Shown instead of an error when the analysis is blocked (content guard). Self-contained:
+// renderAlternativeRoute(container) can be reused from any other part of the app.
+const ALT_ROUTE_STRINGS = {
+  es: {
+    title: 'Esta imagen no puede analizarse aquí.',
+    lead: 'Si eres la persona afectada o conoces a alguien en esta situación:',
+    tidName: 'Take It Down (NCMEC)',
+    tidDomain: 'takeitdown.ncmec.org',
+    tidBody: 'Servicio gratuito para que la imagen no se difunda más. La imagen nunca sale de tu dispositivo.',
+    tidBtn: 'Ir a Take It Down →',
+    waHeading: 'Avisar a un adulto de confianza',
+    letterHeading: 'Carta para tu escuela',
+    letterBody: 'Puedes generar la carta aunque no hayas podido analizar la imagen.',
+    letterBtn: 'Generar carta →',
+  },
+  en: {
+    title: 'This image cannot be analyzed here.',
+    lead: 'If you are the person affected or you know someone in this situation:',
+    tidName: 'Take It Down (NCMEC)',
+    tidDomain: 'takeitdown.ncmec.org',
+    tidBody: 'A free service to stop the image from spreading further. The image never leaves your device.',
+    tidBtn: 'Go to Take It Down →',
+    waHeading: 'Tell a trusted adult',
+    letterHeading: 'Letter for your school',
+    letterBody: 'You can generate the letter even if the image could not be analyzed.',
+    letterBtn: 'Generate letter →',
+  },
+  hi: {
+    title: 'इस तस्वीर का विश्लेषण यहाँ नहीं किया जा सकता।',
+    lead: 'अगर आप प्रभावित व्यक्ति हैं या ऐसी स्थिति में किसी को जानते हैं:',
+    tidName: 'Take It Down (NCMEC)',
+    tidDomain: 'takeitdown.ncmec.org',
+    tidBody: 'तस्वीर को और फैलने से रोकने के लिए एक निःशुल्क सेवा। तस्वीर कभी आपके डिवाइस से बाहर नहीं जाती।',
+    tidBtn: 'Take It Down पर जाएँ →',
+    waHeading: 'किसी विश्वसनीय वयस्क को बताएँ',
+    letterHeading: 'आपके स्कूल के लिए पत्र',
+    letterBody: 'तस्वीर का विश्लेषण न हो पाने पर भी आप पत्र बना सकते हैं।',
+    letterBtn: 'पत्र बनाएँ →',
+  },
 };
 
-let analyzedImage = null;                       // the image behind currentResult (photo mode only)
-let findState = { status: 'idle', data: null }; // idle | loading | done | error
+const altRouteEl = document.getElementById('alternative-route');
 
-function canSearchLinks() {
-  return !directCrisisActive && !!analyzedImage && !!currentResult && currentResult.bucket !== 'low';
+// First line of every WhatsApp message (agreed with SocialTIC, 28 Oct 2026). The site comes from
+// SITE_DOMAIN. If the whole URL would exceed WhatsApp's ~2,000 character limit, the short form is used.
+const WHATSAPP_URL_LIMIT = 2000;
+const WHATSAPP_INTRO = {
+  withAnalysis: {
+    es: 'Este mensaje fue generado con VeraShield ({site}), herramienta de detección de imágenes manipuladas con IA.',
+    en: 'This message was generated with VeraShield ({site}), a tool for detecting AI-manipulated images.',
+    hi: 'यह संदेश VeraShield ({site}) से बनाया गया है, जो AI से बदली गई इमेज पहचानने वाला टूल है।',
+  },
+  plain: {
+    es: 'Este mensaje fue generado con VeraShield ({site}).',
+    en: 'This message was generated with VeraShield ({site}).',
+    hi: 'यह संदेश VeraShield ({site}) से बनाया गया है।',
+  },
+  short: {
+    es: 'Generado con VeraShield ({site}).',
+    en: 'Generated with VeraShield ({site}).',
+    hi: 'VeraShield ({site}) से बनाया गया।',
+  },
+};
+
+// With analysis = there is a score in the shared case data and this is not the direct-crisis path.
+function hasAnalysis() {
+  return caseData.score_analisis !== null && !directCrisisActive;
 }
 
-function fileToBase64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result).split(',')[1] || '');
-    reader.onerror = () => reject(reader.error);
-    reader.readAsDataURL(file);
-  });
+function buildWhatsappMessage(body) {
+  const intro = (key) => WHATSAPP_INTRO[key][currentLang].replace('{site}', SITE_DOMAIN);
+  let text = intro(hasAnalysis() ? 'withAnalysis' : 'plain') + '\n\n' + body;
+  if (whatsappShareUrl(text).length > WHATSAPP_URL_LIMIT) text = intro('short') + '\n\n' + body;
+  return text;
 }
 
-async function runFindLinks() {
-  if (!canSearchLinks() || findState.status === 'loading') return;
-  findState = { status: 'loading', data: null };
-  renderCrisisPathway();
-  try {
-    const image = await fileToBase64(analyzedImage);
-    if (image.length > 4_200_000) throw new Error('image too large for request'); // Vercel body limit ~4.5MB
-    const response = await fetch('/api/find-links', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ image }),
-    });
-    if (!response.ok) throw new Error('HTTP ' + response.status);
-    const data = await response.json();
-    findState = { status: 'done', data: { found: !!data.found, matchingUrls: data.matchingUrls || [] } };
-  } catch (err) {
-    console.warn('[find-links]', err);
-    findState = { status: 'error', data: null };
-  }
-  renderCrisisPathway();
+function whatsappShareUrl(text) {
+  return `https://wa.me/?text=${encodeURIComponent(text)}`;
 }
 
-function foundLinks() {
-  return findState.status === 'done' && findState.data.found ? findState.data.matchingUrls : [];
-}
-
-function buildFindLinksStep() {
-  const f = FIND_STRINGS[currentLang];
-  const li = document.createElement('li');
-  li.className = 'find-step';
-  const body = document.createElement('div');
-  body.className = 'find-body';
-  li.appendChild(body);
-
-  const text = document.createElement('p');
-  text.textContent = f.step;
-  body.appendChild(text);
-
-  const addNote = (msg, cls = 'find-note') => {
-    const p = document.createElement('p');
-    p.className = cls;
-    p.textContent = msg;
-    body.appendChild(p);
-    return p;
+function renderAlternativeRoute(container) {
+  const s = ALT_ROUTE_STRINGS[currentLang];
+  const t = T[currentLang];
+  const make = (tag, className, text) => {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  };
+  const item = (heading, ...children) => {
+    const box = make('div', 'alt-route-item');
+    box.append(make('h3', '', heading), ...children);
+    return box;
   };
 
-  if (!canSearchLinks()) {
-    addNote(f.needAnalysis);
-    return li;
-  }
+  const title = make('h2', 'crisis-title', s.title);
+  title.id = 'alt-route-title';
+  title.tabIndex = -1;
 
-  if (findState.status === 'idle' || findState.status === 'error') {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'secondary-btn find-btn';
-    btn.textContent = f.btn;
-    btn.addEventListener('click', runFindLinks);
-    body.appendChild(btn);
-    const privacyP = addNote(f.privacy);
-    privacyP.append(' ');
-    const privacyBtn = document.createElement('button');
-    privacyBtn.type = 'button';
-    privacyBtn.className = 'privacy-link';
-    privacyBtn.dataset.privacyOpen = '';
-    privacyBtn.textContent = PRIVACY_STRINGS[currentLang].link;
-    privacyP.appendChild(privacyBtn);
-    addNote(f.results);
-    if (findState.status === 'error') addNote(f.error, 'find-note find-error');
-    return li;
-  }
+  // Take It Down: external service, the image never leaves the device
+  const tidLink = make('a', 'takedown-btn', s.tidBtn);
+  tidLink.href = 'https://takeitdown.ncmec.org';
+  tidLink.target = '_blank';
+  tidLink.rel = 'noopener';
 
-  if (findState.status === 'loading') {
-    const p = addNote(f.searching, 'find-note find-loading');
-    p.setAttribute('role', 'status');
-    const spin = document.createElement('span');
-    spin.className = 'find-spinner';
-    spin.setAttribute('aria-hidden', 'true');
-    p.prepend(spin);
-    return li;
-  }
+  // WhatsApp: same share link and message as the crisis path without analysis
+  const waLink = make('a', 'share-btn whatsapp-btn', t.whatsappBtn);
+  waLink.href = whatsappShareUrl(buildWhatsappMessage(t.whatsappMessageDirect[victimMode]));
+  waLink.target = '_blank';
+  waLink.rel = 'noopener';
 
-  const { found, matchingUrls } = findState.data;
-  if (!found || !matchingUrls.length) {
-    addNote(f.none);
-    return li;
-  }
+  // School letter: jumps straight to the letter form, skipping the analysis
+  const letterBtn = make('button', 'secondary-btn', s.letterBtn);
+  letterBtn.type = 'button';
+  letterBtn.addEventListener('click', openSchoolLetterFromUpload);
 
-  const groups = new Map();
-  matchingUrls.forEach(({ url, platform }) => {
-    if (!groups.has(platform)) groups.set(platform, []);
-    groups.get(platform).push(url);
-  });
-  groups.forEach((urls, platform) => {
-    const group = document.createElement('div');
-    group.className = 'find-group';
-    const name = document.createElement('p');
-    name.className = 'find-platform';
-    name.textContent = platform;
-    group.appendChild(name);
-    urls.forEach((url) => {
-      const a = document.createElement('a');
-      a.className = 'find-url';
-      a.href = url;
-      a.target = '_blank';
-      a.rel = 'noopener';
-      a.textContent = url;
-      group.appendChild(a);
-    });
-    const reportUrl = PLATFORM_REPORT_URLS[platform];
-    if (reportUrl) {
-      const r = document.createElement('a');
-      r.className = 'secondary-btn find-report';
-      r.href = reportUrl;
-      r.target = '_blank';
-      r.rel = 'noopener';
-      r.textContent = f.report(platform);
-      group.appendChild(r);
-    }
-    body.appendChild(group);
-  });
-  addNote(f.saveNote);
-  return li;
+  container.replaceChildren(
+    title,
+    make('p', 'alt-path-lead', s.lead),
+    item('🔗 ' + s.tidName, make('p', 'alt-path-lead', s.tidDomain), make('p', 'alt-path-lead', s.tidBody), tidLink),
+    item('📱 ' + s.waHeading, make('p', 'alt-path-lead', t.whatsappDisclaimer), waLink),
+    item('📄 ' + s.letterHeading, make('p', 'alt-path-lead', s.letterBody), letterBtn),
+  );
+}
+
+function showAlternativeRoute() {
+  renderAlternativeRoute(altRouteEl);
+  altRouteEl.hidden = false;
+  altRouteEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.getElementById('alt-route-title').focus({ preventScroll: true });
+}
+
+function hideAlternativeRoute() {
+  altRouteEl.hidden = true;
+  altRouteEl.replaceChildren();
+}
+
+// key: the File (photo) or 'url:…' string (video URL) about to be sent. Resolves true only when it is safe to send.
+async function ensureContentGuard(key) {
+  if (key && key === contentGuardConfirmed) return true;
+  if (await askContentGuard()) { contentGuardConfirmed = key; return true; }
+  blockAnalysis();
+  return false;
 }
 
 // Technical-analysis block shared by the evidence PDF and the school letter.
@@ -1530,7 +1687,7 @@ function buildFindLinksStep() {
 const TECH_STRINGS = {
   es: {
     title: 'Análisis técnico adjunto:',
-    tool: 'Herramienta utilizada: VeraShield (verashield.help)',
+    tool: `Herramienta utilizada: VeraShield (${SITE_DOMAIN})`,
     api: (a) => `API de detección: ${a}`,
     score: (n) => `Puntuación de detección: ${n}% de probabilidad de contenido generado con IA`,
     when: (d) => `Fecha y hora del análisis: ${d}`,
@@ -1538,7 +1695,7 @@ const TECH_STRINGS = {
   },
   en: {
     title: 'Technical analysis included:',
-    tool: 'Tool used: VeraShield (verashield.help)',
+    tool: `Tool used: VeraShield (${SITE_DOMAIN})`,
     api: (a) => `Detection API: ${a}`,
     score: (n) => `Detection score: ${n}% probability of AI-generated content`,
     when: (d) => `Date and time of analysis: ${d}`,
@@ -1546,7 +1703,7 @@ const TECH_STRINGS = {
   },
   hi: {
     title: 'तकनीकी विश्लेषण:',
-    tool: 'उपयोग किया गया टूल: VeraShield (verashield.help)',
+    tool: `उपयोग किया गया टूल: VeraShield (${SITE_DOMAIN})`,
     api: (a) => `डिटेक्शन API: ${a}`,
     score: (n) => `स्कोर: ${n}% संभावना कि यह AI-generated है`,
     when: (d) => `विश्लेषण की तारीख और समय: ${d}`,
@@ -1556,20 +1713,14 @@ const TECH_STRINGS = {
 const DETECTION_API_NAMES = { sightengine: 'Sightengine', azure: 'Azure AI Content Safety', mock: 'Sightengine' };
 
 function writeTechnicalBlock(w, lang, locale) {
-  if (!currentResult) return;
+  if (caseData.score_analisis === null) return;
   const tc = TECH_STRINGS[lang];
-  const api = DETECTION_API_NAMES[currentResult.source] || currentResult.source || 'N/A';
+  const api = caseData.fuente_analisis;
   const when = (analyzedAt || new Date()).toLocaleString(locale, { dateStyle: 'long', timeStyle: 'short' });
   w.rule(PDF_COLORS.muted, 0.2);
   w.text(tc.title, { size: 11, bold: true, gap: 2 });
-  [tc.tool, tc.api(api), tc.score(Math.round(currentResult.score_percent)), tc.when(when)]
+  [tc.tool, tc.api(api), tc.score(caseData.score_analisis), tc.when(when)]
     .forEach((line) => w.text('- ' + line, { size: 10.5, gap: 1.5 }));
-  const links = foundLinks();
-  if (links.length) {
-    w.space(2);
-    w.text(FIND_STRINGS[lang].letterTitle, { size: 10.5, bold: true, gap: 1.5 });
-    links.forEach(({ platform, url }) => w.text(`- ${platform}: ${url}`, { size: 10, gap: 1.5 }));
-  }
   w.text(tc.note, { size: 9.5, color: PDF_COLORS.muted, gap: 4 });
 }
 
@@ -1617,27 +1768,29 @@ function createPdfWriter(doc, lang) {
   let y = PDF_MARGIN_MM;
   doc.setLineHeightFactor(PDF_LINE_H);
 
-  function layout(str, size, bold, width) {
+  const fontStyle = (bold, italic) => (bold ? (italic ? 'bolditalic' : 'bold') : italic ? 'italic' : 'normal');
+
+  function layout(str, size, bold, width, italic = false) {
     const lineH = size * PDF_PT_TO_MM * PDF_LINE_H;
     if (useCanvas) {
       pdfMeasureCtx = pdfMeasureCtx || document.createElement('canvas').getContext('2d');
-      pdfMeasureCtx.font = pdfCanvasFont(size, bold);
+      pdfMeasureCtx.font = (italic ? 'italic ' : '') + pdfCanvasFont(size, bold);
       const lines = pdfWrapCanvas(pdfMeasureCtx, str, width * PDF_CANVAS_PX_PER_MM);
       return { lines, h: lines.length * lineH, lineH };
     }
-    doc.setFont('helvetica', bold ? 'bold' : 'normal');
+    doc.setFont('helvetica', fontStyle(bold, italic));
     doc.setFontSize(size);
     const lines = doc.splitTextToSize(str, width);
     return { lines, h: lines.length * lineH, lineH };
   }
 
-  function draw({ lines, h, lineH }, str, x, top, { size, bold, color, align }, width) {
+  function draw({ lines, h, lineH }, str, x, top, { size, bold, color, align, italic }, width) {
     if (useCanvas) {
       const canvas = document.createElement('canvas');
       canvas.width  = Math.ceil(width * PDF_CANVAS_PX_PER_MM);
       canvas.height = Math.ceil(h * PDF_CANVAS_PX_PER_MM);
       const ctx = canvas.getContext('2d');
-      ctx.font = pdfCanvasFont(size, bold);
+      ctx.font = (italic ? 'italic ' : '') + pdfCanvasFont(size, bold);
       ctx.fillStyle = `rgb(${color.join(',')})`;
       ctx.textBaseline = 'top';
       ctx.textAlign = align;
@@ -1645,7 +1798,7 @@ function createPdfWriter(doc, lang) {
       lines.forEach((l, i) => ctx.fillText(l, px, i * lineH * PDF_CANVAS_PX_PER_MM));
       doc.addImage(canvas.toDataURL('image/png'), 'PNG', x, top, width, h);
     } else {
-      doc.setFont('helvetica', bold ? 'bold' : 'normal');
+      doc.setFont('helvetica', fontStyle(bold, italic));
       doc.setFontSize(size);
       doc.setTextColor(...color);
       const tx = align === 'right' ? x + width : align === 'center' ? x + width / 2 : x;
@@ -1665,11 +1818,32 @@ function createPdfWriter(doc, lang) {
       doc.line(PDF_MARGIN_MM, y, PDF_PAGE_W_MM - PDF_MARGIN_MM, y);
       y += 3;
     },
-    text(str, { size = 11, bold = false, color = PDF_COLORS.ink, align = 'left', gap = 3 } = {}) {
-      const box = layout(str, size, bold, contentW);
+    text(str, { size = 11, bold = false, italic = false, color = PDF_COLORS.ink, align = 'left', gap = 3 } = {}) {
+      const box = layout(str, size, bold, contentW, italic);
       if (y + box.h > pageLimit) { doc.addPage(); y = PDF_MARGIN_MM; }
-      draw(box, str, PDF_MARGIN_MM, y, { size, bold, color, align }, contentW);
+      draw(box, str, PDF_MARGIN_MM, y, { size, bold, color, align, italic }, contentW);
       y += box.h + gap;
+    },
+    // Light-gray box with a colored left border; `blocks` are text() options plus `str`.
+    callout(blocks, { bar = PDF_COLORS.accent } = {}) {
+      const pad = 4;
+      const innerW = contentW - 2 * pad;
+      const boxes = blocks.map((b) => {
+        const opts = { size: 10.5, bold: false, italic: false, color: PDF_COLORS.ink, align: 'left', gap: 1.5, ...b };
+        return { opts, box: layout(opts.str, opts.size, opts.bold, innerW, opts.italic) };
+      });
+      const total = boxes.reduce((sum, { box, opts }) => sum + box.h + opts.gap, 0) + 2 * pad - boxes[boxes.length - 1].opts.gap;
+      if (y + total > pageLimit) { doc.addPage(); y = PDF_MARGIN_MM; }
+      doc.setFillColor(240, 241, 244);
+      doc.rect(PDF_MARGIN_MM, y, contentW, total, 'F');
+      doc.setFillColor(...bar);
+      doc.rect(PDF_MARGIN_MM, y, 1.2, total, 'F');
+      let top = y + pad;
+      boxes.forEach(({ opts, box }) => {
+        draw(box, opts.str, PDF_MARGIN_MM + pad, top, opts, innerW);
+        top += box.h + opts.gap;
+      });
+      y += total + 5;
     },
     // fixed position, no flow (used for the footer on every page)
     textAt(str, top, opts) {
@@ -1681,8 +1855,35 @@ function createPdfWriter(doc, lang) {
   };
 }
 
+const CASE_STRINGS = {
+  es: { title: 'Datos del caso', student: 'Alumno/a', school: 'Escuela', level: 'Nivel educativo', state: 'Estado', date: 'Fecha del incidente',
+        ph: { student: '[nombre del alumno/a]', school: '[nombre de la escuela]', level: '[nivel educativo]', state: '[estado]', date: '[fecha del incidente]' } },
+  en: { title: 'Case details', student: 'Student', school: 'School', level: 'School level', state: 'State', date: 'Date of the incident',
+        ph: { student: '[student name]', school: '[school name]', level: '[school level]', state: '[state]', date: '[date of the incident]' } },
+  hi: { title: 'मामले का विवरण', student: 'छात्र/छात्रा', school: 'विद्यालय', level: 'शिक्षा स्तर', state: 'राज्य', date: 'घटना की तारीख',
+        ph: { student: '[छात्र/छात्रा का नाम]', school: '[विद्यालय का नाम]', level: '[शिक्षा स्तर]', state: '[राज्य]', date: '[घटना की तारीख]' } },
+};
+const LEVEL_KEYS = { basica: 'levelBasica', mediaFederal: 'levelMediaFederal', local: 'levelLocal' };
+
+// Reads the shared case data; a missing value prints its placeholder and never blocks generation.
+function caseDataLines(lang) {
+  const c = CASE_STRINGS[lang];
+  const sl = SL[lang];
+  const lines = [
+    [c.student, caseData.nombre_victima || c.ph.student],
+    [c.school, caseData.nombre_escuela || c.ph.school],
+  ];
+  if (currentCountry === 'mx') {
+    lines.push([c.level, caseData.nivel_escolar ? sl[LEVEL_KEYS[caseData.nivel_escolar]] : c.ph.level]);
+    lines.push([c.state, caseData.estado || c.ph.state]);
+  }
+  lines.push([c.date, caseData.fecha_incidente ? isoToDate(caseData.fecha_incidente, sl.locale) : c.ph.date]);
+  return lines;
+}
+
 function generateEvidencePdf() {
   if (!currentResult || !window.jspdf?.jsPDF) return;
+  if (!requireState()) return;
   const lang = currentLang;
   const t    = T[lang];
   const p    = PDF_STRINGS[lang];
@@ -1699,6 +1900,12 @@ function generateEvidencePdf() {
   w.rule();
   w.space(4);
 
+  // 1b. Case data (shared state)
+  w.callout([
+    { str: CASE_STRINGS[lang].title, bold: true, size: 11.5, gap: 2.5 },
+    ...caseDataLines(lang).map(([label, value], i, all) => ({ str: `- ${label}: ${value}`, gap: i === all.length - 1 ? 0 : 1.5 })),
+  ], { bar: PDF_COLORS.accent });
+
   // 2. Result: manipulation probability + plain-language interpretation
   w.text(p.resultTitle, { size: 15, bold: true, gap: 3 });
   w.text(p.probability, { size: 10, color: PDF_COLORS.muted, gap: 1 });
@@ -1710,10 +1917,30 @@ function generateEvidencePdf() {
   w.text(p.meaningTitle, { size: 15, bold: true, gap: 3 });
   w.text(p.meaning[bucket], { size: 11, gap: 6 });
 
+  // 3b. Evidence preservation (own section, before the reporting steps).
+  // Helvetica has no check/warning glyphs, so the PDF uses plain "- " bullets.
+  const ev = EVIDENCE_STRINGS[lang];
+  w.callout([
+    { str: ev.title, bold: true, size: 11.5, gap: 2.5 },
+    ...ev.items.map((item) => ({ str: '- ' + item })),
+    { str: ev.warn, bold: true, color: PDF_COLORS.bucket.high, gap: 1 },
+    { str: ev.warnBody, gap: 0 },
+  ], { bar: PDF_COLORS.bucket.medium });
+
   // 4. Recommended steps
   w.text(p.stepsTitle, { size: 15, bold: true, gap: 3 });
   p.steps.forEach((step, i) => w.text(`${i + 1}. ${step}`, { size: 11, gap: 3 }));
   w.space(4);
+
+  // 4a. Legal framework for the selected state (Mexico only)
+  if (currentCountry === 'mx') {
+    const ref = getLegalReference(caseData.estado, lang);
+    w.callout([
+      { str: LEGAL_FRAMEWORK_TITLE[lang], bold: true, size: 11.5, gap: 2.5 },
+      { str: caseData.estado + ': ' + ref.estatuto, gap: ref.nota ? 1.5 : 0 },
+      ...(ref.nota ? [{ str: ref.nota, italic: true, size: 10, color: PDF_COLORS.muted, gap: 0 }] : []),
+    ], { bar: PDF_COLORS.accent });
+  }
 
   // 4b. Technical analysis (tool, API, score, timestamp, found links)
   writeTechnicalBlock(w, lang, p.locale);
@@ -1765,15 +1992,15 @@ function renderResultDetails() {
 }
 
 // ─── Show result ─────────────────────────────────────────────────────────────
-function showResult(data, image = null) {
+function showResult(data) {
   currentResult = data;
-  analyzedImage = image;
-  findState = { status: 'idle', data: null };
+  setAnalysis(data);
   analyzedAt = new Date();
   directCrisisActive = false;
 
   downloadPdfBtn.hidden = !window.jspdf?.jsPDF; // hide if the CDN script failed to load
 
+  mountCaseFields('result');
   uploadScreen.hidden = true;
   resultScreen.hidden = false;
   scoreDisplay.hidden = false;
@@ -1817,9 +2044,9 @@ function revealCrisisResources() {
 
 function showDirectCrisisPath() {
   currentResult = null;
-  analyzedImage = null;
-  findState = { status: 'idle', data: null };
+  setAnalysis(null);
   downloadPdfBtn.hidden = true;
+  mountCaseFields('result');
   uploadScreen.hidden = true;
   resultScreen.hidden = false;
   scoreDisplay.hidden = true;
@@ -1835,11 +2062,12 @@ function showDirectCrisisPath() {
 directCrisisBtn.addEventListener('click', showDirectCrisisPath);
 noDetectionLink.addEventListener('click', revealCrisisResources);
 function resetToUpload() {
+  hideAlternativeRoute();
   handleFileToken++;
   selectedFile = null;
+  contentGuardConfirmed = null;
   currentResult = null;
-  analyzedImage = null;
-  findState = { status: 'idle', data: null };
+  setAnalysis(null);
   directCrisisActive = false;
   fileInput.value = '';
   clearVideoInputs();
@@ -1854,6 +2082,7 @@ function resetToUpload() {
   noDetectionNote.hidden = true;
   scoreGenerator.hidden = true;
   schoolLetterDetails.open = false;
+  mountCaseFields('upload');
   resultScreen.hidden = true;
   uploadScreen.hidden = false;
   enterScreen(heroTitle);
@@ -1863,19 +2092,6 @@ backToUploadBtn.addEventListener('click', resetToUpload);
 // ─── School letter (MX / ES only) ────────────────────────────────────────────
 // 100% client-side: form values never leave the browser. Reuses the jsPDF
 // build already loaded in index.html.
-
-// Entidades con Ley Olimpia adoptada (reformas al código penal estatal).
-// NOTE: lista pendiente de verificación contra fuente oficial; se asumen los
-// 32 estados. Para quitar uno, borrarlo de este Set: la carta citará
-// entonces solo el marco federal.
-const LEY_OLIMPIA_STATES = new Set([
-  'Aguascalientes', 'Baja California', 'Baja California Sur', 'Campeche',
-  'Chiapas', 'Chihuahua', 'Ciudad de México', 'Coahuila', 'Colima', 'Durango',
-  'Estado de México', 'Guanajuato', 'Guerrero', 'Hidalgo', 'Jalisco',
-  'Michoacán', 'Morelos', 'Nayarit', 'Nuevo León', 'Oaxaca', 'Puebla',
-  'Querétaro', 'Quintana Roo', 'San Luis Potosí', 'Sinaloa', 'Sonora',
-  'Tabasco', 'Tamaulipas', 'Tlaxcala', 'Veracruz', 'Yucatán', 'Zacatecas',
-]);
 
 const schoolLetterLink    = document.getElementById('school-letter-link');
 const schoolLetterSection = document.getElementById('school-letter');
@@ -1897,6 +2113,12 @@ const SL = {
     desc: 'Descripción breve del incidente', descPh: 'Describe brevemente qué pasó, sin datos que no quieras compartir con la escuela.',
     guardian: 'Nombre del tutor o tutora legal', guardianPh: 'Ej. Ana López Ramírez',
     state: 'Estado', statePh: 'Selecciona tu estado',
+    docsSummary: '¿Quieres preparar tus documentos? (opcional)',
+    docsNote: 'Estos datos se quedan en tu dispositivo. Se usan solo para llenar la carta y el PDF; no se envían a ningún servicio.',
+    level: 'Nivel educativo', levelPh: 'Selecciona el nivel',
+    levelBasica: 'Educación básica (preescolar, primaria o secundaria)',
+    levelMediaFederal: 'Bachillerato federal',
+    levelLocal: 'Bachillerato estatal o privado',
     generate: 'Generar carta', clear: 'Limpiar formulario',
     pdfError: 'No se pudo cargar el generador de PDF. Revisa tu conexión e inténtalo de nuevo.',
     file: 'carta-escuela-verashield',
@@ -1906,7 +2128,7 @@ const SL = {
     body: (g, st, gr, inc) => 'Por medio de la presente, yo, ' + g + ', en mi carácter de tutor(a) legal del/de la alumno/a ' + st + ', quien cursa ' + gr + ' en esa institución, me dirijo a usted para hacer de su conocimiento un incidente de difusión o manipulación de contenido digital (imágenes o video) sin consentimiento, ocurrido ' + (inc ? 'el ' + inc : 'en fecha ____________________') + ', que afecta al/a la alumno/a.',
     descLabel: 'Descripción de los hechos: ',
     legal: {
-      mx: (state) => 'Hago de su conocimiento que la difusión de contenido íntimo o sexual sin consentimiento constituye una conducta sancionada por la denominada «Ley Olimpia», ' + (state ? 'tanto en el ámbito federal (Ley General de Acceso de las Mujeres a una Vida Libre de Violencia y Código Penal Federal) como en la legislación penal de ' + state : 'en el ámbito federal (Ley General de Acceso de las Mujeres a una Vida Libre de Violencia y Código Penal Federal)') + '. Al tratarse de una persona menor de edad, debe prevalecer además el interés superior de la niñez, conforme a la Ley General de los Derechos de Niñas, Niños y Adolescentes.',
+      mx: (state, level) => buildMxLetterLegal('es', state, level), // text lives in lib/legalReferences.js
       in: () => 'Hago de su conocimiento que difundir o manipular imágenes de una persona sin su consentimiento puede constituir un delito conforme a la Sección 66E de la Ley de Tecnología de la Información de 2000 y, al tratarse de una persona menor de edad, también puede estar comprendido en la Ley POCSO de 2012. Debe prevalecer el interés superior de la niñez.',
       us: () => 'Hago de su conocimiento que difundir o manipular imágenes de una persona menor de edad sin su consentimiento puede violar la ley federal (incluida la ley TAKE IT DOWN) y las leyes estatales aplicables. La seguridad y el interés superior del alumno/a deben ser la prioridad.',
     },
@@ -1926,7 +2148,7 @@ const SL = {
       in: 'Esta carta es para reporte escolar. Para una denuncia penal, el tutor puede acompañar al menor a la comisaría más cercana o presentar la queja en cybercrime.gov.in.',
       us: 'Esta carta es para reporte escolar. Para una denuncia penal, contacta a la policía local o reporta en la CyberTipline del NCMEC.',
     },
-    generated: 'Generado con VeraShield | verashield.help',
+    generated: `Generado con VeraShield | ${SITE_DOMAIN}`,
   },
   en: {
     locale: 'en-US',
@@ -1939,6 +2161,12 @@ const SL = {
     desc: 'Short description of the incident', descPh: 'Briefly describe what happened. Leave out anything you do not want the school to know.',
     guardian: 'Name of parent or legal guardian', guardianPh: 'e.g. Ana Lopez Ramirez',
     state: 'State', statePh: 'Select your state',
+    docsSummary: 'Want to prepare your documents? (optional)',
+    docsNote: 'This information stays on your device. It is only used to fill in the letter and the PDF; it is not sent to any service.',
+    level: 'School level', levelPh: 'Select the level',
+    levelBasica: 'Basic education (preschool, primary or lower secondary)',
+    levelMediaFederal: 'Federal upper secondary (bachillerato)',
+    levelLocal: 'State or private upper secondary (bachillerato)',
     generate: 'Generate letter', clear: 'Clear form',
     pdfError: 'The PDF generator could not be loaded. Check your connection and try again.',
     file: 'school-letter-verashield',
@@ -1948,7 +2176,7 @@ const SL = {
     body: (g, st, gr, inc) => 'I, ' + g + ', as the legal guardian of the student ' + st + ', who attends ' + gr + ' at your institution, am writing to inform you of an incident involving the sharing or manipulation of digital content (images or video) without consent, which occurred ' + (inc ? 'on ' + inc : 'on a date ____________________') + ' and affects the student.',
     descLabel: 'Description of events: ',
     legal: {
-      mx: (state) => 'Please be advised that sharing intimate or sexual content without consent is conduct punishable under the so-called "Ley Olimpia", ' + (state ? 'both at the federal level (General Law on Women\'s Access to a Life Free of Violence and the Federal Criminal Code) and under the criminal law of ' + state : 'at the federal level (General Law on Women\'s Access to a Life Free of Violence and the Federal Criminal Code)') + '. Because the student is a minor, the best interests of the child must also prevail under the General Law on the Rights of Children and Adolescents.',
+      mx: (state, level) => buildMxLetterLegal('en', state, level),
       in: () => 'Please be advised that sharing or manipulating a person\'s images without consent may be an offence under Section 66E of the Information Technology Act, 2000 and, because the student is a minor, may also fall under the POCSO Act, 2012. The best interests of the child must prevail.',
       us: () => 'Please be advised that sharing or manipulating images of a minor without consent may violate federal law (including the TAKE IT DOWN Act) and applicable state law. The student\'s safety and best interests must come first.',
     },
@@ -1968,7 +2196,7 @@ const SL = {
       in: 'This letter is for school reporting. For a criminal complaint, the guardian can accompany the minor to the nearest police station or file at cybercrime.gov.in.',
       us: 'This letter is for school reporting. For a criminal complaint, contact local law enforcement or report to the NCMEC CyberTipline.',
     },
-    generated: 'Generated with VeraShield | verashield.help',
+    generated: `Generated with VeraShield | ${SITE_DOMAIN}`,
   },
   hi: {
     locale: 'hi-IN',
@@ -1981,6 +2209,12 @@ const SL = {
     desc: 'घटना का संक्षिप्त विवरण', descPh: 'संक्षेप में बताएँ क्या हुआ। ऐसी बातें न लिखें जो आप स्कूल को नहीं बताना चाहते।',
     guardian: 'अभिभावक का नाम', guardianPh: 'जैसे: सुनीता शर्मा',
     state: 'राज्य', statePh: 'अपना राज्य चुनें',
+    docsSummary: 'क्या आप अपने दस्तावेज़ तैयार करना चाहते हैं? (वैकल्पिक)',
+    docsNote: 'यह जानकारी आपके डिवाइस पर रहती है। इसका उपयोग केवल पत्र और PDF भरने के लिए होता है; इसे किसी सेवा को नहीं भेजा जाता।',
+    level: 'शिक्षा स्तर', levelPh: 'स्तर चुनें',
+    levelBasica: 'बुनियादी शिक्षा (प्रीस्कूल, प्राथमिक या माध्यमिक)',
+    levelMediaFederal: 'संघीय बाचिलेराटो (उच्च माध्यमिक)',
+    levelLocal: 'राज्य या निजी बाचिलेराटो (उच्च माध्यमिक)',
     generate: 'पत्र बनाएँ', clear: 'फ़ॉर्म साफ़ करें',
     pdfError: 'PDF जनरेटर लोड नहीं हो सका। अपना कनेक्शन जाँचें और दोबारा कोशिश करें।',
     file: 'school-letter-verashield',
@@ -1990,7 +2224,7 @@ const SL = {
     body: (g, st, gr, inc) => 'मैं, ' + g + ', छात्र/छात्रा ' + st + ' का कानूनी अभिभावक, जो आपके विद्यालय में ' + gr + ' में पढ़ता/पढ़ती है, आपको एक घटना की जानकारी देने के लिए लिख रहा/रही हूँ, जिसमें डिजिटल सामग्री (तस्वीरें या वीडियो) बिना सहमति के साझा या बदली गई। यह घटना ' + (inc ? inc + ' को' : 'दिनांक ____________________ को') + ' हुई और इससे छात्र/छात्रा प्रभावित है।',
     descLabel: 'घटना का विवरण: ',
     legal: {
-      mx: (state) => 'मैं आपको सूचित करता/करती हूँ कि सहमति के बिना निजी या यौन सामग्री साझा करना मेक्सिको की "ले ओलम्पिया" के तहत दंडनीय है' + (state ? ', संघीय स्तर पर भी और ' + state + ' के आपराधिक कानून के तहत भी' : ', संघीय स्तर पर') + '। छात्र/छात्रा नाबालिग है, इसलिए बच्चों और किशोरों के अधिकारों के सामान्य कानून के अनुसार बच्चे का सर्वोत्तम हित सर्वोपरि होना चाहिए।',
+      mx: (state, level) => buildMxLetterLegal('hi', state, level),
       in: () => 'मैं आपको सूचित करता/करती हूँ कि किसी व्यक्ति की तस्वीरें बिना सहमति के साझा करना या बदलना सूचना प्रौद्योगिकी अधिनियम, 2000 की धारा 66E के तहत अपराध हो सकता है और, छात्र/छात्रा नाबालिग होने के कारण, POCSO अधिनियम, 2012 के अंतर्गत भी आ सकता है। बच्चे का सर्वोत्तम हित सर्वोपरि होना चाहिए।',
       us: () => 'मैं आपको सूचित करता/करती हूँ कि किसी नाबालिग की तस्वीरें बिना सहमति के साझा करना या बदलना संघीय कानून (TAKE IT DOWN Act सहित) और लागू राज्य कानूनों का उल्लंघन हो सकता है। छात्र/छात्रा की सुरक्षा और सर्वोत्तम हित को प्राथमिकता मिलनी चाहिए।',
     },
@@ -2010,11 +2244,87 @@ const SL = {
       in: 'यह पत्र विद्यालय को सूचित करने के लिए है। आपराधिक शिकायत के लिए अभिभावक नाबालिग के साथ नज़दीकी पुलिस थाने जा सकते हैं या cybercrime.gov.in पर शिकायत दर्ज कर सकते हैं।',
       us: 'यह पत्र विद्यालय को सूचित करने के लिए है। आपराधिक शिकायत के लिए स्थानीय पुलिस से संपर्क करें या NCMEC CyberTipline पर रिपोर्ट करें।',
     },
-    generated: 'VeraShield से बनाया गया | verashield.help',
+    generated: `VeraShield से बनाया गया | ${SITE_DOMAIN}`,
   },
 };
 
-const stateField = document.getElementById('sl-state-field');
+// ─── State (entidad federativa) selector ─────────────────────────────────────
+// One control, one value, shared by the school letter and the evidence PDF. It starts on the
+// upload screen and is moved (same DOM node) to the result screen, where both documents are
+// generated. Purely local: nothing is sent anywhere.
+const STATE_FIELD_STRINGS = {
+  es: { label: '¿En qué estado está la escuela o donde ocurrió esto?', error: 'Selecciona un estado para generar este documento.' },
+  en: { label: 'In which state is the school, or where did this happen?', error: 'Select a state to generate this document.' },
+  hi: { label: 'स्कूल किस राज्य में है, या यह कहाँ हुआ?', error: 'यह दस्तावेज़ बनाने के लिए एक राज्य चुनें।' },
+};
+const stateField  = document.getElementById('state-field');
+const stateSelect = document.getElementById('state-select');
+const stateError  = document.getElementById('state-error');
+// Shared case data: captured once, read by the letter, the evidence PDF and the WhatsApp message.
+const caseData = {
+  nombre_victima: '',
+  nombre_escuela: '',
+  nivel_escolar: '',      // '' | basica | mediaFederal | local
+  estado: '',
+  fecha_incidente: '',    // yyyy-mm-dd
+  score_analisis: null,   // rounded %, null while there is no analysis
+  fuente_analisis: 'ninguno',
+};
+const caseFields = document.getElementById('case-fields');
+// Each field exists twice (letter form + the folded shortcut on the upload screen); both copies
+// always show the same value and write to the one caseData.
+const caseInputs = {
+  nombre_victima: ['sl-student', 'docs-student'].map((id) => document.getElementById(id)),
+  nombre_escuela: ['sl-school', 'docs-school'].map((id) => document.getElementById(id)),
+  nivel_escolar: ['sl-level', 'docs-level'].map((id) => document.getElementById(id)),
+  fecha_incidente: ['sl-date', 'docs-date'].map((id) => document.getElementById(id)),
+};
+Object.entries(caseInputs).forEach(([key, inputs]) => {
+  inputs.forEach((input) => {
+    input.addEventListener(input.tagName === 'SELECT' || input.type === 'date' ? 'change' : 'input', () => {
+      caseData[key] = input.value.trim();
+      inputs.forEach((other) => { if (other !== input) other.value = input.value; });
+    });
+  });
+});
+
+function clearCaseData() {
+  Object.assign(caseData, { nombre_victima: '', nombre_escuela: '', nivel_escolar: '', estado: '', fecha_incidente: '' });
+  Object.values(caseInputs).flat().forEach((input) => { input.value = ''; });
+  stateSelect.value = '';
+}
+
+function setAnalysis(result) {
+  caseData.score_analisis = result ? Math.round(result.score_percent) : null;
+  caseData.fuente_analisis = result ? (DETECTION_API_NAMES[result.source] || result.source || 'N/A') : 'ninguno';
+}
+
+function renderStateField() {
+  document.getElementById('state-label').textContent = STATE_FIELD_STRINGS[currentLang].label;
+  if (!stateError.hidden) stateError.textContent = STATE_FIELD_STRINGS[currentLang].error;
+  stateField.hidden = currentCountry !== 'mx';
+}
+
+function mountCaseFields(where) {
+  document.getElementById('state-host-' + where).appendChild(caseFields); // same nodes, one value
+}
+
+stateSelect.addEventListener('change', () => {
+  caseData.estado = stateSelect.value;
+  if (caseData.estado) stateError.hidden = true;
+});
+
+// True when a Mexican document can be generated; otherwise shows the error and focuses the field.
+function requireState() {
+  if (currentCountry !== 'mx' || caseData.estado) return true;
+  stateError.textContent = STATE_FIELD_STRINGS[currentLang].error;
+  stateError.hidden = false;
+  stateField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  stateSelect.focus({ preventScroll: true });
+  return false;
+}
+
+const levelFields = document.querySelectorAll('[data-level-field]');
 
 function applySchoolLetterStrings() {
   const sl = SL[currentLang];
@@ -2025,7 +2335,8 @@ function applySchoolLetterStrings() {
 function updateSchoolLetterVisibility() {
   schoolLetterSection.hidden = false;
   schoolLetterLink.hidden = false;
-  stateField.hidden = currentCountry !== 'mx';
+  renderStateField();
+  levelFields.forEach((f) => { f.hidden = currentCountry !== 'mx'; });
   applySchoolLetterStrings();
 }
 
@@ -2042,6 +2353,7 @@ function todayStamp(d) {
 
 function generateSchoolLetter() {
   slError.hidden = true;
+  if (!requireState()) return;
   const sl = SL[currentLang];
   const jsPDFCtor = window.jspdf && window.jspdf.jsPDF;
   if (!jsPDFCtor) {
@@ -2053,12 +2365,13 @@ function generateSchoolLetter() {
   const val = (id) => document.getElementById(id).value.trim();
   const blank = (v, n = 18) => v || '_'.repeat(n);
   const country  = currentCountry;
-  const student  = val('sl-student');
+  const student  = caseData.nombre_victima;
   const grade    = val('sl-grade');
-  const school   = val('sl-school');
+  const school   = caseData.nombre_escuela;
   const guardian = val('sl-guardian');
-  const state    = country === 'mx' ? val('sl-state') : '';
-  const incident = isoToDate(val('sl-date'), sl.locale);
+  const state    = country === 'mx' ? caseData.estado : '';
+  const level    = country === 'mx' ? caseData.nivel_escolar : ''; // '' falls back to the local-protocol wording
+  const incident = isoToDate(caseData.fecha_incidente, sl.locale);
   const desc     = val('sl-description').slice(0, 300);
   const now      = new Date();
   const today    = now.toLocaleDateString(sl.locale, { dateStyle: 'long' });
@@ -2076,7 +2389,9 @@ function generateSchoolLetter() {
   w.text(sl.descLabel + (desc || '_'.repeat(40)), { gap: desc ? 4 : 1, color: ink });
   if (!desc) w.text('_'.repeat(75), { gap: 4, color: ink });
 
-  w.text(sl.legal[country](state && LEY_OLIMPIA_STATES.has(state) ? state : ''), { gap: 4, color: ink });
+  w.text(sl.legal[country](state, level), { gap: 4, color: ink });
+  const legalNote = country === 'mx' ? getLegalReference(state, currentLang).nota : null;
+  if (legalNote) w.text(legalNote, { size: 10, italic: true, gap: 4, color: PDF_COLORS.muted });
 
   w.text(sl.requestsIntro, { gap: 2, color: ink });
   sl.requests.forEach((item) => w.text(item, { gap: 2, color: ink }));
@@ -2120,6 +2435,7 @@ schoolLetterForm.addEventListener('submit', (e) => {
 
 document.getElementById('sl-clear').addEventListener('click', () => {
   schoolLetterForm.reset();
+  clearCaseData(); // the shared fields live outside the letter form
   slCounter.textContent = '0 / 300';
   slError.hidden = true;
 });
@@ -2129,11 +2445,12 @@ slDescription.addEventListener('input', () => {
 });
 
 // Entry point from the upload screen (independent of any analysis result)
-schoolLetterLink.addEventListener('click', () => {
+function openSchoolLetterFromUpload() {
   showDirectCrisisPath();
   schoolLetterDetails.open = true;
   schoolLetterSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-});
+}
+schoolLetterLink.addEventListener('click', openSchoolLetterFromUpload);
 
 // ─── Video mode ──────────────────────────────────────────────────────────────
 // Photo/Video toggle, video upload (file or direct URL) and analysis. The result
@@ -2534,6 +2851,7 @@ async function analyzeVideo() {
     init = { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ videoUrl }) };
   }
 
+  if (!(await ensureContentGuard(selectedVideo || 'url:' + videoUrlInput.value.trim()))) return;
   setLoading(true);
   const controller = new AbortController();
   const timeoutId  = setTimeout(() => controller.abort(), VIDEO_REQUEST_TIMEOUT_MS);
@@ -2570,6 +2888,7 @@ analyzeBtn.addEventListener('click', async () => {
   if (inputMode === 'video') { analyzeVideo(); return; }
   if (!selectedFile) return;
   clearFormError();
+  if (!(await ensureContentGuard(selectedFile))) return;
   setLoading(true);
 
   const formData = new FormData();
@@ -2585,7 +2904,7 @@ analyzeBtn.addEventListener('click', async () => {
     const data     = await response.json();
     if (data.error) { showError(data.code); return; }
     setLoading(false);
-    showResult(data, selectedFile);
+    showResult(data);
   } catch (error) {
     showError(error.name === 'AbortError' ? 'TIMEOUT' : 'NETWORK');
   } finally {
