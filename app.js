@@ -2117,6 +2117,8 @@ const SL = {
     guardian: 'Nombre del tutor o tutora legal', guardianPh: 'Ej. Ana López Ramírez',
     state: 'Estado', statePh: 'Selecciona tu estado',
     docsSummary: '¿Quieres preparar tus documentos? (opcional)',
+    docsSaved: '✓ Datos guardados en tu dispositivo',
+    docsGenerate: 'Generar carta con estos datos',
     docsNote: 'Estos datos se quedan en tu dispositivo. Se usan solo para llenar la carta y el PDF; no se envían a ningún servicio.',
     level: 'Nivel educativo', levelPh: 'Selecciona el nivel',
     levelBasica: 'Educación básica (preescolar, primaria o secundaria)',
@@ -2165,6 +2167,8 @@ const SL = {
     guardian: 'Name of parent or legal guardian', guardianPh: 'e.g. Ana Lopez Ramirez',
     state: 'State', statePh: 'Select your state',
     docsSummary: 'Want to prepare your documents? (optional)',
+    docsSaved: '✓ Data saved on your device',
+    docsGenerate: 'Generate letter with this data',
     docsNote: 'This information stays on your device. It is only used to fill in the letter and the PDF; it is not sent to any service.',
     level: 'School level', levelPh: 'Select the level',
     levelBasica: 'Basic education (preschool, primary or lower secondary)',
@@ -2213,6 +2217,8 @@ const SL = {
     guardian: 'अभिभावक का नाम', guardianPh: 'जैसे: सुनीता शर्मा',
     state: 'राज्य', statePh: 'अपना राज्य चुनें',
     docsSummary: 'क्या आप अपने दस्तावेज़ तैयार करना चाहते हैं? (वैकल्पिक)',
+    docsSaved: '✓ डेटा आपके डिवाइस पर सेव हो गया',
+    docsGenerate: 'इस जानकारी से पत्र बनाएँ',
     docsNote: 'यह जानकारी आपके डिवाइस पर रहती है। इसका उपयोग केवल पत्र और PDF भरने के लिए होता है; इसे किसी सेवा को नहीं भेजा जाता।',
     level: 'शिक्षा स्तर', levelPh: 'स्तर चुनें',
     levelBasica: 'बुनियादी शिक्षा (प्रीस्कूल, प्राथमिक या माध्यमिक)',
@@ -2282,11 +2288,18 @@ const caseInputs = {
   nivel_escolar: ['sl-level', 'docs-level'].map((id) => document.getElementById(id)),
   fecha_incidente: ['sl-date', 'docs-date'].map((id) => document.getElementById(id)),
 };
+// Visible confirmation (and the letter shortcut) once any of the shared fields has a value.
+function updateDocsSaved() {
+  const any = ['nombre_victima', 'nombre_escuela', 'nivel_escolar', 'fecha_incidente'].some((k) => caseData[k]);
+  document.getElementById('docs-saved').hidden = !any;
+}
+
 Object.entries(caseInputs).forEach(([key, inputs]) => {
   inputs.forEach((input) => {
     input.addEventListener(input.tagName === 'SELECT' || input.type === 'date' ? 'change' : 'input', () => {
       caseData[key] = input.value.trim();
       inputs.forEach((other) => { if (other !== input) other.value = input.value; });
+      updateDocsSaved();
     });
   });
 });
@@ -2295,6 +2308,7 @@ function clearCaseData() {
   Object.assign(caseData, { nombre_victima: '', nombre_escuela: '', nivel_escolar: '', estado: '', fecha_incidente: '' });
   Object.values(caseInputs).flat().forEach((input) => { input.value = ''; });
   stateSelect.value = '';
+  updateDocsSaved();
 }
 
 function setAnalysis(result) {
@@ -2454,6 +2468,13 @@ function openSchoolLetterFromUpload() {
   schoolLetterSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 schoolLetterLink.addEventListener('click', openSchoolLetterFromUpload);
+
+document.getElementById('docs-generate').addEventListener('click', () => {
+  if (!uploadScreen.hidden) { openSchoolLetterFromUpload(); return; }
+  // already on the results screen: do not reset it, just open the letter
+  schoolLetterDetails.open = true;
+  schoolLetterSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
 
 // ─── Video mode ──────────────────────────────────────────────────────────────
 // Photo/Video toggle, video upload (file or direct URL) and analysis. The result

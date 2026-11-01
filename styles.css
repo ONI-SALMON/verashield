@@ -1085,3 +1085,5 @@ summary:focus-visible,
   #upload-screen { grid-template-areas: "panel" "intro" "trust" "foot"; }
   .panel { width: 100%; }
 }
+.docs-data-saved { margin: var(--space-3) 0 0; font-size: var(--text-sm); font-weight: 600; color: var(--color-accent); }
+.docs-data .secondary-btn { margin-top: var(--space-3); }
