@@ -68,7 +68,7 @@ function buildResult(score, inputType, source) {
   };
 }
 
-// ─── URL safety ──────────────────────────────────────────────────────────────
+// URL safety
 function isPrivateAddress(address) {
   if (net.isIPv4(address)) {
     const [a, b] = address.split('.').map(Number);
@@ -179,7 +179,7 @@ function fetchVideo(url, redirectsLeft = MAX_REDIRECTS) {
   });
 }
 
-// ─── Sightengine ─────────────────────────────────────────────────────────────
+// Sightengine
 async function callSightengine(buffer, mimeType) {
   const form = new FormData();
   form.append('api_user', process.env.SIGHTENGINE_API_USER);
@@ -231,7 +231,7 @@ async function callSightengine(buffer, mimeType) {
   return Math.max(...scores);
 }
 
-// ─── Input parsing ───────────────────────────────────────────────────────────
+// Input parsing
 function readJsonBody(req) {
   return new Promise((resolve, reject) => {
     const chunks = [];
