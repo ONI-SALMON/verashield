@@ -164,6 +164,7 @@ const T = {
       NETWORK:               'No se pudo conectar. Revisa tu internet e intenta de nuevo.',
       DETECTION_FAILED:      'Detección temporalmente no disponible. Intenta en unos minutos.',
       DETECTION_UNAVAILABLE: 'Detección temporalmente no disponible. Intenta en unos minutos.',
+      DETECTION_NOT_CONFIGURED: 'El servicio de análisis no está configurado todavía. No se generó ningún resultado. Inténtalo más tarde.',
     },
     crisisSteps: [
       'Guarda evidencia: toma una captura de pantalla con la URL visible.',
@@ -260,6 +261,7 @@ const T = {
       NETWORK:               'Could not connect. Check your internet and try again.',
       DETECTION_FAILED:      'Detection temporarily unavailable. Try again in a few minutes.',
       DETECTION_UNAVAILABLE: 'Detection temporarily unavailable. Try again in a few minutes.',
+      DETECTION_NOT_CONFIGURED: 'The analysis service is not set up yet. No result was generated. Please try again later.',
     },
     crisisSteps: [
       'Save evidence: take a screenshot showing the URL.',
@@ -356,6 +358,7 @@ const T = {
       NETWORK:               'कनेक्ट नहीं हो पाया। इंटरनेट जाँचें और दोबारा कोशिश करें।',
       DETECTION_FAILED:      'जाँच अस्थायी रूप से उपलब्ध नहीं है। कुछ मिनट बाद कोशिश करें।',
       DETECTION_UNAVAILABLE: 'जाँच अस्थायी रूप से उपलब्ध नहीं है। कुछ मिनट बाद कोशिश करें।',
+      DETECTION_NOT_CONFIGURED: 'विश्लेषण सेवा अभी सेट अप नहीं है। कोई नतीजा नहीं बना। कृपया बाद में कोशिश करें।',
     },
     crisisSteps: [
       'सबूत सेव करें: URL दिखाते हुए स्क्रीनशॉट लें।',
@@ -1710,7 +1713,7 @@ const TECH_STRINGS = {
     note: 'यह जानकारी सांकेतिक है। कानूनी उपयोग के लिए किसी विशेषज्ञ से परामर्श लें।',
   },
 };
-const DETECTION_API_NAMES = { sightengine: 'Sightengine', azure: 'Azure AI Content Safety', mock: 'Sightengine' };
+const DETECTION_API_NAMES = { sightengine: 'Sightengine', azure: 'Azure AI Content Safety', mock: 'Mock (simulated test, not a real analysis)' };
 
 function writeTechnicalBlock(w, lang, locale) {
   if (caseData.score_analisis === null) return;

@@ -211,9 +211,19 @@ export default async function handler(req, res) {
     const file = new Blob([buffer], { type: mimetype });
 
     if (!process.env.SIGHTENGINE_API_USER || !process.env.SIGHTENGINE_API_SECRET) {
-      const mock = buildResult({ aiGenerated: MOCK_SCORE }, 'mock');
-      logDetection(mock);
-      return res.status(200).json(mock);
+      // Never invent a score: a fixed fake result looked like a real analysis (always 82%).
+      // The simulated result is only allowed explicitly, for local development.
+      if (process.env.ALLOW_MOCK_DETECTION === 'true') {
+        const mock = { ...buildResult({ aiGenerated: MOCK_SCORE }, 'mock'), mock: true };
+        logDetection(mock);
+        return res.status(200).json(mock);
+      }
+      console.error('[detect] SIGHTENGINE_API_USER / SIGHTENGINE_API_SECRET are not set; refusing to return a simulated score');
+      return res.status(503).json({
+        error: true,
+        code: 'DETECTION_NOT_CONFIGURED',
+        message: 'Detection is not configured on this server.',
+      });
     }
 
     let result;

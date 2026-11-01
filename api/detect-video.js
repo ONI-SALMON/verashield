@@ -267,6 +267,16 @@ function sendError(res, status, code, message) {
   return res.status(status).json({ error: code, code, message });
 }
 
+// Without Sightengine credentials never invent a score (a fixed fake result looked like a real
+// analysis). The simulated result is only allowed explicitly, for local development.
+function respondWithoutCredentials(res, inputType) {
+  if (process.env.ALLOW_MOCK_DETECTION === 'true') {
+    return res.status(200).json({ ...buildResult(MOCK_SCORE, inputType, 'mock'), mock: true });
+  }
+  console.error('[detect-video] SIGHTENGINE_API_USER / SIGHTENGINE_API_SECRET are not set; refusing to return a simulated score');
+  return sendError(res, 503, 'DETECTION_NOT_CONFIGURED', 'Detection is not configured on this server.');
+}
+
 export default async function handler(req, res) {
   let tempPath = null;
   try {
@@ -282,7 +292,7 @@ export default async function handler(req, res) {
       const body = await readJsonBody(req);
       const url = parseVideoUrl(body.videoUrl);
       if (!process.env.SIGHTENGINE_API_USER || !process.env.SIGHTENGINE_API_SECRET) {
-        return res.status(200).json(buildResult(MOCK_SCORE, inputType, 'mock'));
+        return respondWithoutCredentials(res, inputType);
       }
       ({ buffer, type: mimeType } = await fetchVideo(url));
     } else {
@@ -308,7 +318,7 @@ export default async function handler(req, res) {
         return sendError(res, 413, 'FILE_TOO_LARGE', 'Video too large. Max size is 50MB.');
       }
       if (!process.env.SIGHTENGINE_API_USER || !process.env.SIGHTENGINE_API_SECRET) {
-        return res.status(200).json(buildResult(MOCK_SCORE, inputType, 'mock'));
+        return respondWithoutCredentials(res, inputType);
       }
       buffer = await readFile(uploaded.filepath);
     }
