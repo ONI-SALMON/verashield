@@ -416,8 +416,10 @@ const T = {
 const PDF_STRINGS = {
   es: {
     btn:          'Descargar reporte PDF',
+    noAnalysis:   'No se analizó la imagen: este reporte no incluye ningún puntaje. Contiene los datos del caso y los pasos recomendados.',
     locale:       'es-MX',
     analyzedOn:   'Fecha y hora del análisis',
+    generatedOn:  'Fecha y hora del reporte',
     resultTitle:  'Resultado del análisis',
     probability:  'Probabilidad de manipulación',
     meaningTitle: 'Qué significa este resultado',
@@ -437,8 +439,10 @@ const PDF_STRINGS = {
   },
   en: {
     btn:          'Download PDF report',
+    noAnalysis:   'The image was not analyzed: this report does not include any score. It contains the case details and the recommended steps.',
     locale:       'en-US',
     analyzedOn:   'Analysis date and time',
+    generatedOn:  'Report date and time',
     resultTitle:  'Analysis result',
     probability:  'Probability of manipulation',
     meaningTitle: 'What this result means',
@@ -458,8 +462,10 @@ const PDF_STRINGS = {
   },
   hi: {
     btn:          'PDF रिपोर्ट डाउनलोड करें',
+    noAnalysis:   'तस्वीर की जाँच नहीं की गई: इस रिपोर्ट में कोई स्कोर नहीं है। इसमें मामले का ब्योरा और सुझाए गए कदम हैं।',
     locale:       'hi-IN',
     analyzedOn:   'जाँच की तारीख और समय',
+    generatedOn:  'रिपोर्ट की तारीख और समय',
     resultTitle:  'जाँच का परिणाम',
     probability:  'छेड़छाड़ की संभावना',
     meaningTitle: 'इस परिणाम का क्या मतलब है',
@@ -1135,7 +1141,7 @@ const CASE_STRINGS = {
   hi: { title: 'मामले का विवरण', student: 'छात्र/छात्रा', school: 'विद्यालय', level: 'शिक्षा स्तर', state: 'राज्य', date: 'घटना की तारीख',
         ph: { student: '[छात्र/छात्रा का नाम]', school: '[विद्यालय का नाम]', level: '[शिक्षा स्तर]', state: '[राज्य]', date: '[घटना की तारीख]' } },
 };
-const LEVEL_KEYS = { basica: 'levelBasica', mediaFederal: 'levelMediaFederal', local: 'levelLocal' };
+const LEVEL_KEYS = { basica: 'levelBasica', mediaFederal: 'levelMediaFederal', local: 'levelLocal', unknown: 'levelUnknown' };
 
 // Reads the shared case data; a missing value prints its placeholder and never blocks generation.
 function caseDataLines(lang) {
@@ -1147,27 +1153,28 @@ function caseDataLines(lang) {
   ];
   if (flow.pais === 'mx') {
     lines.push([c.level, caseData.nivel_escolar ? sl[LEVEL_KEYS[caseData.nivel_escolar]] : c.ph.level]);
-    lines.push([c.state, caseData.estado || c.ph.state]);
+    lines.push([c.state, caseData.estado === 'unknown' ? sl.stateUnknown : (caseData.estado || c.ph.state)]);
   }
   lines.push([c.date, caseData.fecha_incidente ? isoToDate(caseData.fecha_incidente, sl.locale) : c.ph.date]);
   return lines;
 }
 
 function generateEvidencePdf() {
-  if (!currentResult || !window.jspdf?.jsPDF) return;
+  if (!window.jspdf?.jsPDF) return;
   if (!requireState()) return;
   const lang = currentLang;
   const t    = T[lang];
   const p    = PDF_STRINGS[lang];
   const when = analyzedAt || new Date();
-  const bucket = PDF_COLORS.bucket[currentResult.bucket] ? currentResult.bucket : 'medium';
+  const hasResult = !!currentResult;
+  const bucket = hasResult && PDF_COLORS.bucket[currentResult.bucket] ? currentResult.bucket : 'medium';
 
   const doc = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4' });
   const w = createPdfWriter(doc, lang);
 
   // 1. Header: textual logo + analysis date/time
   w.text('VeraShield', { size: 26, bold: true, color: PDF_COLORS.accent, gap: 1 });
-  w.text(`${p.analyzedOn}: ${when.toLocaleString(p.locale, { dateStyle: 'long', timeStyle: 'short' })}`,
+  w.text(`${hasResult ? p.analyzedOn : p.generatedOn}: ${when.toLocaleString(p.locale, { dateStyle: 'long', timeStyle: 'short' })}`,
     { size: 10, color: PDF_COLORS.muted, gap: 2 });
   w.rule();
   w.space(4);
@@ -1178,16 +1185,21 @@ function generateEvidencePdf() {
     ...caseDataLines(lang).map(([label, value], i, all) => ({ str: `- ${label}: ${value}`, gap: i === all.length - 1 ? 0 : 1.5 })),
   ], { bar: PDF_COLORS.accent });
 
-  // 2. Result: manipulation probability + plain-language interpretation
-  w.text(p.resultTitle, { size: 15, bold: true, gap: 3 });
-  w.text(p.probability, { size: 10, color: PDF_COLORS.muted, gap: 1 });
-  w.text(`${Math.round(currentResult.score_percent)}%`, { size: 38, bold: true, color: PDF_COLORS.bucket[bucket], gap: 2 });
-  w.text(t.labels[currentResult.label] || '', { size: 13, bold: true, gap: 2 });
-  w.text(t.explanations[currentResult.label] || '', { size: 11, gap: 6 });
+  // 2. Result (only when the optional analysis was done) or a clear note that it was not
+  if (hasResult) {
+    w.text(p.resultTitle, { size: 15, bold: true, gap: 3 });
+    w.text(p.probability, { size: 10, color: PDF_COLORS.muted, gap: 1 });
+    w.text(`${Math.round(currentResult.score_percent)}%`, { size: 38, bold: true, color: PDF_COLORS.bucket[bucket], gap: 2 });
+    w.text(t.labels[currentResult.label] || '', { size: 13, bold: true, gap: 2 });
+    w.text(t.explanations[currentResult.label] || '', { size: 11, gap: 6 });
 
-  // 3. What this result means (by bucket)
-  w.text(p.meaningTitle, { size: 15, bold: true, gap: 3 });
-  w.text(p.meaning[bucket], { size: 11, gap: 6 });
+    // 3. What this result means (by bucket)
+    w.text(p.meaningTitle, { size: 15, bold: true, gap: 3 });
+    w.text(p.meaning[bucket], { size: 11, gap: 6 });
+  } else {
+    w.text(p.resultTitle, { size: 15, bold: true, gap: 3 });
+    w.text(p.noAnalysis, { size: 11, gap: 6 });
+  }
 
   // 3b. Evidence preservation (own section, before the reporting steps).
   // Helvetica has no check/warning glyphs, so the PDF uses plain "- " bullets.
@@ -1208,7 +1220,7 @@ function generateEvidencePdf() {
     const ref = getLegalReference(caseData.estado, lang);
     w.callout([
       { str: LEGAL_FRAMEWORK_TITLE[lang], bold: true, size: 11.5, gap: 2.5 },
-      { str: caseData.estado + ': ' + ref.estatuto, gap: ref.nota ? 1.5 : 0 },
+      { str: (caseData.estado && caseData.estado !== 'unknown' ? caseData.estado + ': ' : '') + ref.estatuto, gap: ref.nota ? 1.5 : 0 },
       ...(ref.nota ? [{ str: ref.nota, italic: true, size: 10, color: PDF_COLORS.muted, gap: 0 }] : []),
     ], { bar: PDF_COLORS.accent });
   }
@@ -1333,22 +1345,20 @@ const SL = {
   es: {
     locale: 'es-MX',
     title: 'Generar carta para mi escuela',
-    intro: 'Llena los datos que quieras (todos son opcionales) y descarga una carta formal para la dirección de tu escuela. Se genera en tu dispositivo: nada se envía ni se guarda.',
+    intro: 'Esta carta la firma tu mamá, papá o tutor/a. Puedes llenarla tú y entregársela. Llena los datos que quieras (todos son opcionales). Se genera en tu dispositivo: nada se envía ni se guarda.',
     student: 'Nombre del alumno/a', studentPh: 'Ej. María Pérez López',
     grade: 'Grado y grupo', gradePh: 'Ej. 2.º B de secundaria',
     school: 'Nombre de la escuela', schoolPh: 'Ej. Secundaria Técnica No. 25',
     date: 'Fecha del incidente',
     desc: 'Descripción breve del incidente', descPh: 'Describe brevemente qué pasó, sin datos que no quieras compartir con la escuela.',
     guardian: 'Nombre del tutor o tutora legal', guardianPh: 'Ej. Ana López Ramírez',
-    state: 'Estado', statePh: 'Selecciona tu estado',
-    docsSummary: '¿Quieres preparar tus documentos? (opcional)',
-    docsSaved: 'Datos guardados en tu dispositivo',
-    docsGenerate: 'Generar carta con estos datos',
-    docsNote: 'Estos datos se quedan en tu dispositivo. Se usan solo para llenar la carta y el PDF; no se envían a ningún servicio.',
+    state: 'Estado', statePh: 'Selecciona tu estado', stateUnknown: 'No sé',
+    descWarn: 'No describas contenido sexual ni adjuntes la imagen. La escuela leerá esta carta.',
     level: 'Nivel educativo', levelPh: 'Selecciona el nivel',
     levelBasica: 'Educación básica (preescolar, primaria o secundaria)',
-    levelMediaFederal: 'Bachillerato federal',
-    levelLocal: 'Bachillerato estatal o privado',
+    levelMediaFederal: 'Bachillerato federal (por ejemplo CBTIS o CETIS)',
+    levelLocal: 'Bachillerato estatal o privado (por ejemplo COBACH)',
+    levelUnknown: 'No sé',
     generate: 'Generar carta', clear: 'Limpiar formulario',
     pdfError: 'No se pudo cargar el generador de PDF. Revisa tu conexión e inténtalo de nuevo.',
     file: 'carta-escuela-verashield',
@@ -1364,11 +1374,12 @@ const SL = {
     },
     requestsIntro: 'Por lo anterior, solicito respetuosamente a esa dirección:',
     requests: [
-      '1. Que se realice una investigación interna para esclarecer los hechos y deslindar responsabilidades.',
-      '2. Que se implementen medidas de protección inmediatas para el/la alumno/a, que garanticen su seguridad e integridad y eviten la revictimización.',
-      '3. Que se levante el acta correspondiente y se me entregue copia de la misma, así como del folio de seguimiento.',
+      "1. Que se active el protocolo escolar correspondiente para esclarecer los hechos.",
+      "2. Que se adopten medidas inmediatas de protección para el/la alumno/a, que garanticen su seguridad y su confidencialidad y eviten la revictimización.",
+      "3. Que, conforme al protocolo, se notifique a las autoridades competentes cuando corresponda.",
+      "4. Que se levante el acta correspondiente y se me entregue copia, con un folio de seguimiento.",
     ],
-    closing: 'Sin otro particular, agradezco su atención y quedo en espera de su pronta respuesta.',
+    closing: 'Sin otro particular, agradezco su atención y quedo en espera de su respuesta por escrito, con los plazos de atención.',
     farewell: 'Atentamente',
     signature: 'Tutor(a) legal (firma)',
     stampTitle: 'Para uso de la escuela',
@@ -1383,22 +1394,20 @@ const SL = {
   en: {
     locale: 'en-US',
     title: 'Generate a letter for my school',
-    intro: 'Fill in whatever you like (everything is optional) and download a formal letter for your school principal. It is created on your device: nothing is sent or saved.',
+    intro: 'This letter is signed by your mom, dad or guardian. You can fill it in and hand it to them. Fill in whatever you like (everything is optional). It is created on your device: nothing is sent or saved.',
     student: 'Student name', studentPh: 'e.g. Maria Perez Lopez',
     grade: 'Grade and class', gradePh: 'e.g. Grade 8, Section B',
     school: 'School name', schoolPh: 'e.g. Riverside Secondary School',
     date: 'Date of the incident',
     desc: 'Short description of the incident', descPh: 'Briefly describe what happened. Leave out anything you do not want the school to know.',
     guardian: 'Name of parent or legal guardian', guardianPh: 'e.g. Ana Lopez Ramirez',
-    state: 'State', statePh: 'Select your state',
-    docsSummary: 'Want to prepare your documents? (optional)',
-    docsSaved: 'Data saved on your device',
-    docsGenerate: 'Generate letter with this data',
-    docsNote: 'This information stays on your device. It is only used to fill in the letter and the PDF; it is not sent to any service.',
+    state: 'State', statePh: 'Select your state', stateUnknown: "I don't know",
+    descWarn: 'Do not describe sexual content or attach the image. The school will read this letter.',
     level: 'School level', levelPh: 'Select the level',
     levelBasica: 'Basic education (preschool, primary or lower secondary)',
-    levelMediaFederal: 'Federal upper secondary (bachillerato)',
-    levelLocal: 'State or private upper secondary (bachillerato)',
+    levelMediaFederal: 'Federal upper secondary (for example CBTIS or CETIS)',
+    levelLocal: 'State or private upper secondary (for example COBACH)',
+    levelUnknown: "I don't know",
     generate: 'Generate letter', clear: 'Clear form',
     pdfError: 'The PDF generator could not be loaded. Check your connection and try again.',
     file: 'school-letter-verashield',
@@ -1414,11 +1423,12 @@ const SL = {
     },
     requestsIntro: 'For these reasons, I respectfully ask the school to:',
     requests: [
-      '1. Carry out an internal investigation to establish the facts and determine responsibilities.',
-      '2. Put immediate protective measures in place for the student, ensuring their safety and preventing re-victimization.',
-      '3. Make a formal record of the incident and give me a copy of it, together with a follow-up reference number.',
+      "1. Activate the school protocol to establish the facts.",
+      "2. Put immediate protection measures in place for the student that ensure their safety and confidentiality and prevent re-victimization.",
+      "3. Notify the competent authorities when the protocol requires it.",
+      "4. Make a formal record of the incident and give me a copy of it, together with a follow-up reference number.",
     ],
-    closing: 'Thank you for your attention. I look forward to your prompt reply.',
+    closing: 'Thank you for your attention. I look forward to a written reply that states the response times.',
     farewell: 'Sincerely,',
     signature: 'Parent or legal guardian (signature)',
     stampTitle: 'For school use',
@@ -1433,22 +1443,20 @@ const SL = {
   hi: {
     locale: 'hi-IN',
     title: 'स्कूल के लिए पत्र बनाएँ',
-    intro: 'जो जानकारी देना चाहें भरें (सब वैकल्पिक है) और अपने स्कूल के प्रधानाचार्य के लिए औपचारिक पत्र डाउनलोड करें। यह आपके डिवाइस पर बनता है: कुछ भेजा या सेव नहीं किया जाता।',
+    intro: 'इस पत्र पर आपकी माँ, पापा या अभिभावक हस्ताक्षर करते हैं। आप इसे भरकर उन्हें दे सकते हैं। जो जानकारी देना चाहें भरें (सब वैकल्पिक है)। यह आपके डिवाइस पर बनता है: कुछ भेजा या सेव नहीं किया जाता।',
     student: 'छात्र/छात्रा का नाम', studentPh: 'जैसे: प्रिया शर्मा',
     grade: 'कक्षा और सेक्शन', gradePh: 'जैसे: कक्षा 8, सेक्शन बी',
     school: 'स्कूल का नाम', schoolPh: 'जैसे: राजकीय उच्च माध्यमिक विद्यालय',
     date: 'घटना की तारीख',
     desc: 'घटना का संक्षिप्त विवरण', descPh: 'संक्षेप में बताएँ क्या हुआ। ऐसी बातें न लिखें जो आप स्कूल को नहीं बताना चाहते।',
     guardian: 'अभिभावक का नाम', guardianPh: 'जैसे: सुनीता शर्मा',
-    state: 'राज्य', statePh: 'अपना राज्य चुनें',
-    docsSummary: 'क्या आप अपने दस्तावेज़ तैयार करना चाहते हैं? (वैकल्पिक)',
-    docsSaved: 'डेटा आपके डिवाइस पर सेव हो गया',
-    docsGenerate: 'इस जानकारी से पत्र बनाएँ',
-    docsNote: 'यह जानकारी आपके डिवाइस पर रहती है। इसका उपयोग केवल पत्र और PDF भरने के लिए होता है; इसे किसी सेवा को नहीं भेजा जाता।',
+    state: 'राज्य', statePh: 'अपना राज्य चुनें', stateUnknown: 'मुझे नहीं पता',
+    descWarn: 'यौन सामग्री का वर्णन न करें और तस्वीर न जोड़ें। स्कूल यह पत्र पढ़ेगा।',
     level: 'शिक्षा स्तर', levelPh: 'स्तर चुनें',
     levelBasica: 'बुनियादी शिक्षा (प्रीस्कूल, प्राथमिक या माध्यमिक)',
-    levelMediaFederal: 'संघीय बाचिलेराटो (उच्च माध्यमिक)',
-    levelLocal: 'राज्य या निजी बाचिलेराटो (उच्च माध्यमिक)',
+    levelMediaFederal: 'संघीय बाचिलेराटो (उच्च माध्यमिक), जैसे CBTIS या CETIS',
+    levelLocal: 'राज्य या निजी बाचिलेराटो (उच्च माध्यमिक), जैसे COBACH',
+    levelUnknown: 'मुझे नहीं पता',
     generate: 'पत्र बनाएँ', clear: 'फ़ॉर्म साफ़ करें',
     pdfError: 'PDF जनरेटर लोड नहीं हो सका। अपना कनेक्शन जाँचें और दोबारा कोशिश करें।',
     file: 'school-letter-verashield',
@@ -1464,11 +1472,12 @@ const SL = {
     },
     requestsIntro: 'इसलिए मैं विद्यालय से विनम्र अनुरोध करता/करती हूँ कि:',
     requests: [
-      '1. तथ्यों का पता लगाने और ज़िम्मेदारी तय करने के लिए आंतरिक जाँच की जाए।',
-      '2. छात्र/छात्रा की सुरक्षा सुनिश्चित करने और दोबारा पीड़ित होने से बचाने के लिए तुरंत सुरक्षात्मक कदम उठाए जाएँ।',
-      '3. घटना का औपचारिक रिकॉर्ड बनाया जाए और उसकी प्रति तथा अनुवर्ती संदर्भ संख्या मुझे दी जाए।',
+      "1. तथ्यों का पता लगाने के लिए स्कूल का प्रोटोकॉल शुरू किया जाए।",
+      "2. छात्र/छात्रा की सुरक्षा और गोपनीयता सुनिश्चित करने और दोबारा पीड़ित होने से बचाने के लिए तुरंत सुरक्षात्मक कदम उठाए जाएँ।",
+      "3. प्रोटोकॉल के अनुसार जहाँ ज़रूरी हो वहाँ सक्षम अधिकारियों को सूचित किया जाए।",
+      "4. घटना का औपचारिक रिकॉर्ड बनाया जाए और उसकी प्रति तथा अनुवर्ती संदर्भ संख्या मुझे दी जाए।",
     ],
-    closing: 'आपके ध्यान के लिए धन्यवाद। मैं आपके शीघ्र उत्तर की प्रतीक्षा करूँगा/करूँगी।',
+    closing: 'आपके ध्यान के लिए धन्यवाद। मैं समय-सीमा बताने वाले लिखित उत्तर की प्रतीक्षा करूँगा/करूँगी।',
     farewell: 'सादर,',
     signature: 'अभिभावक (हस्ताक्षर)',
     stampTitle: 'विद्यालय के उपयोग के लिए',
@@ -1591,8 +1600,9 @@ function generateSchoolLetter() {
   const grade    = val('sl-grade');
   const school   = caseData.nombre_escuela;
   const guardian = val('sl-guardian');
-  const state    = country === 'mx' ? caseData.estado : '';
-  const level    = country === 'mx' ? caseData.nivel_escolar : ''; // '' falls back to the local-protocol wording
+  const known    = (v) => (v && v !== 'unknown' ? v : '');  // 'No sé' behaves like an empty choice
+  const state    = country === 'mx' ? known(caseData.estado) : '';
+  const level    = country === 'mx' ? known(caseData.nivel_escolar) : ''; // '' falls back to the local-protocol wording
   const incident = isoToDate(caseData.fecha_incidente, sl.locale);
   const desc     = val('sl-description').slice(0, 300);
   const now      = new Date();
@@ -1602,7 +1612,8 @@ function generateSchoolLetter() {
   const w = createPdfWriter(doc, currentLang);
   const ink = PDF_COLORS.ink;
 
-  w.text(state ? state + ', ' + today : today, { align: 'right', gap: 8, color: ink });
+  const place = !state ? today : (currentLang === 'es' ? state + ', a ' + today : state + ', ' + today);
+  w.text(place, { align: 'right', gap: 8, color: ink });
   w.text(sl.addressee(school || '______________________________'), { bold: true, gap: 0, color: ink });
   w.text(sl.greeting, { bold: true, gap: 8, color: ink });
   w.text(sl.subject, { bold: true, gap: 8, color: ink });
@@ -1611,14 +1622,11 @@ function generateSchoolLetter() {
   w.text(sl.descLabel + (desc || '_'.repeat(40)), { gap: desc ? 4 : 1, color: ink });
   if (!desc) w.text('_'.repeat(75), { gap: 4, color: ink });
 
-  w.text(sl.legal[country](state, level), { gap: 4, color: ink });
-  const legalNote = country === 'mx' ? getLegalReference(state, currentLang).nota : null;
-  if (legalNote) w.text(legalNote, { size: 10, italic: true, gap: 4, color: PDF_COLORS.muted });
+  String(sl.legal[country](state, level)).split('\n\n').forEach((par) => w.text(par, { gap: 4, color: ink }));
 
   w.text(sl.requestsIntro, { gap: 2, color: ink });
   sl.requests.forEach((item) => w.text(item, { gap: 2, color: ink }));
   w.space(2);
-  writeTechnicalBlock(w, currentLang, sl.locale); // no-op without an analysis result
   w.text(sl.closing, { gap: 8, color: ink });
 
   w.ensure(50);

@@ -1201,3 +1201,4 @@ ol.plain-list { list-style: decimal; }
   .print-message { white-space: pre-wrap; }
   .print-link, .print-footer { font-size: 11pt; color: #333; margin-top: 10mm; }
 }
+.sl-warn { color: var(--color-amber); font-size: var(--text-xs); line-height: 1.4; }

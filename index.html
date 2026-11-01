@@ -136,6 +136,7 @@
           <label for="state-select" id="state-label"></label>
           <select id="state-select" aria-describedby="state-error" aria-required="true" required>
             <option value="" data-sl="statePh"></option>
+            <option value="unknown" data-sl="stateUnknown"></option>
             <option value="Aguascalientes">Aguascalientes</option>
             <option value="Baja California">Baja California</option>
             <option value="Baja California Sur">Baja California Sur</option>
@@ -172,7 +173,7 @@
           <p class="form-error" id="state-error" role="alert" hidden></p>
         </div>
         </div>
-        <section class="school-letter" id="school-letter" aria-labelledby="school-letter-title" hidden>
+        <section class="school-letter" id="school-letter" aria-labelledby="school-letter-title">
           <details id="school-letter-details">
             <summary id="school-letter-title" data-sl="title"></summary>
             <p class="school-letter-intro" data-sl="intro"></p>
@@ -187,7 +188,8 @@
                 <input type="date" id="sl-date"></label>
               <label class="sl-field"><span data-sl="desc"></span>
                 <textarea id="sl-description" maxlength="300" rows="4" data-sl-ph="descPh"></textarea>
-                <small class="sl-counter" id="sl-counter">0 / 300</small></label>
+                <small class="sl-counter" id="sl-counter">0 / 300</small>
+                <small class="sl-warn" data-sl="descWarn"></small></label>
               <label class="sl-field"><span data-sl="guardian"></span>
                 <input type="text" id="sl-guardian" maxlength="100" data-sl-ph="guardianPh"></label>
               <label class="sl-field" id="sl-level-field" data-level-field><span data-sl="level"></span>
@@ -196,6 +198,7 @@
                   <option value="basica" data-sl="levelBasica"></option>
                   <option value="mediaFederal" data-sl="levelMediaFederal"></option>
                   <option value="local" data-sl="levelLocal"></option>
+                  <option value="unknown" data-sl="levelUnknown"></option>
                 </select></label>
               <p class="form-error" id="sl-error" role="alert" hidden></p>
               <div class="sl-actions">
