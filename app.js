@@ -1,7 +1,11 @@
 import {
-  CNDH_NOTE_TEXT, LEGAL_FRAMEWORK_TITLE, LEY_OLIMPIA, MX_CRISIS_LEGAL_NOTE,
+  LEGAL_FRAMEWORK_TITLE, LEY_OLIMPIA,
   buildMxLetterLegal, getLegalReference,
 } from './lib/legalReferences.js';
+import { initFlow } from './lib/flow/index.js';
+import { flow } from './lib/flow/session.js';
+import { renderCurrent } from './lib/flow/router.js';
+import { getContent } from './lib/content/index.js';
 import { SITE_DOMAIN } from './lib/siteConfig.js';
 import { AZURE_PRIVACY_URL, SIGHTENGINE_URL } from './lib/privacyServices.js';
 
@@ -26,22 +30,7 @@ const scoreNumber     = document.getElementById('score-number');
 const scoreLabel      = document.getElementById('score-label');
 const scoreExplanation= document.getElementById('score-explanation');
 const scoreGenerator  = document.getElementById('score-generator');
-const crisisPathway   = document.getElementById('crisis-pathway');
-const countrySelector = document.getElementById('country-selector');
-const victimToggle    = document.getElementById('victim-toggle');
-const crisisIntro     = document.getElementById('crisis-intro');
-const whatsappBtn     = document.getElementById('whatsapp-btn');
-const crisisSteps     = document.getElementById('crisis-steps');
-const ngoCard         = document.getElementById('ngo-card');
-const legalNote       = document.getElementById('legal-note');
-const takedownBtn     = document.getElementById('takedown-btn');
 const langBtns        = document.querySelectorAll('.lang-btn');
-const directCrisisBtn    = document.getElementById('direct-crisis-btn');
-const directCrisisHeading= document.getElementById('direct-crisis-heading');
-const noDetectionNote    = document.getElementById('no-detection-note');
-const noDetectionText    = document.getElementById('no-detection-text');
-const noDetectionLink    = document.getElementById('no-detection-link');
-const backToUploadBtn    = document.getElementById('back-to-upload-btn');
 const downloadPdfBtn     = document.getElementById('download-pdf-btn');
 
 const analyzeHint    = document.getElementById('analyze-hint');
@@ -52,10 +41,6 @@ const uploadHint     = document.getElementById('upload-hint');
 const resultHeading  = document.getElementById('result-heading');
 const scoreCaption   = document.getElementById('score-caption');
 const scoreMeterFill = document.getElementById('score-meter-fill');
-const countryLabel   = document.getElementById('country-label');
-const whatsappSub    = document.getElementById('whatsapp-sub');
-const whatsappDisclaimer = document.getElementById('whatsapp-disclaimer');
-const heroTitle      = document.getElementById('hero-title');
 
 // Extra UI strings (labels, hints, orientation copy)
 const UI = {
@@ -427,49 +412,6 @@ const T = {
   },
 };
 
-// Direct crisis path (real photo, no AI analysis needed)
-const DIRECT_CRISIS_STRINGS = {
-  en: {
-    directCrisisBtn: "My image was shared without my consent (real photo)",
-    directCrisisHeading: "Your rights and support resources",
-    directCrisisIntro:
-      "You don't need AI analysis to get support. " +
-      "Even if your image is real, not a deepfake, " +
-      "you have rights and there are people who can help you right now.",
-    noDetectionNote:
-      "If a real photo of you was shared without your consent, " +
-      "you still have the right to report it.",
-    noDetectionLink: "See your resources",
-    backToUpload: "Analyze an image instead",
-  },
-  es: {
-    directCrisisBtn: "Mi imagen real fue compartida sin mi consentimiento",
-    directCrisisHeading: "Tus derechos y recursos de apoyo",
-    directCrisisIntro:
-      "No necesitas análisis de IA para obtener apoyo. " +
-      "Aunque tu imagen sea real, no un deepfake, " +
-      "tienes derechos y hay personas que pueden ayudarte ahora mismo.",
-    noDetectionNote:
-      "Si una foto real tuya fue compartida sin tu consentimiento, " +
-      "sigues teniendo el derecho de denunciarlo.",
-    noDetectionLink: "Ver tus recursos",
-    backToUpload: "Analizar una imagen en su lugar",
-  },
-  hi: {
-    directCrisisBtn: "मेरी असली फ़ोटो बिना अनुमति के साझा की गई",
-    directCrisisHeading: "आपके अधिकार और सहायता संसाधन",
-    directCrisisIntro:
-      "सहायता पाने के लिए AI विश्लेषण की ज़रूरत नहीं है। " +
-      "चाहे आपकी फ़ोटो असली हो, deepfake नहीं, " +
-      "आपके अधिकार हैं और ऐसे लोग हैं जो अभी आपकी मदद कर सकते हैं।",
-    noDetectionNote:
-      "अगर आपकी असली फ़ोटो बिना सहमति के साझा की गई है, " +
-      "तो आपको रिपोर्ट करने का पूरा अधिकार है।",
-    noDetectionLink: "अपने संसाधन देखें",
-    backToUpload: "इसके बजाय एक छवि का विश्लेषण करें",
-  },
-};
-
 // PDF evidence report strings
 const PDF_STRINGS = {
   es: {
@@ -537,423 +479,38 @@ const PDF_STRINGS = {
   },
 };
 
-// Evidence preservation (UI callout + PDF section; text only, no inputs)
-// Art. 20 Sexies LGAMVLV: the authority safeguards the reported content, so the victim must
-// document it first and must not download or forward it (art. 202 CPF).
-const EVIDENCE_STRINGS = {
-  es: {
-    title: 'Antes de pedir que lo eliminen, guarda esta evidencia:',
-    items: [
-      'URL completa donde aparece el contenido',
-      'Captura de pantalla del perfil o cuenta que lo publicó',
-      'Fecha y hora en que lo viste por primera vez',
-      'Nombre de usuario o identificador visible',
-    ],
-    warn: 'No descargues ni reenvíes la imagen o video.',
-    warnBody: 'Eso puede tener consecuencias legales. La autoridad es quien debe resguardar el contenido.',
-  },
-  en: {
-    title: 'Before requesting removal, preserve this evidence:',
-    items: [
-      'Full URL where the content appears',
-      'Screenshot of the profile or account that posted it',
-      'Date and time you first saw it',
-      'Visible username or identifier',
-    ],
-    warn: 'Do not download or forward the image or video.',
-    warnBody: 'That may have legal consequences. The authority is responsible for preserving the content.',
-  },
-  hi: {
-    title: 'हटाने का अनुरोध करने से पहले यह सबूत सुरक्षित रखें:',
-    items: [
-      'वह पूरा URL जहाँ सामग्री दिखती है',
-      'उस प्रोफ़ाइल या अकाउंट का स्क्रीनशॉट जिसने इसे पोस्ट किया',
-      'वह तारीख और समय जब आपने इसे पहली बार देखा',
-      'दिखाई देने वाला यूज़रनेम या पहचान',
-    ],
-    warn: 'तस्वीर या वीडियो को डाउनलोड या फ़ॉरवर्ड न करें।',
-    warnBody: 'इसके कानूनी परिणाम हो सकते हैं। सामग्री को सुरक्षित रखना अधिकारियों की ज़िम्मेदारी है।',
-  },
-};
-
-function renderEvidenceNote() {
-  const s = EVIDENCE_STRINGS[currentLang];
-  document.getElementById('evidence-note-title').textContent = s.title;
-  document.getElementById('evidence-list').replaceChildren(...s.items.map((text) => {
-    const li = document.createElement('li');
-    li.textContent = '✓ ' + text;
-    return li;
-  }));
-  const warn = document.createElement('strong');
-  warn.textContent = s.warn;
-  document.getElementById('evidence-warn').replaceChildren(warn, document.createTextNode(' ' + s.warnBody));
-}
-
-// Action resources: copy-only email templates
-// Text is only ever copied to the user's clipboard: nothing is sent or stored.
-const ACTION_STRINGS = {
-  es: {
-    title:      'Cómo reportar',
-    disclaimer: 'Estos textos son sugerencias. Puedes modificarlos antes de enviarlos. Siempre consulta con un adulto antes de contactar a cualquier institución.',
-    copy:       'Copiar al portapapeles',
-    copied:     '¡Copiado!',
-    fallback:   'Selecciona y copia este texto',
-  },
-  en: {
-    title:      'How to report',
-    disclaimer: 'These are suggested templates. Edit them before sending. Always consult a trusted adult before contacting any institution.',
-    copy:       'Copy to clipboard',
-    copied:     'Copied!',
-    fallback:   'Select and copy this text',
-  },
-  hi: {
-    title:      'रिपोर्ट कैसे करें',
-    disclaimer: 'ये केवल सुझाए गए टेम्पलेट हैं। भेजने से पहले इन्हें बदल लें। किसी भी संस्था से संपर्क करने से पहले हमेशा किसी विश्वसनीय वयस्क से सलाह लें।',
-    copy:       'क्लिपबोर्ड पर कॉपी करें',
-    copied:     'कॉपी हो गया!',
-    fallback:   'इस टेक्स्ट को चुनें और कॉपी करें',
-  },
-};
-
-const EMAIL_TEMPLATES = {
-  es: [
-    {
-      title: 'Plataforma (Instagram, TikTok, etc.)',
-      text:
-        'Asunto: Solicitud urgente de eliminación de contenido\n\n' +
-        'Hola equipo de seguridad:\n\n' +
-        'Me llamo [NOMBRE] y soy menor de edad. El [FECHA] descubrí que se publicó contenido que me muestra sin mi consentimiento, y que puede haber sido creado o alterado con inteligencia artificial.\n\n' +
-        'Descripción: [DESCRIPCIÓN]\n\n' +
-        'Solicito que lo eliminen de inmediato, ya que viola sus normas contra el abuso de imágenes y el acoso. También les pido que me confirmen cuando se haya retirado.\n\n' +
-        'Gracias,\n[NOMBRE]',
-    },
-    {
-      title: 'Adulto de confianza',
-      text:
-        'Asunto: Necesito tu ayuda\n\n' +
-        'Hola [NOMBRE]:\n\n' +
-        'Necesito hablar contigo de algo importante. El [FECHA] me enteré de que hay una imagen mía que se compartió sin mi permiso y que podría estar hecha con IA.\n\n' +
-        '[DESCRIPCIÓN]\n\n' +
-        'No es mi culpa, pero me siento preocupado/a y no sé qué hacer. ¿Podemos hablar hoy y decidir juntos cómo reportarlo?\n\n' +
-        'Gracias por escucharme.',
-    },
-    {
-      title: 'Escuela (dirección)',
-      text:
-        'Asunto: Aviso de un incidente que afecta a un estudiante\n\n' +
-        'Estimada dirección:\n\n' +
-        'Les escribo para informarles de manera informal sobre una situación ocurrida el [FECHA]. [NOMBRE] fue afectado/a por la difusión de una imagen sin su consentimiento, posiblemente creada o alterada con inteligencia artificial.\n\n' +
-        'Resumen: [DESCRIPCIÓN]\n\n' +
-        'Les pido que tomen las medidas necesarias para proteger al estudiante y que me indiquen cómo podemos colaborar. Agradezco su discreción.\n\n' +
-        'Atentamente,\n[NOMBRE]',
-    },
-  ],
-  en: [
-    {
-      title: 'Platform (Instagram, TikTok, etc.)',
-      text:
-        'Subject: Urgent content removal request\n\n' +
-        'Hello Safety Team,\n\n' +
-        'My name is [NAME] and I am a minor. On [DATE] I discovered content that shows me without my consent and may have been created or altered using artificial intelligence.\n\n' +
-        'Description: [DESCRIPTION]\n\n' +
-        'I am requesting its immediate removal, as it violates your policies against image abuse and harassment. Please confirm once it has been taken down.\n\n' +
-        'Thank you,\n[NAME]',
-    },
-    {
-      title: 'Trusted adult',
-      text:
-        'Subject: I need your help\n\n' +
-        'Hi [NAME],\n\n' +
-        'I need to talk to you about something important. On [DATE] I found out that an image of me was shared without my permission and it might be made with AI.\n\n' +
-        '[DESCRIPTION]\n\n' +
-        "It's not my fault, but I'm worried and I don't know what to do. Can we talk today and decide together how to report it?\n\n" +
-        'Thank you for listening.',
-    },
-    {
-      title: 'School (principal\'s office)',
-      text:
-        'Subject: Notice of an incident affecting a student\n\n' +
-        'Dear Principal,\n\n' +
-        'I am writing to informally let you know about a situation that happened on [DATE]. [NAME] was affected by an image being shared without consent, possibly created or altered using artificial intelligence.\n\n' +
-        'Summary: [DESCRIPTION]\n\n' +
-        'I ask that you take the necessary steps to protect the student and let me know how we can work together. I appreciate your discretion.\n\n' +
-        'Sincerely,\n[NAME]',
-    },
-  ],
-  hi: [
-    {
-      title: 'प्लेटफ़ॉर्म (Instagram, TikTok आदि)',
-      text:
-        'विषय: सामग्री हटाने का अत्यावश्यक अनुरोध\n\n' +
-        'नमस्ते सुरक्षा टीम,\n\n' +
-        'मेरा नाम [नाम] है और मैं नाबालिग हूँ। [तारीख] को मुझे पता चला कि मेरी अनुमति के बिना मेरी एक तस्वीर पोस्ट की गई है, जो कृत्रिम बुद्धिमत्ता (AI) से बनाई या बदली गई हो सकती है।\n\n' +
-        'विवरण: [विवरण]\n\n' +
-        'मैं इसे तुरंत हटाने का अनुरोध करता/करती हूँ, क्योंकि यह छवि दुरुपयोग और उत्पीड़न के विरुद्ध आपकी नीतियों का उल्लंघन है। कृपया हटाए जाने पर मुझे सूचित करें।\n\n' +
-        'धन्यवाद,\n[नाम]',
-    },
-    {
-      title: 'विश्वसनीय वयस्क',
-      text:
-        'विषय: मुझे आपकी मदद चाहिए\n\n' +
-        'नमस्ते [नाम],\n\n' +
-        'मुझे आपसे एक ज़रूरी बात करनी है। [तारीख] को मुझे पता चला कि मेरी एक तस्वीर बिना मेरी अनुमति के साझा की गई है और वह AI से बनी हो सकती है।\n\n' +
-        '[विवरण]\n\n' +
-        'इसमें मेरी कोई गलती नहीं है, लेकिन मैं चिंतित हूँ और समझ नहीं आ रहा कि क्या करूँ। क्या हम आज बात कर सकते हैं और मिलकर तय कर सकते हैं कि इसकी रिपोर्ट कैसे करें?\n\n' +
-        'मेरी बात सुनने के लिए धन्यवाद।',
-    },
-    {
-      title: 'स्कूल (प्रधानाचार्य कार्यालय)',
-      text:
-        'विषय: एक छात्र को प्रभावित करने वाली घटना की सूचना\n\n' +
-        'आदरणीय प्रधानाचार्य जी,\n\n' +
-        'मैं आपको [तारीख] को हुई एक घटना के बारे में अनौपचारिक रूप से सूचित करने के लिए लिख रहा/रही हूँ। [नाम] की एक तस्वीर बिना सहमति के साझा की गई, जो संभवतः AI से बनाई या बदली गई है।\n\n' +
-        'सारांश: [विवरण]\n\n' +
-        'कृपया छात्र की सुरक्षा के लिए आवश्यक कदम उठाएँ और बताएँ कि हम मिलकर कैसे काम कर सकते हैं। आपकी गोपनीयता के लिए धन्यवाद।\n\n' +
-        'सादर,\n[नाम]',
-    },
-  ],
-};
-
-const COPIED_FEEDBACK_MS = 2000;
-
-// Resolves false when the Clipboard API is missing or the write is rejected
-// (e.g. insecure context), so the caller can show a selectable textarea.
-async function copyText(text) {
-  if (!navigator.clipboard || typeof navigator.clipboard.writeText !== 'function') return false;
-  try {
-    await navigator.clipboard.writeText(text);
-    return true;
-  } catch (err) {
-    return false;
-  }
-}
-
-function showCopyFallback(card, text, label) {
-  let area = card.querySelector('.template-fallback');
-  if (!area) {
-    area = document.createElement('textarea');
-    area.className = 'template-fallback';
-    area.readOnly = true;
-    area.setAttribute('aria-label', label);
-    card.appendChild(area);
-  }
-  area.value = text;
-  area.focus();
-  area.select();
-}
-
-function renderActionResources() {
-  const as = ACTION_STRINGS[currentLang];
-  document.getElementById('action-resources-title').textContent = as.title;
-  document.getElementById('action-disclaimer').textContent = as.disclaimer;
-
-  const list = document.getElementById('template-list');
-  list.innerHTML = '';
-
-  EMAIL_TEMPLATES[currentLang].forEach((tpl) => {
-    const card = document.createElement('details');
-    card.className = 'template-card';
-
-    const title = document.createElement('summary');
-    title.className = 'template-title';
-    title.textContent = tpl.title;
-    card.appendChild(title);
-
-    const body = document.createElement('pre');
-    body.className = 'template-body';
-    body.textContent = tpl.text;
-    card.appendChild(body);
-
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'copy-btn';
-    btn.textContent = as.copy;
-    let resetTimer = null;
-    btn.addEventListener('click', async () => {
-      const ok = await copyText(tpl.text);
-      if (!ok) { showCopyFallback(card, tpl.text, as.fallback); return; }
-      btn.textContent = as.copied;
-      btn.classList.add('copied');
-      clearTimeout(resetTimer);
-      resetTimer = setTimeout(() => {
-        btn.textContent = as.copy;
-        btn.classList.remove('copied');
-      }, COPIED_FEEDBACK_MS);
-    });
-    card.appendChild(btn);
-
-    list.appendChild(card);
-  });
-}
-
-// Country-keyed resources: decoupled from UI language (a Spanish speaker
-// can be in the US, an English speaker can be in India, etc).
-const CRISIS_RESOURCES = {
-  us: {
-    country: "United States",
-    resources: [
-      {
-        name: "Crisis Text Line",
-        description: "Free 24/7 crisis support via text",
-        contact: "Text HOME to 741741",
-        url: "https://www.crisistextline.org",
-        type: "hotline",
-      },
-      {
-        name: "RAINN: National Sexual Assault Hotline",
-        description:
-          "Confidential support for survivors of image-based sexual abuse",
-        contact: "1-800-656-HOPE (4673)",
-        url: "https://www.rainn.org",
-        type: "hotline",
-      },
-      {
-        name: "Cyber Civil Rights Initiative",
-        description:
-          "Specialized support for victims of non-consensual intimate images",
-        contact: "cybercivilrights.org/get-help",
-        url: "https://cybercivilrights.org/get-help/",
-        type: "ngo",
-      },
-      {
-        name: "StopNCII.org",
-        description:
-          "Free tool to prevent non-consensual intimate images from spreading online",
-        contact: "stopncii.org",
-        url: "https://stopncii.org",
-        type: "tool",
-      },
-      {
-        name: "FBI: Internet Crime Complaint Center (IC3)",
-        description: "Official channel to report cybercrimes involving minors",
-        contact: "ic3.gov",
-        url: "https://www.ic3.gov",
-        type: "legal",
-      },
-      {
-        name: "NCMEC CyberTipline",
-        description:
-          "Report child sexual exploitation material, including deepfakes",
-        contact: "1-800-843-5678",
-        url: "https://www.missingkids.org/gethelpnow/cybertipline",
-        type: "legal",
-      },
-    ],
-    legalNote:
-      "In the United States, sharing intimate images without consent is illegal " +
-      "in 48 states. AI-generated sexual images of real people (deepfakes) are " +
-      "increasingly covered under state law and the DEFIANCE Act (2024) at the " +
-      "federal level.",
-  },
-  mx: {
-    country: "México",
-    resources: [
-      {
-        name: "Línea de la Vida",
-        description: "Apoyo psicológico gratuito 24/7: crisis, estrés, violencia",
-        contact: "800 911 2000",
-        url: "https://www.gob.mx/conasama/articulos/linea-de-la-vida-800-911-2000",
-        type: "hotline",
-      },
-      {
-        name: "CNDH: Comisión Nacional de los Derechos Humanos",
-        description: "Denuncia violaciones a derechos humanos, incluyendo violencia digital. " + CNDH_NOTE_TEXT.es,
-        contact: "800 715 2000",
-        url: "https://www.cndh.org.mx/programas/contacto-1",
-        type: "legal",
-      },
-      {
-        name: "Te Protejo México",
-        description:
-          "Plataforma anónima y gratuita para reportar contenido sexual de menores, " +
-          "grooming, sextorsión y ciberacoso. Parte de la red INHOPE.",
-        contact: "contactanos@teprotejomexico.org",
-        url: "https://teprotejomexico.org/",
-        type: "report",
-      },
-      {
-        name: "REDIM: Red por los Derechos de la Infancia en México",
-        description: "Organización de referencia en derechos de niñas, niños y adolescentes",
-        contact: null,
-        url: "https://derechosinfancia.org.mx/v1/",
-        type: "ngo",
-      },
-    ],
-    legalNote: MX_CRISIS_LEGAL_NOTE,
-  },
-};
-
-// Preferred country for the crisis pathway, based on UI language and browser
-// locale. Only used until the user manually picks a country themselves.
-function getDefaultCountry(lang, browserLocale) {
-  if (lang === "hi") return "in";
-  if (lang === "es") return "mx";
-  if (lang === "en") {
-    if (browserLocale && browserLocale.startsWith("en-US")) return "us";
-    if (browserLocale && browserLocale.startsWith("en-IN")) return "in";
-    return "us";
-  }
-  return "us";
-}
-
 // Language state
 let currentLang = 'es';
 let currentResult = null;
 let selectedFile  = null;
-let victimMode    = 'me';
-let currentCountry = 'mx';
-let countryManuallySet = false;
-let directCrisisActive = false;
 let analyzedAt = null;
-
-function syncCountryButtons() {
-  document.querySelectorAll('.country-btn').forEach(b => b.classList.toggle('active', b.dataset.country === currentCountry));
-}
-
-function renderNoDetectionNote() {
-  const dc = DIRECT_CRISIS_STRINGS[currentLang];
-  noDetectionText.textContent = dc.noDetectionNote;
-  noDetectionLink.textContent = dc.noDetectionLink;
-}
+let flowApi = null; // set by initFlow at the bottom of the file
 
 function applyLanguage(lang) {
   currentLang = lang;
   const t  = T[lang];
-  const dc = DIRECT_CRISIS_STRINGS[lang];
 
-  // static text
-  document.querySelectorAll('.hero-title').forEach(el => el.textContent = t.heroTitle);
-  document.querySelectorAll('.hero-subtitle').forEach(el => el.textContent = t.heroSubtitle);
   document.querySelectorAll('.upload-text').forEach(el => {
     if (!selectedFile) el.textContent = t.uploadPrompt;
   });
-  document.querySelectorAll('.privacy-note').forEach(el => el.textContent = t.privacyNote);
-  document.querySelectorAll('.disclaimer-text').forEach(el => el.textContent = t.disclaimer);
 
   // buttons
   if (!analyzeBtn.classList.contains('loading')) {
     analyzeBtn.textContent = t.analyzeBtn;
   }
   resetBtn.textContent        = t.resetBtn;
-  directCrisisBtn.textContent = dc.directCrisisBtn;
-  backToUploadBtn.textContent = dc.backToUpload;
-  directCrisisHeading.textContent = dc.directCrisisHeading;
   downloadPdfBtn.textContent  = PDF_STRINGS[lang].btn;
 
   // extra UI strings
   const ui = UI[lang];
   document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = ui[el.dataset.i18n] || ''; });
-  resultHeading.textContent = directCrisisActive ? ui.directHeading : ui.resultHeading;
+  resultHeading.textContent = ui.resultHeading;
   scoreCaption.textContent  = ui.scoreCaption;
-  countryLabel.textContent  = ui.countryLabel;
-  whatsappSub.textContent   = ui.whatsappSub;
-  schoolLetterLink.textContent = ui.schoolLetter;
   if (selectedFile) uploadHint.textContent = ui.changeImage;
   updateAnalyzeHint();
   renderPrivacyUi();
   renderContentGuard();
-  renderEvidenceNote();
-  if (!altRouteEl.hidden) renderAlternativeRoute(altRouteEl);
+  if (!altRouteEl.hidden) renderBlockedNote();
 
   // toggle active state on ALL lang buttons
   langBtns.forEach(btn => {
@@ -962,20 +519,14 @@ function applyLanguage(lang) {
     btn.setAttribute('aria-pressed', String(on));
   });
 
-  // auto-detect country from language + browser locale, unless the user
-  // already picked one manually via the country selector
-  if (!countryManuallySet) {
-    currentCountry = getDefaultCountry(lang, navigator.language);
-    syncCountryButtons();
-  }
-  renderStateField(); // after the country is known: the selector is Mexico-only
+  // The flow layer re-renders the current step and picks the default country from the language.
+  if (flowApi) flowApi.setLang(lang);
+  renderStateField();
 
-  // re-render result if visible
   if (currentResult) {
     renderResultDetails();
+    renderLowNote();
   }
-  if (!noDetectionNote.hidden) renderNoDetectionNote();
-  if (!crisisPathway.hidden)   renderCrisisPathway();
 
   applyVideoLanguage();
   updateSchoolLetterVisibility();
@@ -1054,7 +605,7 @@ function setPreview(file) {
 
 async function handleFile(file) {
   clearFormError();
-  hideAlternativeRoute();
+  hideBlockedNote();
   const t = T[currentLang];
   const myToken = ++handleFileToken;
 
@@ -1121,182 +672,6 @@ function animateScore(target) {
   }
   requestAnimationFrame(tick);
 }
-
-// Crisis pathway
-function appendNgoEntry(container, { name, description, phone, url }) {
-  const entry = document.createElement('div');
-  entry.className = 'ngo-entry';
-
-  const nameEl = document.createElement('p');
-  nameEl.className = 'ngo-name';
-  nameEl.textContent = name;
-  entry.appendChild(nameEl);
-
-  if (description) {
-    const descEl = document.createElement('p');
-    descEl.className = 'ngo-description';
-    descEl.textContent = description;
-    entry.appendChild(descEl);
-  }
-
-  if (phone) {
-    const phoneEl = document.createElement('p');
-    const phoneLink = document.createElement('a');
-    phoneLink.href = `tel:${phone.replace(/\D/g, '')}`;
-    phoneLink.textContent = phone;
-    phoneEl.appendChild(phoneLink);
-    entry.appendChild(phoneEl);
-  }
-
-  if (url) {
-    const webEl = document.createElement('p');
-    const webLink = document.createElement('a');
-    webLink.href = url;
-    webLink.target = '_blank';
-    webLink.rel = 'noopener';
-    webLink.textContent = new URL(url).hostname.replace(/^www\./, '');
-    webEl.appendChild(webLink);
-    entry.appendChild(webEl);
-  }
-
-  container.appendChild(entry);
-}
-
-// CRISIS_RESOURCES entries carry a description + free-text contact instead
-// of a dialable phone number, so they get their own renderer.
-function appendResourceEntry(container, { name, description, contact, url }) {
-  const entry = document.createElement('div');
-  entry.className = 'ngo-entry';
-
-  const nameEl = document.createElement('p');
-  nameEl.className = 'ngo-name';
-  nameEl.textContent = name;
-  entry.appendChild(nameEl);
-
-  if (description) {
-    const descEl = document.createElement('p');
-    descEl.className = 'ngo-description';
-    descEl.textContent = description;
-    entry.appendChild(descEl);
-  }
-
-  if (contact) {
-    const contactEl = document.createElement('p');
-    contactEl.className = 'ngo-contact';
-    if (/^[\d\s()+-]{7,}$/.test(contact)) {
-      const call = document.createElement('a');
-      call.href = `tel:${contact.replace(/[^\d+]/g, '')}`;
-      call.textContent = contact;
-      contactEl.appendChild(call);
-    } else {
-      contactEl.textContent = contact;
-    }
-    entry.appendChild(contactEl);
-  }
-
-  if (url) {
-    const webEl = document.createElement('p');
-    const webLink = document.createElement('a');
-    webLink.href = url;
-    webLink.target = '_blank';
-    webLink.rel = 'noopener';
-    webLink.textContent = new URL(url).hostname.replace(/^www\./, '');
-    webEl.appendChild(webLink);
-    entry.appendChild(webEl);
-  }
-
-  container.appendChild(entry);
-}
-
-function renderCrisisPathway() {
-   const t  = T[currentLang];
-   const dc = DIRECT_CRISIS_STRINGS[currentLang];
-
-  // victim toggle
-  victimToggle.querySelectorAll('.victim-toggle-btn').forEach((btn) => {
-    btn.textContent = t.victimToggle[btn.dataset.mode];
-    btn.classList.toggle('active', btn.dataset.mode === victimMode);
-  });
-
-  // heading: only shown for the direct crisis path (no AI analysis run)
-  directCrisisHeading.hidden = true;
-
-  // empathy-first intro: country-specific, or direct-crisis copy
-  if (directCrisisActive) {
-    crisisIntro.textContent = dc.directCrisisIntro;
-  } else if (currentCountry === 'us') {
-    crisisIntro.textContent = t.crisisIntro_us;
-  } else if (currentCountry === 'in') {
-    crisisIntro.textContent = t.crisisIntro_in;
-  } else {
-    crisisIntro.textContent = t.crisisIntro_mx;
-  }
-
-  // WhatsApp share: the direct-crisis path (no detection) uses a message
-  // that doesn't mention AI or VeraShield
-  whatsappDisclaimer.textContent = t.whatsappDisclaimer;
-  whatsappBtn.textContent = t.whatsappBtn;
-  const waMessages = hasAnalysis() ? t.whatsappMessage : t.whatsappMessageDirect;
-  whatsappBtn.href = whatsappShareUrl(buildWhatsappMessage(waMessages[victimMode]));
-
-  const crisisTitleEl = document.querySelector('.crisis-title');
-  if (crisisTitleEl) crisisTitleEl.textContent = t.crisisTitle;
-
-  crisisSteps.innerHTML = '';
-  t.crisisSteps.forEach((text, i) => {
-    const li = document.createElement('li');
-    li.textContent = text;
-    crisisSteps.appendChild(li);
-  });
-
-  ngoCard.innerHTML = '';
-
-  const ngoTitleEl = document.createElement('p');
-  ngoTitleEl.className = 'ngo-title';
-  ngoTitleEl.textContent = currentCountry === 'us' ? t.ngoTitle_us
-    : currentCountry === 'in' ? t.ngoTitle_in
-    : t.ngoTitle_mx;
-  ngoCard.appendChild(ngoTitleEl);
-
-  if (currentCountry === 'us') {
-    CRISIS_RESOURCES.us.resources.forEach((resource) => appendResourceEntry(ngoCard, resource));
-  } else if (currentCountry === 'in') {
-    t.ngosIndia.forEach((ngo) => appendNgoEntry(ngoCard, ngo));
-  } else {
-    CRISIS_RESOURCES.mx.resources.forEach((resource) => appendResourceEntry(ngoCard, resource));
-  }
-
-  // legal rights note: content is a hardcoded string, never user input.
-  // MX note is decoupled from UI language (like CRISIS_RESOURCES.mx.resources)
-  // since it's country-specific legal fact, not a UI string.
-  const legalNoteText = currentCountry === 'us' ? CRISIS_RESOURCES.us.legalNote
-    : currentCountry === 'in' ? t.legalNote_in
-    : CRISIS_RESOURCES.mx.legalNote;
-  legalNote.hidden = !legalNoteText;
-  legalNote.innerHTML = legalNoteText || '';
-
-  // TakeItDown removal request
-  takedownBtn.textContent = t.takedownBtn;
-
-  renderActionResources();
-  updateSchoolLetterVisibility();
-}
-
-victimToggle.addEventListener('click', (e) => {
-  const btn = e.target.closest('.victim-toggle-btn');
-  if (!btn) return;
-  victimMode = btn.dataset.mode;
-  renderCrisisPathway();
-});
-
-document.querySelectorAll('.country-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    currentCountry = btn.dataset.country;
-    countryManuallySet = true;
-    syncCountryButtons();
-    renderCrisisPathway();
-  });
-});
 
 // Privacy disclaimer + "how it works" modal
 const PRIVACY_STRINGS = {
@@ -1535,144 +910,38 @@ document.addEventListener('keydown', (e) => {
 
 function blockAnalysis() {
   console.warn('[VeraShield] Análisis bloqueado: el usuario indicó posible desnudez/contenido sexual de un menor de 18 años. No se envió ningún archivo a APIs externas.');
-  resetToUpload();
-  showAlternativeRoute();
+  resetAnalysis();
+  showBlockedNote();
 }
 
-// AlternativeRoute
-// Shown instead of an error when the analysis is blocked (content guard). Self-contained:
-// renderAlternativeRoute(container) can be reused from any other part of the app.
-const ALT_ROUTE_STRINGS = {
-  es: {
-    title: 'Esta imagen no puede analizarse aquí.',
-    lead: 'Si eres la persona afectada o conoces a alguien en esta situación:',
-    tidName: 'Take It Down (NCMEC)',
-    tidDomain: 'takeitdown.ncmec.org',
-    tidBody: 'Servicio gratuito para que la imagen no se difunda más. La imagen nunca sale de tu dispositivo.',
-    tidBtn: 'Ir a Take It Down →',
-    waHeading: 'Avisar a un adulto de confianza',
-    letterHeading: 'Carta para tu escuela',
-    letterBody: 'Puedes generar la carta aunque no hayas podido analizar la imagen.',
-    letterBtn: 'Generar carta →',
-  },
-  en: {
-    title: 'This image cannot be analyzed here.',
-    lead: 'If you are the person affected or you know someone in this situation:',
-    tidName: 'Take It Down (NCMEC)',
-    tidDomain: 'takeitdown.ncmec.org',
-    tidBody: 'A free service to stop the image from spreading further. The image never leaves your device.',
-    tidBtn: 'Go to Take It Down →',
-    waHeading: 'Tell a trusted adult',
-    letterHeading: 'Letter for your school',
-    letterBody: 'You can generate the letter even if the image could not be analyzed.',
-    letterBtn: 'Generate letter →',
-  },
-  hi: {
-    title: 'इस तस्वीर का विश्लेषण यहाँ नहीं किया जा सकता।',
-    lead: 'अगर आप प्रभावित व्यक्ति हैं या ऐसी स्थिति में किसी को जानते हैं:',
-    tidName: 'Take It Down (NCMEC)',
-    tidDomain: 'takeitdown.ncmec.org',
-    tidBody: 'तस्वीर को और फैलने से रोकने के लिए एक निःशुल्क सेवा। तस्वीर कभी आपके डिवाइस से बाहर नहीं जाती।',
-    tidBtn: 'Take It Down पर जाएँ →',
-    waHeading: 'किसी विश्वसनीय वयस्क को बताएँ',
-    letterHeading: 'आपके स्कूल के लिए पत्र',
-    letterBody: 'तस्वीर का विश्लेषण न हो पाने पर भी आप पत्र बना सकते हैं।',
-    letterBtn: 'पत्र बनाएँ →',
-  },
-};
-
+// Blocked note
+// Shown when the content guard stops the analysis. The person does not need the analysis to get
+// help, so the note only explains that nothing was sent and offers the next step.
 const altRouteEl = document.getElementById('alternative-route');
 
-// First line of every WhatsApp message (agreed with SocialTIC, 28 Oct 2026). The site comes from
-// SITE_DOMAIN. If the whole URL would exceed WhatsApp's ~2,000 character limit, the short form is used.
-const WHATSAPP_URL_LIMIT = 2000;
-const WHATSAPP_INTRO = {
-  withAnalysis: {
-    es: 'Este mensaje fue generado con VeraShield ({site}), herramienta de detección de imágenes manipuladas con IA.',
-    en: 'This message was generated with VeraShield ({site}), a tool for detecting AI-manipulated images.',
-    hi: 'यह संदेश VeraShield ({site}) से बनाया गया है, जो AI से बदली गई इमेज पहचानने वाला टूल है।',
-  },
-  plain: {
-    es: 'Este mensaje fue generado con VeraShield ({site}).',
-    en: 'This message was generated with VeraShield ({site}).',
-    hi: 'यह संदेश VeraShield ({site}) से बनाया गया है।',
-  },
-  short: {
-    es: 'Generado con VeraShield ({site}).',
-    en: 'Generated with VeraShield ({site}).',
-    hi: 'VeraShield ({site}) से बनाया गया।',
-  },
-};
-
-// With analysis = there is a score in the shared case data and this is not the direct-crisis path.
-function hasAnalysis() {
-  return caseData.score_analisis !== null && !directCrisisActive;
+function renderBlockedNote() {
+  const c = getContent(currentLang).analysis;
+  altRouteEl.replaceChildren();
+  const text = document.createElement('p');
+  text.id = 'alt-route-title';
+  text.tabIndex = -1;
+  text.textContent = c.blocked;
+  const next = document.createElement('button');
+  next.type = 'button';
+  next.className = 'primary-btn';
+  next.id = 'blocked-continue';
+  next.textContent = c.blockedContinue;
+  next.addEventListener('click', () => flow.step === 'analisis' && document.getElementById('analysis-skip').click());
+  altRouteEl.append(text, next);
 }
 
-function buildWhatsappMessage(body) {
-  const intro = (key) => WHATSAPP_INTRO[key][currentLang].replace('{site}', SITE_DOMAIN);
-  let text = intro(hasAnalysis() ? 'withAnalysis' : 'plain') + '\n\n' + body;
-  if (whatsappShareUrl(text).length > WHATSAPP_URL_LIMIT) text = intro('short') + '\n\n' + body;
-  return text;
-}
-
-function whatsappShareUrl(text) {
-  return `https://wa.me/?text=${encodeURIComponent(text)}`;
-}
-
-function renderAlternativeRoute(container) {
-  const s = ALT_ROUTE_STRINGS[currentLang];
-  const t = T[currentLang];
-  const make = (tag, className, text) => {
-    const node = document.createElement(tag);
-    if (className) node.className = className;
-    if (text !== undefined) node.textContent = text;
-    return node;
-  };
-  const item = (heading, ...children) => {
-    const box = make('div', 'alt-route-item');
-    box.append(make('h3', '', heading), ...children);
-    return box;
-  };
-
-  const title = make('h2', 'crisis-title', s.title);
-  title.id = 'alt-route-title';
-  title.tabIndex = -1;
-
-  // Take It Down: external service, the image never leaves the device
-  const tidLink = make('a', 'takedown-btn', s.tidBtn);
-  tidLink.href = 'https://takeitdown.ncmec.org';
-  tidLink.target = '_blank';
-  tidLink.rel = 'noopener';
-
-  // WhatsApp: same share link and message as the crisis path without analysis
-  const waLink = make('a', 'share-btn whatsapp-btn', t.whatsappBtn);
-  waLink.href = whatsappShareUrl(buildWhatsappMessage(t.whatsappMessageDirect[victimMode]));
-  waLink.target = '_blank';
-  waLink.rel = 'noopener';
-
-  // School letter: jumps straight to the letter form, skipping the analysis
-  const letterBtn = make('button', 'secondary-btn', s.letterBtn);
-  letterBtn.type = 'button';
-  letterBtn.addEventListener('click', openSchoolLetterFromUpload);
-
-  container.replaceChildren(
-    title,
-    make('p', 'alt-path-lead', s.lead),
-    item(s.tidName, make('p', 'alt-path-lead', s.tidDomain), make('p', 'alt-path-lead', s.tidBody), tidLink),
-    item(s.waHeading, make('p', 'alt-path-lead', t.whatsappDisclaimer), waLink),
-    item(s.letterHeading, make('p', 'alt-path-lead', s.letterBody), letterBtn),
-  );
-}
-
-function showAlternativeRoute() {
-  renderAlternativeRoute(altRouteEl);
+function showBlockedNote() {
+  renderBlockedNote();
   altRouteEl.hidden = false;
-  altRouteEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
   document.getElementById('alt-route-title').focus({ preventScroll: true });
 }
 
-function hideAlternativeRoute() {
+function hideBlockedNote() {
   altRouteEl.hidden = true;
   altRouteEl.replaceChildren();
 }
@@ -1876,7 +1145,7 @@ function caseDataLines(lang) {
     [c.student, caseData.nombre_victima || c.ph.student],
     [c.school, caseData.nombre_escuela || c.ph.school],
   ];
-  if (currentCountry === 'mx') {
+  if (flow.pais === 'mx') {
     lines.push([c.level, caseData.nivel_escolar ? sl[LEVEL_KEYS[caseData.nivel_escolar]] : c.ph.level]);
     lines.push([c.state, caseData.estado || c.ph.state]);
   }
@@ -1922,12 +1191,11 @@ function generateEvidencePdf() {
 
   // 3b. Evidence preservation (own section, before the reporting steps).
   // Helvetica has no check/warning glyphs, so the PDF uses plain "- " bullets.
-  const ev = EVIDENCE_STRINGS[lang];
+  const ev = getContent(lang).stop;
   w.callout([
-    { str: ev.title, bold: true, size: 11.5, gap: 2.5 },
-    ...ev.items.map((item) => ({ str: '- ' + item })),
-    { str: ev.warn, bold: true, color: PDF_COLORS.bucket.high, gap: 1 },
-    { str: ev.warnBody, gap: 0 },
+    { str: ev.evidenceTitle, bold: true, size: 11.5, gap: 2.5 },
+    ...ev.evidenceItems.map((item) => ({ str: '- ' + item })),
+    { str: ev.evidenceWarn, bold: true, color: PDF_COLORS.bucket.high, gap: 0 },
   ], { bar: PDF_COLORS.bucket.medium });
 
   // 4. Recommended steps
@@ -1936,7 +1204,7 @@ function generateEvidencePdf() {
   w.space(4);
 
   // 4a. Legal framework for the selected state (Mexico only)
-  if (currentCountry === 'mx') {
+  if (flow.pais === 'mx') {
     const ref = getLegalReference(caseData.estado, lang);
     w.callout([
       { str: LEGAL_FRAMEWORK_TITLE[lang], bold: true, size: 11.5, gap: 2.5 },
@@ -1967,11 +1235,6 @@ function generateEvidencePdf() {
 
 downloadPdfBtn.addEventListener('click', generateEvidencePdf);
 
-function enterScreen(headingEl) {
-  window.scrollTo({ top: 0, behavior: 'auto' });
-  headingEl.focus({ preventScroll: true });
-}
-
 // Result details (label, explanation, generator line)
 function renderResultDetails() {
   if (!currentResult) return;
@@ -1994,22 +1257,23 @@ function renderResultDetails() {
   }
 }
 
-// Show result
+// Low-result note ("a low result does not mean nothing happened")
+const lowNote = document.getElementById('analysis-low-note');
+function renderLowNote() {
+  if (!currentResult) return;
+  lowNote.textContent = getContent(currentLang).analysis.lowNote;
+  lowNote.hidden = currentResult.bucket !== 'low';
+}
+
+// Show result: inside the optional analysis step. It never replaces the flow: the step keeps its
+// Back and Continue buttons, and the next steps are the same whatever the result is.
 function showResult(data) {
   currentResult = data;
   setAnalysis(data);
   analyzedAt = new Date();
-  directCrisisActive = false;
 
-  downloadPdfBtn.hidden = !window.jspdf?.jsPDF; // hide if the CDN script failed to load
-
-  mountCaseFields('result');
   uploadScreen.hidden = true;
   resultScreen.hidden = false;
-  scoreDisplay.hidden = false;
-  scoreExplanation.hidden = false;
-  resetBtn.hidden = false;
-  backToUploadBtn.hidden = true;
 
   resultHeading.textContent = UI[currentLang].resultHeading;
   scoreDisplay.dataset.bucket = data.bucket;
@@ -2017,61 +1281,19 @@ function showResult(data) {
   animateScore(data.score_percent);
 
   renderResultDetails();
-
-  if (data.bucket !== 'low') {
-    renderCrisisPathway();
-    crisisPathway.hidden = false;
-    countrySelector.hidden = false;
-    noDetectionNote.hidden = true;
-  } else {
-    crisisPathway.hidden = true;
-    countrySelector.hidden = true;
-    renderNoDetectionNote();
-    noDetectionNote.hidden = false;
-  }
-  enterScreen(resultHeading);
+  renderLowNote();
+  if (flowApi) flowApi.rerender(); // the step now offers "Continue" instead of "Skip"
+  resultHeading.focus({ preventScroll: true });
 }
 
-// Direct crisis path
-// Entered either from the upload screen (no analysis run at all) or from the
-// "no manipulation detected" note (a result already exists). Both cases just
-// need the crisis pathway visible with direct-crisis framing instead of the
-// AI-triage framing.
-function revealCrisisResources() {
-  directCrisisActive = true;
-  countrySelector.hidden = false;
-  crisisPathway.hidden = false;
-  noDetectionNote.hidden = true;
-  renderCrisisPathway();
-}
-
-function showDirectCrisisPath() {
-  currentResult = null;
-  setAnalysis(null);
-  downloadPdfBtn.hidden = true;
-  mountCaseFields('result');
-  uploadScreen.hidden = true;
-  resultScreen.hidden = false;
-  scoreDisplay.hidden = true;
-  scoreExplanation.hidden = true;
-  scoreGenerator.hidden = true;
-  resetBtn.hidden = true;
-  backToUploadBtn.hidden = false;
-  resultHeading.textContent = UI[currentLang].directHeading;
-  revealCrisisResources();
-  enterScreen(resultHeading);
-}
-
-directCrisisBtn.addEventListener('click', showDirectCrisisPath);
-noDetectionLink.addEventListener('click', revealCrisisResources);
-function resetToUpload() {
-  hideAlternativeRoute();
+// Back to the upload panel with nothing selected (does not touch the rest of the flow).
+function resetAnalysis() {
+  hideBlockedNote();
   handleFileToken++;
   selectedFile = null;
   contentGuardConfirmed = null;
   currentResult = null;
   setAnalysis(null);
-  directCrisisActive = false;
   fileInput.value = '';
   clearVideoInputs();
   setPreview(null);
@@ -2080,23 +1302,26 @@ function resetToUpload() {
   analyzeBtn.disabled = true;
   setLoading(false);
   clearFormError();
-  crisisPathway.hidden = true;
-  countrySelector.hidden = true;
-  noDetectionNote.hidden = true;
+  lowNote.hidden = true;
   scoreGenerator.hidden = true;
-  schoolLetterDetails.open = false;
-  mountCaseFields('upload');
   resultScreen.hidden = true;
   uploadScreen.hidden = false;
-  enterScreen(heroTitle);
+  if (flowApi) flowApi.rerender();
 }
-backToUploadBtn.addEventListener('click', resetToUpload);
+
+// Everything: the analysis, the case data and the in-memory flow (used by Quick exit and Start over).
+function resetAll() {
+  resetAnalysis();
+  clearCaseData();
+  schoolLetterForm.reset();
+  schoolLetterDetails.open = false;
+  if (flowApi) flowApi.resetAll();
+}
 
 // School letter (MX / ES only)
 // 100% client-side: form values never leave the browser. Reuses the jsPDF
 // build already loaded in index.html.
 
-const schoolLetterLink    = document.getElementById('school-letter-link');
 const schoolLetterSection = document.getElementById('school-letter');
 const schoolLetterDetails = document.getElementById('school-letter-details');
 const schoolLetterForm    = document.getElementById('school-letter-form');
@@ -2279,36 +1504,22 @@ const caseData = {
   score_analisis: null,   // rounded %, null while there is no analysis
   fuente_analisis: 'ninguno',
 };
-const caseFields = document.getElementById('case-fields');
-// Each field exists twice (letter form + the folded shortcut on the upload screen); both copies
-// always show the same value and write to the one caseData.
 const caseInputs = {
-  nombre_victima: ['sl-student', 'docs-student'].map((id) => document.getElementById(id)),
-  nombre_escuela: ['sl-school', 'docs-school'].map((id) => document.getElementById(id)),
-  nivel_escolar: ['sl-level', 'docs-level'].map((id) => document.getElementById(id)),
-  fecha_incidente: ['sl-date', 'docs-date'].map((id) => document.getElementById(id)),
+  nombre_victima: document.getElementById('sl-student'),
+  nombre_escuela: document.getElementById('sl-school'),
+  nivel_escolar: document.getElementById('sl-level'),
+  fecha_incidente: document.getElementById('sl-date'),
 };
-// Visible confirmation (and the letter shortcut) once any of the shared fields has a value.
-function updateDocsSaved() {
-  const any = ['nombre_victima', 'nombre_escuela', 'nivel_escolar', 'fecha_incidente'].some((k) => caseData[k]);
-  document.getElementById('docs-saved').hidden = !any;
-}
-
-Object.entries(caseInputs).forEach(([key, inputs]) => {
-  inputs.forEach((input) => {
-    input.addEventListener(input.tagName === 'SELECT' || input.type === 'date' ? 'change' : 'input', () => {
-      caseData[key] = input.value.trim();
-      inputs.forEach((other) => { if (other !== input) other.value = input.value; });
-      updateDocsSaved();
-    });
+Object.entries(caseInputs).forEach(([key, input]) => {
+  input.addEventListener(input.tagName === 'SELECT' || input.type === 'date' ? 'change' : 'input', () => {
+    caseData[key] = input.value.trim();
   });
 });
 
 function clearCaseData() {
   Object.assign(caseData, { nombre_victima: '', nombre_escuela: '', nivel_escolar: '', estado: '', fecha_incidente: '' });
-  Object.values(caseInputs).flat().forEach((input) => { input.value = ''; });
+  Object.values(caseInputs).forEach((input) => { input.value = ''; });
   stateSelect.value = '';
-  updateDocsSaved();
 }
 
 function setAnalysis(result) {
@@ -2319,11 +1530,7 @@ function setAnalysis(result) {
 function renderStateField() {
   document.getElementById('state-label').textContent = STATE_FIELD_STRINGS[currentLang].label;
   if (!stateError.hidden) stateError.textContent = STATE_FIELD_STRINGS[currentLang].error;
-  stateField.hidden = currentCountry !== 'mx';
-}
-
-function mountCaseFields(where) {
-  document.getElementById('state-host-' + where).appendChild(caseFields); // same nodes, one value
+  stateField.hidden = flow.pais !== 'mx';
 }
 
 stateSelect.addEventListener('change', () => {
@@ -2333,7 +1540,7 @@ stateSelect.addEventListener('change', () => {
 
 // True when a Mexican document can be generated; otherwise shows the error and focuses the field.
 function requireState() {
-  if (currentCountry !== 'mx' || caseData.estado) return true;
+  if (flow.pais !== 'mx' || caseData.estado) return true;
   stateError.textContent = STATE_FIELD_STRINGS[currentLang].error;
   stateError.hidden = false;
   stateField.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -2350,10 +1557,8 @@ function applySchoolLetterStrings() {
 }
 
 function updateSchoolLetterVisibility() {
-  schoolLetterSection.hidden = false;
-  schoolLetterLink.hidden = false;
   renderStateField();
-  levelFields.forEach((f) => { f.hidden = currentCountry !== 'mx'; });
+  levelFields.forEach((f) => { f.hidden = flow.pais !== 'mx'; });
   applySchoolLetterStrings();
 }
 
@@ -2381,7 +1586,7 @@ function generateSchoolLetter() {
 
   const val = (id) => document.getElementById(id).value.trim();
   const blank = (v, n = 18) => v || '_'.repeat(n);
-  const country  = currentCountry;
+  const country  = flow.pais;
   const student  = caseData.nombre_victima;
   const grade    = val('sl-grade');
   const school   = caseData.nombre_escuela;
@@ -2459,21 +1664,6 @@ document.getElementById('sl-clear').addEventListener('click', () => {
 
 slDescription.addEventListener('input', () => {
   slCounter.textContent = `${slDescription.value.length} / 300`;
-});
-
-// Entry point from the upload screen (independent of any analysis result)
-function openSchoolLetterFromUpload() {
-  showDirectCrisisPath();
-  schoolLetterDetails.open = true;
-  schoolLetterSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-schoolLetterLink.addEventListener('click', openSchoolLetterFromUpload);
-
-document.getElementById('docs-generate').addEventListener('click', () => {
-  if (!uploadScreen.hidden) { openSchoolLetterFromUpload(); return; }
-  // already on the results screen: do not reset it, just open the letter
-  schoolLetterDetails.open = true;
-  schoolLetterSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
 });
 
 // Video mode
@@ -2917,7 +2107,7 @@ analyzeBtn.addEventListener('click', async () => {
 
   const formData = new FormData();
   formData.append('file', selectedFile);
-  formData.append('country', currentLang === 'hi' ? 'IN' : 'MX');
+  formData.append('country', flow.pais.toUpperCase());
   formData.append('language', currentLang);
 
   const controller = new AbortController();
@@ -2937,10 +2127,16 @@ analyzeBtn.addEventListener('click', async () => {
 });
 
 // Reset
-resetBtn.addEventListener('click', resetToUpload);
+resetBtn.addEventListener('click', resetAnalysis);
 
 // Init
-(function initLanguage() {
+(function init() {
   const nav = (navigator.language || 'es').slice(0, 2).toLowerCase();
-  applyLanguage(['es', 'en', 'hi'].includes(nav) ? nav : 'es');
+  const lang = ['es', 'en', 'hi'].includes(nav) ? nav : 'es';
+  downloadPdfBtn.hidden = !window.jspdf?.jsPDF; // hide if the CDN script failed to load
+  flowApi = initFlow({
+    lang,
+    hooks: { hasResult: () => !!currentResult, resetAll },
+  });
+  applyLanguage(lang);
 })();

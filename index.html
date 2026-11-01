@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<a class="skip-link" href="#main" data-i18n="skipLink"></a>
+<a class="skip-link" href="#main" id="skip-link"></a>
 <header class="site-header">
   <div class="site-header-inner">
     <a class="brand" href="./" aria-label="VeraShield">
@@ -22,28 +22,35 @@
       </svg>
       <span class="wordmark">VeraShield</span>
     </a>
-    <div class="lang-toggle" role="group" aria-label="Language">
-      <button type="button" class="lang-btn active" data-lang="es" lang="es" aria-pressed="true">Español</button>
-      <button type="button" class="lang-btn" data-lang="en" lang="en" aria-pressed="false">English</button>
-      <button type="button" class="lang-btn" data-lang="hi" lang="hi" aria-pressed="false">हिन्दी</button>
+    <div class="header-actions">
+      <div class="lang-toggle" role="group" aria-label="Language">
+        <button type="button" class="lang-btn active" data-lang="es" lang="es" aria-pressed="true">Español</button>
+        <button type="button" class="lang-btn" data-lang="en" lang="en" aria-pressed="false">English</button>
+        <button type="button" class="lang-btn" data-lang="hi" lang="hi" aria-pressed="false">हिन्दी</button>
+      </div>
+      <button type="button" class="quick-exit" id="quick-exit"></button>
     </div>
   </div>
 </header>
 
+<div class="flow-bar" id="flow-bar">
+  <div class="flow-bar-inner">
+    <p class="flow-bar-step" id="flow-bar-step" aria-live="polite"></p>
+    <label class="flow-bar-country"><span id="country-label"></span>
+      <select id="country-select"></select></label>
+    <button type="button" class="flow-bar-plan" id="plan-btn"></button>
+  </div>
+</div>
+
 <main class="page" id="main">
-  <section id="upload-screen" class="screen" aria-labelledby="hero-title">
-    <div class="intro">
-      <p class="eyebrow" data-i18n="eyebrow"></p>
-      <h1 class="hero-title" id="hero-title" tabindex="-1"></h1>
-      <p class="hero-subtitle"></p>
-    </div>
+  <div id="flow-root">
+    <section class="step" id="step-home" hidden></section>
+    <section class="step" id="step-respira" hidden></section>
+    <section class="step" id="step-que-paso" hidden></section>
 
-    <ul class="trust-list">
-      <li><svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="trust1"></span></li>
-      <li><svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="trust2"></span></li>
-      <li><svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="trust3"></span></li>
-    </ul>
-
+    <section class="step" id="step-analisis" hidden>
+      <div class="step-head" id="analysis-head"></div>
+      <section id="upload-screen" class="screen">
     <div class="panel">
       <div class="mode-toggle" id="mode-toggle" role="group">
         <button type="button" class="mode-btn active" data-mode="photo" aria-pressed="true" data-vi18n="modePhoto"></button>
@@ -89,8 +96,42 @@
         <p class="video-soon-body" id="video-soon-body"></p>
       </div>
 
-      <div id="state-host-upload">
-       <div id="case-fields">
+      <p class="step-label" id="step-analyze-label"><span class="step-num">2</span><span data-i18n="stepAnalyze"></span></p>
+      <button type="button" id="analyze-btn" disabled></button>
+      <p class="analyze-hint" id="analyze-hint" data-i18n="analyzeHint"></p>
+      <p class="form-error" id="form-error" role="alert" hidden></p>
+
+      <section class="alt-route" id="alternative-route" aria-labelledby="alt-route-title" hidden></section>
+
+    </div>
+      </section>
+    <section id="result-screen" class="screen" aria-labelledby="result-heading" hidden>
+      <div class="result-summary">
+        <h3 class="section-heading" id="result-heading" tabindex="-1"></h3>
+        <div class="score-display" id="score-display">
+          <div class="score-value"><span class="score-number" id="score-number">0</span><span class="score-unit">%</span></div>
+          <div class="score-body">
+            <span class="score-caption" id="score-caption"></span>
+            <span class="score-label" id="score-label"></span>
+            <div class="score-meter" aria-hidden="true"><i id="score-meter-fill"></i></div>
+          </div>
+        </div>
+        <p class="score-explanation" id="score-explanation"></p>
+        <p class="score-generator" id="score-generator" hidden></p>
+        <p class="resource-text" id="analysis-low-note" hidden></p>
+        <button type="button" id="reset-btn" class="secondary-btn"></button>
+      </div>
+    </section>
+      <div class="step-actions" id="analysis-actions"></div>
+    </section>
+
+    <section class="step" id="step-contarlo" hidden></section>
+    <section class="step" id="step-frenar" hidden></section>
+
+    <section class="step" id="step-adulto" hidden>
+      <div id="adult-render"></div>
+      <div class="letter-host" id="adult-letter-host">
+        <div id="case-fields">
         <div class="sl-field state-field" id="state-field" hidden>
           <label for="state-select" id="state-label"></label>
           <select id="state-select" aria-describedby="state-error" aria-required="true" required>
@@ -130,123 +171,7 @@
           </select>
           <p class="form-error" id="state-error" role="alert" hidden></p>
         </div>
-        <details class="docs-data" id="docs-data">
-          <summary data-sl="docsSummary"></summary>
-          <p class="docs-data-note" data-sl="docsNote"></p>
-          <label class="sl-field"><span data-sl="student"></span>
-                <input type="text" id="docs-student" maxlength="100" data-sl-ph="studentPh"></label>
-          <label class="sl-field"><span data-sl="school"></span>
-                <input type="text" id="docs-school" maxlength="120" data-sl-ph="schoolPh"></label>
-          <label class="sl-field"><span data-sl="date"></span>
-                <input type="date" id="docs-date"></label>
-          <label class="sl-field" id="docs-level-field" data-level-field><span data-sl="level"></span>
-                <select id="docs-level">
-                  <option value="" data-sl="levelPh"></option>
-                  <option value="basica" data-sl="levelBasica"></option>
-                  <option value="mediaFederal" data-sl="levelMediaFederal"></option>
-                  <option value="local" data-sl="levelLocal"></option>
-                </select></label>
-          <p class="docs-data-saved" id="docs-saved" role="status" data-sl="docsSaved" hidden></p>
-          <button type="button" class="secondary-btn" id="docs-generate" data-sl="docsGenerate"></button>
-        </details>
-       </div>
-      </div>
-
-      <p class="step-label" id="step-analyze-label"><span class="step-num">2</span><span data-i18n="stepAnalyze"></span></p>
-      <button type="button" id="analyze-btn" disabled></button>
-      <p class="analyze-hint" id="analyze-hint" data-i18n="analyzeHint"></p>
-      <p class="form-error" id="form-error" role="alert" hidden></p>
-
-      <section class="alt-route" id="alternative-route" aria-labelledby="alt-route-title" hidden></section>
-
-      <div class="or-divider" role="separator"><span data-i18n="or"></span></div>
-
-      <div class="alt-path">
-        <p class="alt-path-lead" data-i18n="altLead"></p>
-        <button type="button" id="direct-crisis-btn" class="secondary-btn"></button>
-        <button type="button" id="school-letter-link" class="link-btn"></button>
-      </div>
-    </div>
-
-    <div class="intro-foot">
-      <aside class="scope-note" id="scope-note" role="note">
-        <p class="scope-lead" data-i18n="scopeLead"></p>
-        <p class="scope-not" data-i18n="scopeNot"></p>
-      </aside>
-      <aside class="disclaimer-banner" role="note"><svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg><p class="disclaimer-text"></p></aside>
-      <p class="privacy-note"></p>
-    </div>
-  </section>
-
-  <section id="result-screen" class="screen" aria-labelledby="result-heading" hidden>
-    <div class="result-summary">
-      <h2 class="section-heading" id="result-heading" tabindex="-1"></h2>
-      <div class="score-display" id="score-display">
-        <div class="score-value"><span class="score-number" id="score-number">0</span><span class="score-unit">%</span></div>
-        <div class="score-body">
-          <span class="score-caption" id="score-caption"></span>
-          <span class="score-label" id="score-label"></span>
-          <div class="score-meter" aria-hidden="true"><i id="score-meter-fill"></i></div>
         </div>
-      </div>
-      <p class="score-explanation" id="score-explanation"></p>
-      <p class="score-generator" id="score-generator" hidden></p>
-
-      <aside class="no-detection-note evidence-note" id="evidence-note" role="note" aria-labelledby="evidence-note-title">
-        <p class="evidence-title" id="evidence-note-title"></p>
-        <ul class="evidence-list" id="evidence-list"></ul>
-        <p class="evidence-warn" id="evidence-warn"></p>
-      </aside>
-
-      <div class="no-detection-note" id="no-detection-note" hidden>
-        <p id="no-detection-text"></p>
-        <button type="button" id="no-detection-link" class="primary-btn"></button>
-      </div>
-
-      <button type="button" id="download-pdf-btn" class="secondary-btn" hidden></button>
-      <button type="button" id="reset-btn" class="secondary-btn"></button>
-      <button type="button" id="back-to-upload-btn" class="secondary-btn" hidden></button>
-      <aside class="disclaimer-banner" role="note"><svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg><p class="disclaimer-text"></p></aside>
-      <p class="privacy-note"></p>
-    </div>
-
-    <div class="result-detail">
-      <div id="state-host-result"></div>
-      <div class="country-selector-wrap" id="country-selector" hidden>
-        <p class="field-label" id="country-label"></p>
-        <div class="country-selector" role="group" aria-labelledby="country-label">
-          <button type="button" class="country-btn active" data-country="mx">México</button>
-          <button type="button" class="country-btn" data-country="in">India</button>
-          <button type="button" class="country-btn" data-country="us">United States</button>
-        </div>
-      </div>
-
-      <div class="crisis-pathway" id="crisis-pathway" hidden>
-        <h2 class="direct-crisis-heading section-heading" id="direct-crisis-heading" hidden></h2>
-        <div class="victim-toggle" id="victim-toggle" role="group">
-          <button type="button" class="victim-toggle-btn" data-mode="me"></button>
-          <button type="button" class="victim-toggle-btn" data-mode="other"></button>
-        </div>
-        <p class="crisis-intro" id="crisis-intro"></p>
-
-        <div class="primary-action">
-          <p class="action-sub whatsapp-disclaimer" id="whatsapp-disclaimer"></p>
-          <a class="share-btn whatsapp-btn" id="whatsapp-btn" target="_blank" rel="noopener"></a>
-          <p class="action-sub" id="whatsapp-sub"></p>
-        </div>
-
-        <h3 class="crisis-title"></h3>
-        <ol class="crisis-steps" id="crisis-steps"></ol>
-        <div class="ngo-card" id="ngo-card"></div>
-        <p class="legal-note" id="legal-note"></p>
-        <a class="takedown-btn" id="takedown-btn" href="https://takeitdown.ncmec.org" target="_blank" rel="noopener"></a>
-
-        <section class="action-resources" id="action-resources" aria-labelledby="action-resources-title">
-          <h3 class="crisis-title" id="action-resources-title"></h3>
-          <p class="action-disclaimer" id="action-disclaimer" role="note"></p>
-          <div class="template-list" id="template-list"></div>
-        </section>
-
         <section class="school-letter" id="school-letter" aria-labelledby="school-letter-title" hidden>
           <details id="school-letter-details">
             <summary id="school-letter-title" data-sl="title"></summary>
@@ -281,9 +206,20 @@
           </details>
         </section>
       </div>
-    </div>
-  </section>
+      <div class="pdf-host" id="adult-pdf-host">
+        <h3 id="adult-pdf-title"></h3>
+        <p class="resource-text" id="adult-pdf-lead"></p>
+        <button type="button" id="download-pdf-btn" class="secondary-btn"></button>
+      </div>
+      <div id="adult-nav"></div>
+    </section>
+
+    <section class="step" id="step-cuidarte" hidden></section>
+  </div>
 </main>
+
+<div class="privacy-modal" id="plan-modal" hidden></div>
+<div class="print-sheet" id="print-sheet" aria-hidden="true"></div>
 
 <div class="privacy-modal" id="privacy-modal" hidden>
   <div class="privacy-modal-card" role="dialog" aria-modal="true" aria-labelledby="privacy-modal-title">
