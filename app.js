@@ -12,7 +12,7 @@ const JPEG_QUALITY              = 0.8;
 const CANVAS_COMPRESSIBLE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
 const REQUEST_TIMEOUT_MS        = 22000;             // 2s longer than server's maxDuration (vercel.json)
 
-// ─── DOM refs ───────────────────────────────────────────────────────────────
+// DOM refs
 const uploadScreen    = document.getElementById('upload-screen');
 const resultScreen    = document.getElementById('result-screen');
 const uploadZone      = document.getElementById('upload-zone');
@@ -57,7 +57,7 @@ const whatsappSub    = document.getElementById('whatsapp-sub');
 const whatsappDisclaimer = document.getElementById('whatsapp-disclaimer');
 const heroTitle      = document.getElementById('hero-title');
 
-// ─── Extra UI strings (labels, hints, orientation copy) ─────────────────────
+// Extra UI strings (labels, hints, orientation copy)
 const UI = {
   es: {
     skipLink:     'Saltar al contenido',
@@ -133,13 +133,13 @@ const UI = {
   },
 };
 
-// ─── Translations ────────────────────────────────────────────────────────────
+// Translations
 const T = {
   es: {
     heroTitle:       '¿Esta imagen es real?',
     heroSubtitle:    'Herramienta de respuesta a abuso de imagen para adolescentes.',
     uploadPrompt:    'Toca para subir o arrastra una imagen aquí',
-    preparingImage:  'Preparando imagen…',
+    preparingImage:  'Preparando imagen...',
     analyzeBtn:      'Analizar',
     analyzingBtn:    'Analizando...',
     resetBtn:        'Analizar otra imagen',
@@ -164,6 +164,7 @@ const T = {
       NETWORK:               'No se pudo conectar. Revisa tu internet e intenta de nuevo.',
       DETECTION_FAILED:      'Detección temporalmente no disponible. Intenta en unos minutos.',
       DETECTION_UNAVAILABLE: 'Detección temporalmente no disponible. Intenta en unos minutos.',
+      DETECTION_NOT_CONFIGURED: 'El servicio de análisis no está configurado todavía. No se generó ningún resultado. Inténtalo más tarde.',
     },
     crisisSteps: [
       'Guarda evidencia: toma una captura de pantalla con la URL visible.',
@@ -233,9 +234,9 @@ const T = {
 
   en: {
     heroTitle:       'Is this image real?',
-    heroSubtitle:    'Image abuse response tool for teens aged 13–17.',
+    heroSubtitle:    'Image abuse response tool for teens aged 13 to 17.',
     uploadPrompt:    'Tap to upload or drag an image here',
-    preparingImage:  'Preparing image…',
+    preparingImage:  'Preparing image...',
     analyzeBtn:      'Analyze',
     analyzingBtn:    'Analyzing...',
     resetBtn:        'Analyze another image',
@@ -260,6 +261,7 @@ const T = {
       NETWORK:               'Could not connect. Check your internet and try again.',
       DETECTION_FAILED:      'Detection temporarily unavailable. Try again in a few minutes.',
       DETECTION_UNAVAILABLE: 'Detection temporarily unavailable. Try again in a few minutes.',
+      DETECTION_NOT_CONFIGURED: 'The analysis service is not set up yet. No result was generated. Please try again later.',
     },
     crisisSteps: [
       'Save evidence: take a screenshot showing the URL.',
@@ -329,9 +331,9 @@ const T = {
 
   hi: {
     heroTitle:       'क्या यह तस्वीर असली है?',
-    heroSubtitle:    '13–17 वर्ष के किशोरों के लिए छवि दुर्व्यवहार प्रतिक्रिया उपकरण।',
+    heroSubtitle:    '13 से 17 वर्ष के किशोरों के लिए छवि दुर्व्यवहार प्रतिक्रिया उपकरण।',
     uploadPrompt:    'यहाँ टैप करें या तस्वीर खींचकर डालें',
-    preparingImage:  'इमेज तैयार हो रही है…',
+    preparingImage:  'इमेज तैयार हो रही है...',
     analyzeBtn:      'जाँचें',
     analyzingBtn:    'जाँच हो रही है...',
     resetBtn:        'दूसरी तस्वीर जाँचें',
@@ -356,6 +358,7 @@ const T = {
       NETWORK:               'कनेक्ट नहीं हो पाया। इंटरनेट जाँचें और दोबारा कोशिश करें।',
       DETECTION_FAILED:      'जाँच अस्थायी रूप से उपलब्ध नहीं है। कुछ मिनट बाद कोशिश करें।',
       DETECTION_UNAVAILABLE: 'जाँच अस्थायी रूप से उपलब्ध नहीं है। कुछ मिनट बाद कोशिश करें।',
+      DETECTION_NOT_CONFIGURED: 'विश्लेषण सेवा अभी सेट अप नहीं है। कोई नतीजा नहीं बना। कृपया बाद में कोशिश करें।',
     },
     crisisSteps: [
       'सबूत सेव करें: URL दिखाते हुए स्क्रीनशॉट लें।',
@@ -424,7 +427,7 @@ const T = {
   },
 };
 
-// ─── Direct crisis path (real photo, no AI analysis needed) ─────────────────
+// Direct crisis path (real photo, no AI analysis needed)
 const DIRECT_CRISIS_STRINGS = {
   en: {
     directCrisisBtn: "My image was shared without my consent (real photo)",
@@ -467,7 +470,7 @@ const DIRECT_CRISIS_STRINGS = {
   },
 };
 
-// ─── PDF evidence report strings ─────────────────────────────────────────────
+// PDF evidence report strings
 const PDF_STRINGS = {
   es: {
     btn:          'Descargar reporte PDF',
@@ -534,7 +537,7 @@ const PDF_STRINGS = {
   },
 };
 
-// ─── Evidence preservation (UI callout + PDF section; text only, no inputs) ──
+// Evidence preservation (UI callout + PDF section; text only, no inputs)
 // Art. 20 Sexies LGAMVLV: the authority safeguards the reported content, so the victim must
 // document it first and must not download or forward it (art. 202 CPF).
 const EVIDENCE_STRINGS = {
@@ -575,18 +578,18 @@ const EVIDENCE_STRINGS = {
 
 function renderEvidenceNote() {
   const s = EVIDENCE_STRINGS[currentLang];
-  document.getElementById('evidence-note-title').textContent = '📋 ' + s.title;
+  document.getElementById('evidence-note-title').textContent = s.title;
   document.getElementById('evidence-list').replaceChildren(...s.items.map((text) => {
     const li = document.createElement('li');
     li.textContent = '✓ ' + text;
     return li;
   }));
   const warn = document.createElement('strong');
-  warn.textContent = '⚠️ ' + s.warn;
+  warn.textContent = s.warn;
   document.getElementById('evidence-warn').replaceChildren(warn, document.createTextNode(' ' + s.warnBody));
 }
 
-// ─── Action resources: copy-only email templates ────────────────────────────
+// Action resources: copy-only email templates
 // Text is only ever copied to the user's clipboard: nothing is sent or stored.
 const ACTION_STRINGS = {
   es: {
@@ -667,7 +670,7 @@ const EMAIL_TEMPLATES = {
         'Thank you for listening.',
     },
     {
-      title: 'School (principal’s office)',
+      title: 'School (principal\'s office)',
       text:
         'Subject: Notice of an incident affecting a student\n\n' +
         'Dear Principal,\n\n' +
@@ -893,7 +896,7 @@ function getDefaultCountry(lang, browserLocale) {
   return "us";
 }
 
-// ─── Language state ──────────────────────────────────────────────────────────
+// Language state
 let currentLang = 'es';
 let currentResult = null;
 let selectedFile  = null;
@@ -986,7 +989,7 @@ langBtns.forEach(btn => {
   btn.addEventListener('click', () => applyLanguage(btn.dataset.lang));
 });
 
-// ─── File handling ───────────────────────────────────────────────────────────
+// File handling
 function formatFileSize(bytes) {
   if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
@@ -1095,7 +1098,7 @@ fileInput.addEventListener('change', () => {
   if (fileInput.files[0]) handleFile(fileInput.files[0]);
 });
 
-// ─── Loading state ───────────────────────────────────────────────────────────
+// Loading state
 function setLoading(isLoading) {
   const t = T[currentLang];
   analyzeBtn.disabled = isLoading || !hasAnalyzeInput();
@@ -1105,7 +1108,7 @@ function setLoading(isLoading) {
   updateAnalyzeHint();
 }
 
-// ─── Score animation ─────────────────────────────────────────────────────────
+// Score animation
 function animateScore(target) {
   const duration = 800;
   const start = performance.now();
@@ -1119,7 +1122,7 @@ function animateScore(target) {
   requestAnimationFrame(tick);
 }
 
-// ─── Crisis pathway ──────────────────────────────────────────────────────────
+// Crisis pathway
 function appendNgoEntry(container, { name, description, phone, url }) {
   const entry = document.createElement('div');
   entry.className = 'ngo-entry';
@@ -1295,7 +1298,7 @@ document.querySelectorAll('.country-btn').forEach(btn => {
   });
 });
 
-// ─── Privacy disclaimer + "how it works" modal ──────────────────────────────
+// Privacy disclaimer + "how it works" modal
 const PRIVACY_STRINGS = {
   es: {
     link: '¿Cómo funciona?',
@@ -1303,7 +1306,7 @@ const PRIVACY_STRINGS = {
     title: 'Cómo funciona VeraShield',
     sections: [
       { h: 'VeraShield no almacena tu imagen', p: 'Cuando subes una imagen, la analizamos y la descartamos de inmediato. No creamos cuentas, no pedimos datos personales y no guardamos ningún archivo tuyo.' },
-      { h: 'Detección de IA — Sightengine', p: 'Tu imagen se envía a Sightengine para determinar si fue generada o manipulada con IA. Sightengine la procesa bajo su propia política de privacidad y no la usa para entrenar modelos sin tu consentimiento explícito.', a: 'Ver política de Sightengine →', url: SIGHTENGINE_URL },
+      { h: 'Detección de IA: Sightengine', p: 'Tu imagen se envía a Sightengine para determinar si fue generada o manipulada con IA. Sightengine la procesa bajo su propia política de privacidad y no la usa para entrenar modelos sin tu consentimiento explícito.', a: 'Ver política de Sightengine →', url: SIGHTENGINE_URL },
     ],
   },
   en: {
@@ -1312,7 +1315,7 @@ const PRIVACY_STRINGS = {
     title: 'How VeraShield Works',
     sections: [
       { h: 'VeraShield does not store your image', p: "When you upload an image, we analyze it and discard it immediately. We don't create accounts, we don't ask for personal data, and we don't keep any of your files." },
-      { h: 'AI Detection — Sightengine', p: 'Your image is sent to Sightengine to determine whether it was AI-generated or manipulated. Sightengine processes it under their own privacy policy and does not use it to train models without your explicit consent.', a: "View Sightengine's policy →", url: SIGHTENGINE_URL },
+      { h: 'AI Detection: Sightengine', p: 'Your image is sent to Sightengine to determine whether it was AI-generated or manipulated. Sightengine processes it under their own privacy policy and does not use it to train models without your explicit consent.', a: "View Sightengine's policy →", url: SIGHTENGINE_URL },
     ],
   },
   hi: {
@@ -1321,7 +1324,7 @@ const PRIVACY_STRINGS = {
     title: 'VeraShield कैसे काम करता है',
     sections: [
       { h: 'VeraShield आपकी इमेज स्टोर नहीं करता', p: 'जब आप इमेज अपलोड करते हैं, हम उसका विश्लेषण करके तुरंत हटा देते हैं। हम कोई अकाउंट नहीं बनाते, कोई व्यक्तिगत डेटा नहीं मांगते और आपकी कोई फ़ाइल नहीं रखते।' },
-      { h: 'AI डिटेक्शन — Sightengine', p: 'यह जांचने के लिए कि इमेज AI-generated या manipulated है या नहीं, आपकी इमेज Sightengine को भेजी जाती है। Sightengine इसे अपनी privacy policy के तहत process करता है और बिना आपकी सहमति के इसे model training के लिए उपयोग नहीं करता।', a: 'Sightengine की policy देखें →', url: SIGHTENGINE_URL },
+      { h: 'AI डिटेक्शन: Sightengine', p: 'यह जांचने के लिए कि इमेज AI-generated या manipulated है या नहीं, आपकी इमेज Sightengine को भेजी जाती है। Sightengine इसे अपनी privacy policy के तहत process करता है और बिना आपकी सहमति के इसे model training के लिए उपयोग नहीं करता।', a: 'Sightengine की policy देखें →', url: SIGHTENGINE_URL },
     ],
   },
 };
@@ -1373,7 +1376,7 @@ function closePrivacyModal() {
 // VERIFICAR: the Hindi text has not been checked (URLs live in lib/privacyServices.js).
 const PRIVACY_PANEL_STRINGS = {
   es: {
-    summary: '🔒 Tu imagen es privada',
+    summary: 'Tu imagen es privada',
     title: '¿Qué pasa con tu imagen?',
     memory: 'Se procesa en memoria. VeraShield no la guarda en ningún servidor.',
     sent: 'Se envía temporalmente a servicios de IA para el análisis:',
@@ -1385,7 +1388,7 @@ const PRIVACY_PANEL_STRINGS = {
     more: '¿Cómo funciona esto?',
   },
   en: {
-    summary: '🔒 Your image is private',
+    summary: 'Your image is private',
     title: 'What happens to your image?',
     memory: 'Processed in memory. VeraShield does not store it on any server.',
     sent: 'Temporarily sent to AI services for analysis:',
@@ -1397,7 +1400,7 @@ const PRIVACY_PANEL_STRINGS = {
     more: 'How does this work?',
   },
   hi: {
-    summary: '🔒 आपकी इमेज निजी है',
+    summary: 'आपकी इमेज निजी है',
     title: 'आपकी इमेज का क्या होता है?',
     memory: 'इसे मेमोरी में प्रोसेस किया जाता है। VeraShield इसे किसी भी सर्वर पर सेव नहीं करता।',
     sent: 'विश्लेषण के लिए इसे अस्थायी रूप से AI सेवाओं को भेजा जाता है:',
@@ -1462,7 +1465,7 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && !privacyModal.hidden) closePrivacyModal();
 });
 
-// ─── Content guard ───────────────────────────────────────────────────────────
+// Content guard
 // Blocking question asked BEFORE any file leaves the browser (Sightengine, Azure).
 // Art. 202 CPF (MX) punishes "transmitting" sexual material involving minors, so sending it to
 // a third-party API is itself the offence. Nothing is logged externally; only console.warn.
@@ -1489,7 +1492,7 @@ const contentGuardQuestion = document.getElementById('content-guard-question');
 const contentGuardNo       = document.getElementById('content-guard-no');
 const contentGuardYes      = document.getElementById('content-guard-yes');
 let contentGuardResolve   = null;  // pending answer while the modal is open
-let contentGuardConfirmed = null;  // File (or 'url:…' key) the user already answered "No" for
+let contentGuardConfirmed = null;  // File (or 'url:...' key) the user already answered "No" for
 let contentGuardLastFocus = null;
 
 function renderContentGuard() {
@@ -1536,7 +1539,7 @@ function blockAnalysis() {
   showAlternativeRoute();
 }
 
-// ─── AlternativeRoute ────────────────────────────────────────────────────────
+// AlternativeRoute
 // Shown instead of an error when the analysis is blocked (content guard). Self-contained:
 // renderAlternativeRoute(container) can be reused from any other part of the app.
 const ALT_ROUTE_STRINGS = {
@@ -1656,9 +1659,9 @@ function renderAlternativeRoute(container) {
   container.replaceChildren(
     title,
     make('p', 'alt-path-lead', s.lead),
-    item('🔗 ' + s.tidName, make('p', 'alt-path-lead', s.tidDomain), make('p', 'alt-path-lead', s.tidBody), tidLink),
-    item('📱 ' + s.waHeading, make('p', 'alt-path-lead', t.whatsappDisclaimer), waLink),
-    item('📄 ' + s.letterHeading, make('p', 'alt-path-lead', s.letterBody), letterBtn),
+    item(s.tidName, make('p', 'alt-path-lead', s.tidDomain), make('p', 'alt-path-lead', s.tidBody), tidLink),
+    item(s.waHeading, make('p', 'alt-path-lead', t.whatsappDisclaimer), waLink),
+    item(s.letterHeading, make('p', 'alt-path-lead', s.letterBody), letterBtn),
   );
 }
 
@@ -1674,7 +1677,7 @@ function hideAlternativeRoute() {
   altRouteEl.replaceChildren();
 }
 
-// key: the File (photo) or 'url:…' string (video URL) about to be sent. Resolves true only when it is safe to send.
+// key: the File (photo) or 'url:...' string (video URL) about to be sent. Resolves true only when it is safe to send.
 async function ensureContentGuard(key) {
   if (key && key === contentGuardConfirmed) return true;
   if (await askContentGuard()) { contentGuardConfirmed = key; return true; }
@@ -1710,7 +1713,7 @@ const TECH_STRINGS = {
     note: 'यह जानकारी सांकेतिक है। कानूनी उपयोग के लिए किसी विशेषज्ञ से परामर्श लें।',
   },
 };
-const DETECTION_API_NAMES = { sightengine: 'Sightengine', azure: 'Azure AI Content Safety', mock: 'Sightengine' };
+const DETECTION_API_NAMES = { sightengine: 'Sightengine', azure: 'Azure AI Content Safety', mock: 'Mock (simulated test, not a real analysis)' };
 
 function writeTechnicalBlock(w, lang, locale) {
   if (caseData.score_analisis === null) return;
@@ -1724,7 +1727,7 @@ function writeTechnicalBlock(w, lang, locale) {
   w.text(tc.note, { size: 9.5, color: PDF_COLORS.muted, gap: 4 });
 }
 
-// ─── PDF evidence report (100% client-side, nothing leaves the browser) ─────
+// PDF evidence report (100% client-side, nothing leaves the browser)
 const PDF_PAGE_W_MM = 210;
 const PDF_PAGE_H_MM = 297;
 const PDF_MARGIN_MM = 20;
@@ -1969,7 +1972,7 @@ function enterScreen(headingEl) {
   headingEl.focus({ preventScroll: true });
 }
 
-// ─── Result details (label, explanation, generator line) ─────────────────────
+// Result details (label, explanation, generator line)
 function renderResultDetails() {
   if (!currentResult) return;
   const t = T[currentLang];
@@ -1991,7 +1994,7 @@ function renderResultDetails() {
   }
 }
 
-// ─── Show result ─────────────────────────────────────────────────────────────
+// Show result
 function showResult(data) {
   currentResult = data;
   setAnalysis(data);
@@ -2029,7 +2032,7 @@ function showResult(data) {
   enterScreen(resultHeading);
 }
 
-// ─── Direct crisis path ──────────────────────────────────────────────────────
+// Direct crisis path
 // Entered either from the upload screen (no analysis run at all) or from the
 // "no manipulation detected" note (a result already exists). Both cases just
 // need the crisis pathway visible with direct-crisis framing instead of the
@@ -2089,7 +2092,7 @@ function resetToUpload() {
 }
 backToUploadBtn.addEventListener('click', resetToUpload);
 
-// ─── School letter (MX / ES only) ────────────────────────────────────────────
+// School letter (MX / ES only)
 // 100% client-side: form values never leave the browser. Reuses the jsPDF
 // build already loaded in index.html.
 
@@ -2114,6 +2117,8 @@ const SL = {
     guardian: 'Nombre del tutor o tutora legal', guardianPh: 'Ej. Ana López Ramírez',
     state: 'Estado', statePh: 'Selecciona tu estado',
     docsSummary: '¿Quieres preparar tus documentos? (opcional)',
+    docsSaved: 'Datos guardados en tu dispositivo',
+    docsGenerate: 'Generar carta con estos datos',
     docsNote: 'Estos datos se quedan en tu dispositivo. Se usan solo para llenar la carta y el PDF; no se envían a ningún servicio.',
     level: 'Nivel educativo', levelPh: 'Selecciona el nivel',
     levelBasica: 'Educación básica (preescolar, primaria o secundaria)',
@@ -2162,6 +2167,8 @@ const SL = {
     guardian: 'Name of parent or legal guardian', guardianPh: 'e.g. Ana Lopez Ramirez',
     state: 'State', statePh: 'Select your state',
     docsSummary: 'Want to prepare your documents? (optional)',
+    docsSaved: 'Data saved on your device',
+    docsGenerate: 'Generate letter with this data',
     docsNote: 'This information stays on your device. It is only used to fill in the letter and the PDF; it is not sent to any service.',
     level: 'School level', levelPh: 'Select the level',
     levelBasica: 'Basic education (preschool, primary or lower secondary)',
@@ -2210,6 +2217,8 @@ const SL = {
     guardian: 'अभिभावक का नाम', guardianPh: 'जैसे: सुनीता शर्मा',
     state: 'राज्य', statePh: 'अपना राज्य चुनें',
     docsSummary: 'क्या आप अपने दस्तावेज़ तैयार करना चाहते हैं? (वैकल्पिक)',
+    docsSaved: 'डेटा आपके डिवाइस पर सेव हो गया',
+    docsGenerate: 'इस जानकारी से पत्र बनाएँ',
     docsNote: 'यह जानकारी आपके डिवाइस पर रहती है। इसका उपयोग केवल पत्र और PDF भरने के लिए होता है; इसे किसी सेवा को नहीं भेजा जाता।',
     level: 'शिक्षा स्तर', levelPh: 'स्तर चुनें',
     levelBasica: 'बुनियादी शिक्षा (प्रीस्कूल, प्राथमिक या माध्यमिक)',
@@ -2248,7 +2257,7 @@ const SL = {
   },
 };
 
-// ─── State (entidad federativa) selector ─────────────────────────────────────
+// State (entidad federativa) selector
 // One control, one value, shared by the school letter and the evidence PDF. It starts on the
 // upload screen and is moved (same DOM node) to the result screen, where both documents are
 // generated. Purely local: nothing is sent anywhere.
@@ -2279,11 +2288,18 @@ const caseInputs = {
   nivel_escolar: ['sl-level', 'docs-level'].map((id) => document.getElementById(id)),
   fecha_incidente: ['sl-date', 'docs-date'].map((id) => document.getElementById(id)),
 };
+// Visible confirmation (and the letter shortcut) once any of the shared fields has a value.
+function updateDocsSaved() {
+  const any = ['nombre_victima', 'nombre_escuela', 'nivel_escolar', 'fecha_incidente'].some((k) => caseData[k]);
+  document.getElementById('docs-saved').hidden = !any;
+}
+
 Object.entries(caseInputs).forEach(([key, inputs]) => {
   inputs.forEach((input) => {
     input.addEventListener(input.tagName === 'SELECT' || input.type === 'date' ? 'change' : 'input', () => {
       caseData[key] = input.value.trim();
       inputs.forEach((other) => { if (other !== input) other.value = input.value; });
+      updateDocsSaved();
     });
   });
 });
@@ -2292,6 +2308,7 @@ function clearCaseData() {
   Object.assign(caseData, { nombre_victima: '', nombre_escuela: '', nivel_escolar: '', estado: '', fecha_incidente: '' });
   Object.values(caseInputs).flat().forEach((input) => { input.value = ''; });
   stateSelect.value = '';
+  updateDocsSaved();
 }
 
 function setAnalysis(result) {
@@ -2452,7 +2469,14 @@ function openSchoolLetterFromUpload() {
 }
 schoolLetterLink.addEventListener('click', openSchoolLetterFromUpload);
 
-// ─── Video mode ──────────────────────────────────────────────────────────────
+document.getElementById('docs-generate').addEventListener('click', () => {
+  if (!uploadScreen.hidden) { openSchoolLetterFromUpload(); return; }
+  // already on the results screen: do not reset it, just open the letter
+  schoolLetterDetails.open = true;
+  schoolLetterSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
+// Video mode
 // Photo/Video toggle, video upload (file or direct URL) and analysis. The result
 // goes through the same showResult() as images, so the crisis pathway is shared.
 const VIDEO_STRINGS = {
@@ -2464,8 +2488,8 @@ const VIDEO_STRINGS = {
     or: 'O',
     urlLabel: 'URL del video',
     urlPlaceholder: 'URL directa del archivo de video (no de redes sociales)',
-    urlNote: '⚠ Las URLs de TikTok, Instagram y YouTube no son compatibles. Descarga el video y súbelo como archivo.',
-    preparing: 'Preparando video…',
+    urlNote: 'Las URLs de TikTok, Instagram y YouTube no son compatibles. Descarga el video y súbelo como archivo.',
+    preparing: 'Preparando video...',
     changeVideo: 'Toca para cambiar el video',
     analyzing: 'Analizando video...',
     analyzeHint: 'Sube un video o pega una URL para activar este botón.',
@@ -2486,8 +2510,8 @@ const VIDEO_STRINGS = {
     or: 'OR',
     urlLabel: 'Video URL',
     urlPlaceholder: 'Direct video file URL (not social media pages)',
-    urlNote: '⚠ TikTok, Instagram, and YouTube URLs are not supported. Download the video and upload it as a file.',
-    preparing: 'Preparing video…',
+    urlNote: 'TikTok, Instagram, and YouTube URLs are not supported. Download the video and upload it as a file.',
+    preparing: 'Preparing video...',
     changeVideo: 'Tap to change the video',
     analyzing: 'Analyzing video...',
     analyzeHint: 'Upload a video or paste a URL to enable this button.',
@@ -2508,8 +2532,8 @@ const VIDEO_STRINGS = {
     or: 'या',
     urlLabel: 'वीडियो URL',
     urlPlaceholder: 'वीडियो फ़ाइल का सीधा URL (सोशल मीडिया नहीं)',
-    urlNote: '⚠ TikTok, Instagram और YouTube URLs काम नहीं करते। वीडियो डाउनलोड करके फ़ाइल के रूप में अपलोड करें।',
-    preparing: 'वीडियो तैयार हो रहा है…',
+    urlNote: 'TikTok, Instagram और YouTube URLs काम नहीं करते। वीडियो डाउनलोड करके फ़ाइल के रूप में अपलोड करें।',
+    preparing: 'वीडियो तैयार हो रहा है...',
     changeVideo: 'वीडियो बदलने के लिए टैप करें',
     analyzing: 'वीडियो का विश्लेषण हो रहा है...',
     analyzeHint: 'इस बटन को चालू करने के लिए वीडियो अपलोड करें या URL पेस्ट करें।',
@@ -2584,9 +2608,9 @@ function applyVideoLanguage() {
 }
 
 const VIDEO_SOON_STRINGS = {
-  es: { title: "Detección de video — Próximamente", body: "Estamos trabajando para traerte análisis de deepfakes en video. Por ahora, puedes analizar imágenes en la pestaña de imagen." },
-  en: { title: "Video Detection — Coming Soon", body: "We’re working on bringing deepfake detection to videos. For now, you can analyze images in the image tab." },
-  hi: { title: "वीडियो डिटेक्शन — जल्द आ रहा है", body: "हम वीडियो के लिए डीपफेक डिटेक्शन पर काम कर रहे हैं। अभी के लिए, आप इमेज टैब में छवियों का विश्लेषण कर सकती/सकते हैं।" },
+  es: { title: "Detección de video: próximamente", body: "Estamos trabajando para traerte análisis de deepfakes en video. Por ahora, puedes analizar imágenes en la pestaña de imagen." },
+  en: { title: "Video Detection: coming soon", body: "We're working on bringing deepfake detection to videos. For now, you can analyze images in the image tab." },
+  hi: { title: "वीडियो डिटेक्शन: जल्द आ रहा है", body: "हम वीडियो के लिए डीपफेक डिटेक्शन पर काम कर रहे हैं। अभी के लिए, आप इमेज टैब में छवियों का विश्लेषण कर सकती/सकते हैं।" },
 };
 const videoSoon         = document.getElementById("video-soon");
 const stepAnalyzeLabel  = document.getElementById("step-analyze-label");
@@ -2632,7 +2656,7 @@ function clearVideoInputs() {
   renderVideoZone();
 }
 
-// ── Video preparation (metadata check + browser-side downsizing) ──
+// Video preparation (metadata check + browser-side downsizing)
 function readVideoMeta(file) {
   return new Promise((resolve) => {
     const url = URL.createObjectURL(file);
@@ -2875,7 +2899,7 @@ async function analyzeVideo() {
   }
 }
 
-// ─── Error handler ───────────────────────────────────────────────────────────
+// Error handler
 function showError(code) {
   const t = T[currentLang];
   setLoading(false);
@@ -2883,7 +2907,7 @@ function showError(code) {
   analyzeBtn.disabled = !selectedFile;
 }
 
-// ─── Analyze ─────────────────────────────────────────────────────────────────
+// Analyze
 analyzeBtn.addEventListener('click', async () => {
   if (inputMode === 'video') { analyzeVideo(); return; }
   if (!selectedFile) return;
@@ -2912,10 +2936,10 @@ analyzeBtn.addEventListener('click', async () => {
   }
 });
 
-// ─── Reset ───────────────────────────────────────────────────────────────────
+// Reset
 resetBtn.addEventListener('click', resetToUpload);
 
-// ─── Init ────────────────────────────────────────────────────────────────────
+// Init
 (function initLanguage() {
   const nav = (navigator.language || 'es').slice(0, 2).toLowerCase();
   applyLanguage(['es', 'en', 'hi'].includes(nav) ? nav : 'es');
