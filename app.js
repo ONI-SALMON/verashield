@@ -93,7 +93,7 @@ const T = {
       likely_fake:   'Probablemente creada por IA',
     },
     explanations: {
-      likely_real:   'Esta imagen no muestra señales de haber sido generada por IA.',
+      likely_real:   'Según la herramienta, esta imagen no muestra señales de haber sido generada por IA. Puede equivocarse.',
       uncertain:     'Nuestra detección no pudo clasificar esta imagen con certeza.',
       likely_fake:   'Esta imagen probablemente fue creada o alterada por IA.',
     },
@@ -121,7 +121,7 @@ const T = {
       likely_fake:   'Likely created by AI',
     },
     explanations: {
-      likely_real:   'This image does not show signs of AI generation.',
+      likely_real:   'According to the tool, this image does not show signs of AI generation. It can be wrong.',
       uncertain:     'Our detection could not confidently classify this image.',
       likely_fake:   'This image was likely created or altered by AI.',
     },
@@ -149,7 +149,7 @@ const T = {
       likely_fake:   'संभवतः AI से बनी',
     },
     explanations: {
-      likely_real:   'इस तस्वीर में AI जनरेशन के कोई संकेत नहीं हैं।',
+      likely_real:   'टूल के अनुसार इस तस्वीर में AI जनरेशन के कोई संकेत नहीं हैं। वह गलत भी हो सकता है।',
       uncertain:     'हमारी प्रणाली इस तस्वीर को निश्चित रूप से वर्गीकृत नहीं कर पाई।',
       likely_fake:   'यह तस्वीर संभवतः AI द्वारा बनाई या बदली गई है।',
     },
@@ -1029,6 +1029,7 @@ function renderLowNote() {
   if (!currentResult) return;
   lowNote.textContent = getContent(currentLang).analysis.lowNote;
   lowNote.hidden = currentResult.bucket !== 'low';
+  document.getElementById('analysis-accuracy-note').textContent = getContent(currentLang).analysis.accuracyResultNote;
 }
 
 // Show result: inside the optional analysis step. It never replaces the flow: the step keeps its
