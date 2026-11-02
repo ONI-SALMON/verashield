@@ -513,7 +513,7 @@ const PRIVACY_PANEL_STRINGS = {
   es: {
     summary: 'Tu imagen es privada',
     title: '¿Qué pasa con tu imagen?',
-    memory: 'Se procesa en memoria. VeraShield no la guarda en ningún servidor.',
+    memory: 'Se guarda un instante en un archivo temporal del servidor y se borra al terminar el análisis. VeraShield no la conserva.',
     sent: 'Se envía temporalmente a servicios de IA para el análisis:',
     services: [
       { name: 'Sightengine (Kozelo SAS, París)', url: SIGHTENGINE_URL },
@@ -525,7 +525,7 @@ const PRIVACY_PANEL_STRINGS = {
   en: {
     summary: 'Your image is private',
     title: 'What happens to your image?',
-    memory: 'Processed in memory. VeraShield does not store it on any server.',
+    memory: 'It is kept for a moment in a temporary file on the server and deleted when the analysis ends. VeraShield does not keep it.',
     sent: 'Temporarily sent to AI services for analysis:',
     services: [
       { name: 'Sightengine (Kozelo SAS, Paris)', url: SIGHTENGINE_URL },
@@ -537,7 +537,7 @@ const PRIVACY_PANEL_STRINGS = {
   hi: {
     summary: 'आपकी इमेज निजी है',
     title: 'आपकी इमेज का क्या होता है?',
-    memory: 'इसे मेमोरी में प्रोसेस किया जाता है। VeraShield इसे किसी भी सर्वर पर सेव नहीं करता।',
+    memory: 'इसे कुछ पल के लिए सर्वर की अस्थायी फ़ाइल में रखा जाता है और विश्लेषण खत्म होते ही मिटा दिया जाता है। VeraShield इसे नहीं रखता।',
     sent: 'विश्लेषण के लिए इसे अस्थायी रूप से AI सेवाओं को भेजा जाता है:',
     services: [
       { name: 'Sightengine (Kozelo SAS, पेरिस)', url: SIGHTENGINE_URL },

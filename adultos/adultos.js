@@ -48,7 +48,7 @@ function render() {
     section(a.next.title, a.next.items),
     h('section', { class: 'adults-section' },
       h('h2', { class: 'section-heading' }, a.countryTitle),
-      countryBlock({ country: getCountry(pais), lang, t, sections: ['removal', 'report', 'helplines'] })),
+      countryBlock({ country: getCountry(pais), lang, t, sections: ['removal', 'report', 'helplines', 'materials'] })),
     h('p', { class: 'resource-status' }, a.note),
     h('p', {}, h('a', { class: 'secondary-btn', href: '/' }, a.back)),
   );
