@@ -1,5 +1,6 @@
 import { IncomingForm } from 'formidable';
 import { readFile, unlink } from 'fs/promises';
+import { checkRateLimit, sendRateLimited } from '../lib/server/rateLimit.js';
 
 export const config = { api: { bodyParser: false } };
 
@@ -20,51 +21,16 @@ function bucketToLabel(bucket) {
   return 'likely_fake';
 }
 
-const GENERATOR_NAMES = {
-  dalle: 'DALL-E',
-  midjourney: 'Midjourney',
-  stable_diffusion: 'Stable Diffusion',
-  flux: 'FLUX',
-};
-const GENERATOR_MIN_SCORE = 0.1;
-
-function formatGenerator(key) {
-  if (GENERATOR_NAMES[key]) return GENERATOR_NAMES[key];
-  return key
-    .split('_')
-    .filter(Boolean)
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(' ');
-}
-
-function topGeneratorFrom(generators) {
-  if (!generators || typeof generators !== 'object') return null;
-  let bestKey = null;
-  let bestValue = 0;
-  for (const [key, value] of Object.entries(generators)) {
-    if (typeof value === 'number' && value > bestValue) {
-      bestKey = key;
-      bestValue = value;
-    }
-  }
-  if (!bestKey || bestValue < GENERATOR_MIN_SCORE) return null;
-  return formatGenerator(bestKey);
-}
-
-function buildResult({ aiGenerated, deepfake = 0, topGenerator = null }, source) {
-  const scoreFraction = Math.max(aiGenerated, deepfake);
-  const score_percent = Math.round(scoreFraction * 100);
+// The response is deliberately coarse: a level (low, medium, high) and a face-swap flag, never the
+// numeric score. An exact number would let someone retouch an image until it drops below a threshold.
+function buildResult({ aiGenerated, deepfake = 0 }, source) {
+  const score_percent = Math.round(Math.max(aiGenerated, deepfake) * 100);
   const bucket = scoreToBucket(score_percent);
   const label = bucketToLabel(bucket);
   return {
-    score: scoreFraction,
-    aiGenerated,
-    deepfake,
-    topGenerator,
-    confidence: score_percent,
-    score_percent,
-    label,
     bucket,
+    label,
+    faceSwap: bucket !== 'low' && deepfake > 0.6 && aiGenerated < 0.4,
     source,
     message_key: `result_${label}`,
   };
@@ -117,7 +83,6 @@ async function callSightengine(file) {
     {
       aiGenerated: type.ai_generated,
       deepfake: typeof type.deepfake === 'number' ? type.deepfake : 0,
-      topGenerator: topGeneratorFrom(type.ai_generators),
     },
     'sightengine'
   );
@@ -178,6 +143,9 @@ export default async function handler(req, res) {
     if (req.method !== 'POST') {
       return res.status(405).json({ error: true, code: 'METHOD_NOT_ALLOWED', message: 'Only POST is supported.' });
     }
+    res.setHeader('Cache-Control', 'no-store');
+    const limit = checkRateLimit(req);
+    if (limit.limited) return sendRateLimited(res, limit.retryAfterSeconds);
 
     let files;
     try {

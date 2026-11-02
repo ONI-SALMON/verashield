@@ -4,6 +4,7 @@ import http from 'http';
 import https from 'https';
 import dns from 'dns';
 import net from 'net';
+import { checkRateLimit, sendRateLimited } from '../lib/server/rateLimit.js';
 
 // bodyParser is off on purpose: multipart is parsed by formidable and the small
 // JSON body (mode B) is read by hand. Vercel Functions also hard-cap any request
@@ -46,23 +47,17 @@ function bucketToLabel(bucket) {
   return 'likely_fake';
 }
 
-// Same shape the image flow returns, so the frontend result screen and crisis
-// pathway are reused as-is. The first four fields are the video contract.
+// Same coarse shape the image flow returns, so the frontend result screen is reused as-is.
 function buildResult(score, inputType, source) {
-  const confidence = Math.round(score * 100);
-  const bucket = scoreToBucket(confidence);
+  const bucket = scoreToBucket(Math.round(score * 100));
   const label = bucketToLabel(bucket);
+  // Coarse on purpose: a level and a flag, never the numeric score (see api/detect.js).
   return {
-    score,
-    isAiGenerated: score > AI_THRESHOLD,
-    confidence,
-    inputType,
-    aiGenerated: score,
-    deepfake: 0,
-    topGenerator: null,
-    score_percent: confidence,
-    label,
     bucket,
+    label,
+    faceSwap: false,
+    inputType,
+    isAiGenerated: score > AI_THRESHOLD,
     source,
     message_key: `result_${label}`,
   };
@@ -281,6 +276,9 @@ export default async function handler(req, res) {
   let tempPath = null;
   try {
     if (req.method !== 'POST') return sendError(res, 405, 'METHOD_NOT_ALLOWED', 'Only POST is supported.');
+    res.setHeader('Cache-Control', 'no-store');
+    const limit = checkRateLimit(req);
+    if (limit.limited) return sendRateLimited(res, limit.retryAfterSeconds);
 
     const contentType = String(req.headers['content-type'] || '');
     let inputType;

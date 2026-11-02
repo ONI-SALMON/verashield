@@ -49,7 +49,7 @@ const UI = {
     changeImage:  'Toca para cambiar la imagen',
     or:           'o',
     resultHeading:'Resultado',
-    scoreCaption: 'Probabilidad de creada por IA',
+    scoreCaption: 'Nivel de señales de creada por IA',
     generatorLabel: 'Posible generador: ',
     faceSwapExplanation: 'Parece una manipulación del rostro (face swap), no una imagen creada por completo con IA.',
   },
@@ -61,7 +61,7 @@ const UI = {
     changeImage:  'Tap to change the image',
     or:           'or',
     resultHeading:'Result',
-    scoreCaption: 'Chance it was created by AI',
+    scoreCaption: 'Level of signs it was created by AI',
     generatorLabel: 'Possible generator: ',
     faceSwapExplanation: 'This looks like a face manipulation (face swap), not an image created entirely by AI.',
   },
@@ -73,7 +73,7 @@ const UI = {
     changeImage:  'तस्वीर बदलने के लिए टैप करें',
     or:           'या',
     resultHeading:'परिणाम',
-    scoreCaption: 'AI से बनी होने की संभावना',
+    scoreCaption: 'AI से बनी होने के संकेतों का स्तर',
     generatorLabel: 'संभावित जनरेटर: ',
     faceSwapExplanation: 'यह चेहरे में हेरफेर (फेस स्वैप) लगता है, पूरी तरह AI से बनी तस्वीर नहीं।',
   },
@@ -104,6 +104,7 @@ const T = {
       TIMEOUT:               'Está tardando más de lo esperado. Intenta de nuevo.',
       NETWORK:               'No se pudo conectar. Revisa tu internet e intenta de nuevo.',
       DETECTION_FAILED:      'Detección temporalmente no disponible. Intenta en unos minutos.',
+      RATE_LIMITED:          'Hiciste muchos análisis en poco tiempo. Espera unos minutos y vuelve a intentar. No necesitas este análisis para seguir.',
       DETECTION_UNAVAILABLE: 'Detección temporalmente no disponible. Intenta en unos minutos.',
       DETECTION_NOT_CONFIGURED: 'El servicio de análisis no está configurado todavía. No se generó ningún resultado. Inténtalo más tarde.',
     },
@@ -132,6 +133,7 @@ const T = {
       TIMEOUT:               'Taking longer than expected. Please try again.',
       NETWORK:               'Could not connect. Check your internet and try again.',
       DETECTION_FAILED:      'Detection temporarily unavailable. Try again in a few minutes.',
+      RATE_LIMITED:          'You ran many analyses in a short time. Wait a few minutes and try again. You do not need this analysis to keep going.',
       DETECTION_UNAVAILABLE: 'Detection temporarily unavailable. Try again in a few minutes.',
       DETECTION_NOT_CONFIGURED: 'The analysis service is not set up yet. No result was generated. Please try again later.',
     },
@@ -160,6 +162,7 @@ const T = {
       TIMEOUT:               'अपेक्षा से अधिक समय लग रहा है। दोबारा कोशिश करें।',
       NETWORK:               'कनेक्ट नहीं हो पाया। इंटरनेट जाँचें और दोबारा कोशिश करें।',
       DETECTION_FAILED:      'जाँच अस्थायी रूप से उपलब्ध नहीं है। कुछ मिनट बाद कोशिश करें।',
+      RATE_LIMITED:          'आपने थोड़े समय में कई जाँचें कीं। कुछ मिनट रुककर फिर कोशिश करें। आगे बढ़ने के लिए इस जाँच की ज़रूरत नहीं है।',
       DETECTION_UNAVAILABLE: 'जाँच अस्थायी रूप से उपलब्ध नहीं है। कुछ मिनट बाद कोशिश करें।',
       DETECTION_NOT_CONFIGURED: 'विश्लेषण सेवा अभी सेट अप नहीं है। कोई नतीजा नहीं बना। कृपया बाद में कोशिश करें।',
     },
@@ -175,12 +178,12 @@ const PDF_STRINGS = {
     analyzedOn:   'Fecha y hora del análisis',
     generatedOn:  'Fecha y hora del reporte',
     resultTitle:  'Resultado del análisis',
-    probability:  'Probabilidad de manipulación',
+    probability:  'Nivel de señales de manipulación',
     meaningTitle: 'Qué significa este resultado',
     meaning: {
-      low:    'Una probabilidad baja indica que no encontramos señales claras de manipulación por IA. Aun así, ningún detector es perfecto: si algo te preocupa, confía en tu criterio y busca apoyo.',
-      medium: 'Una probabilidad media significa que hay algunas señales de posible manipulación, pero no podemos estar seguros. Trátalo con cuidado y no lo compartas mientras buscas ayuda.',
-      high:   'Una probabilidad alta indica que la imagen probablemente fue creada o alterada con IA. Esto no es tu culpa, y hay pasos concretos que puedes tomar para frenar su difusión.',
+      low:    'Un nivel bajo indica que no encontramos señales claras de manipulación por IA. Aun así, ningún detector es perfecto: si algo te preocupa, confía en tu criterio y busca apoyo.',
+      medium: 'Un nivel medio significa que hay algunas señales de posible manipulación, pero no podemos estar seguros. Trátalo con cuidado y no lo compartas mientras buscas ayuda.',
+      high:   'Un nivel alto indica que la imagen probablemente fue creada o alterada con IA. Esto no es tu culpa, y hay pasos concretos que puedes tomar para frenar su difusión.',
     },
     stepsTitle: 'Pasos recomendados',
     steps: [
@@ -198,12 +201,12 @@ const PDF_STRINGS = {
     analyzedOn:   'Analysis date and time',
     generatedOn:  'Report date and time',
     resultTitle:  'Analysis result',
-    probability:  'Probability of manipulation',
+    probability:  'Level of signs of manipulation',
     meaningTitle: 'What this result means',
     meaning: {
-      low:    'A low probability means we found no clear signs of AI manipulation. Still, no detector is perfect: if something worries you, trust your instincts and seek support.',
-      medium: 'A medium probability means there are some signs of possible manipulation, but we cannot be sure. Handle it with care and do not share it while you look for help.',
-      high:   'A high probability means the image was likely created or altered with AI. This is not your fault, and there are concrete steps you can take to stop it from spreading.',
+      low:    'A low level means we found no clear signs of AI manipulation. Still, no detector is perfect: if something worries you, trust your instincts and seek support.',
+      medium: 'A medium level means there are some signs of possible manipulation, but we cannot be sure. Handle it with care and do not share it while you look for help.',
+      high:   'A high level means the image was likely created or altered with AI. This is not your fault, and there are concrete steps you can take to stop it from spreading.',
     },
     stepsTitle: 'Recommended steps',
     steps: [
@@ -221,12 +224,12 @@ const PDF_STRINGS = {
     analyzedOn:   'जाँच की तारीख और समय',
     generatedOn:  'रिपोर्ट की तारीख और समय',
     resultTitle:  'जाँच का परिणाम',
-    probability:  'छेड़छाड़ की संभावना',
+    probability:  'छेड़छाड़ के संकेतों का स्तर',
     meaningTitle: 'इस परिणाम का क्या मतलब है',
     meaning: {
-      low:    'कम संभावना का मतलब है कि हमें AI द्वारा छेड़छाड़ के स्पष्ट संकेत नहीं मिले। फिर भी कोई भी डिटेक्टर पूरी तरह सही नहीं होता: अगर कुछ चिंता की बात है, तो अपनी समझ पर भरोसा करें और सहायता लें।',
-      medium: 'मध्यम संभावना का मतलब है कि छेड़छाड़ के कुछ संकेत हैं, लेकिन हम निश्चित नहीं हैं। सावधानी रखें और मदद ढूँढते समय इसे साझा न करें।',
-      high:   'अधिक संभावना का मतलब है कि तस्वीर संभवतः AI से बनाई या बदली गई है। यह आपकी गलती नहीं है, और इसे फैलने से रोकने के लिए आप ठोस कदम उठा सकते हैं।',
+      low:    'कम स्तर का मतलब है कि हमें AI द्वारा छेड़छाड़ के स्पष्ट संकेत नहीं मिले। फिर भी कोई भी डिटेक्टर पूरी तरह सही नहीं होता: अगर कुछ चिंता की बात है, तो अपनी समझ पर भरोसा करें और सहायता लें।',
+      medium: 'मध्यम स्तर का मतलब है कि छेड़छाड़ के कुछ संकेत हैं, लेकिन हम निश्चित नहीं हैं। सावधानी रखें और मदद ढूँढते समय इसे साझा न करें।',
+      high:   'अधिक स्तर का मतलब है कि तस्वीर संभवतः AI से बनाई या बदली गई है। यह आपकी गलती नहीं है, और इसे फैलने से रोकने के लिए आप ठोस कदम उठा सकते हैं।',
     },
     stepsTitle: 'सुझाए गए कदम',
     steps: [
@@ -419,18 +422,19 @@ function setLoading(isLoading) {
   updateAnalyzeHint();
 }
 
-// Score animation
-function animateScore(target) {
-  const duration = 800;
-  const start = performance.now();
-  function tick(now) {
-    const progress = Math.min((now - start) / duration, 1);
-    const eased = 1 - Math.pow(1 - progress, 3);
-    scoreNumber.textContent = Math.round(eased * target);
-    scoreMeterFill.style.transform = `scaleX(${(eased * target) / 100})`;
-    if (progress < 1) requestAnimationFrame(tick);
-  }
-  requestAnimationFrame(tick);
+// Level display: low, medium or high (never a number: the server does not send one)
+const LEVELS = {
+  es: { low: 'Bajo', medium: 'Medio', high: 'Alto' },
+  en: { low: 'Low', medium: 'Medium', high: 'High' },
+  hi: { low: 'कम', medium: 'मध्यम', high: 'अधिक' },
+};
+const LEVEL_FILL = { low: 0.33, medium: 0.66, high: 1 };
+function levelName(bucket, lang = currentLang) {
+  return (LEVELS[lang] || LEVELS.es)[bucket] || '';
+}
+function showLevel(bucket) {
+  scoreNumber.textContent = levelName(bucket);
+  scoreMeterFill.style.transform = `scaleX(${LEVEL_FILL[bucket] || 0})`;
 }
 
 // Privacy disclaimer + "how it works" modal
@@ -721,7 +725,7 @@ const TECH_STRINGS = {
     title: 'Análisis técnico adjunto:',
     tool: `Herramienta utilizada: VeraShield (${SITE_DOMAIN})`,
     api: (a) => `API de detección: ${a}`,
-    score: (n) => `Puntuación de detección: ${n}% de probabilidad de contenido generado con IA`,
+    score: (n) => `Nivel de señales de contenido generado con IA: ${n}`,
     when: (d) => `Fecha y hora del análisis: ${d}`,
     note: 'Esta información es orientativa. Para uso legal, consulta a un especialista.',
   },
@@ -729,7 +733,7 @@ const TECH_STRINGS = {
     title: 'Technical analysis included:',
     tool: `Tool used: VeraShield (${SITE_DOMAIN})`,
     api: (a) => `Detection API: ${a}`,
-    score: (n) => `Detection score: ${n}% probability of AI-generated content`,
+    score: (n) => `Level of signs of AI-generated content: ${n}`,
     when: (d) => `Date and time of analysis: ${d}`,
     note: 'This information is indicative. For legal purposes, consult a specialist.',
   },
@@ -737,7 +741,7 @@ const TECH_STRINGS = {
     title: 'तकनीकी विश्लेषण:',
     tool: `उपयोग किया गया टूल: VeraShield (${SITE_DOMAIN})`,
     api: (a) => `डिटेक्शन API: ${a}`,
-    score: (n) => `स्कोर: ${n}% संभावना कि यह AI-generated है`,
+    score: (n) => `AI-generated सामग्री के संकेतों का स्तर: ${n}`,
     when: (d) => `विश्लेषण की तारीख और समय: ${d}`,
     note: 'यह जानकारी सांकेतिक है। कानूनी उपयोग के लिए किसी विशेषज्ञ से परामर्श लें।',
   },
@@ -745,13 +749,13 @@ const TECH_STRINGS = {
 const DETECTION_API_NAMES = { sightengine: 'Sightengine', azure: 'Azure AI Content Safety', mock: 'Mock (simulated test, not a real analysis)' };
 
 function writeTechnicalBlock(w, lang, locale) {
-  if (caseData.score_analisis === null) return;
+  if (caseData.nivel_analisis === null) return;
   const tc = TECH_STRINGS[lang];
   const api = caseData.fuente_analisis;
   const when = (analyzedAt || new Date()).toLocaleString(locale, { dateStyle: 'long', timeStyle: 'short' });
   w.rule(PDF_COLORS.muted, 0.2);
   w.text(tc.title, { size: 11, bold: true, gap: 2 });
-  [tc.tool, tc.api(api), tc.score(caseData.score_analisis), tc.when(when)]
+  [tc.tool, tc.api(api), tc.score(levelName(caseData.nivel_analisis, lang)), tc.when(when)]
     .forEach((line) => w.text('- ' + line, { size: 10.5, gap: 1.5 }));
   w.text(tc.note, { size: 9.5, color: PDF_COLORS.muted, gap: 4 });
 }
@@ -943,7 +947,7 @@ function generateEvidencePdf() {
   if (hasResult) {
     w.text(p.resultTitle, { size: 15, bold: true, gap: 3 });
     w.text(p.probability, { size: 10, color: PDF_COLORS.muted, gap: 1 });
-    w.text(`${Math.round(currentResult.score_percent)}%`, { size: 38, bold: true, color: PDF_COLORS.bucket[bucket], gap: 2 });
+    w.text(levelName(currentResult.bucket, lang), { size: 38, bold: true, color: PDF_COLORS.bucket[bucket], gap: 2 });
     w.text(t.labels[currentResult.label] || '', { size: 13, bold: true, gap: 2 });
     w.text(t.explanations[currentResult.label] || '', { size: 11, gap: 6 });
 
@@ -1011,16 +1015,11 @@ function renderResultDetails() {
   scoreLabel.textContent = t.labels[r.label] || '';
 
   // Face-swap nuance: deepfake signal dominates, image is not fully AI-generated
-  const faceSwapOnly = r.bucket !== 'low' && r.deepfake > 0.6 && r.aiGenerated < 0.4;
+  const faceSwapOnly = !!r.faceSwap;
   scoreExplanation.textContent = faceSwapOnly ? ui.faceSwapExplanation : (t.explanations[r.label] || '');
 
-  if (r.topGenerator && r.score > 0.5) {
-    scoreGenerator.textContent = ui.generatorLabel + r.topGenerator;
-    scoreGenerator.hidden = false;
-  } else {
-    scoreGenerator.textContent = '';
-    scoreGenerator.hidden = true;
-  }
+  scoreGenerator.textContent = '';
+  scoreGenerator.hidden = true;
 }
 
 // Low-result note ("a low result does not mean nothing happened")
@@ -1044,8 +1043,7 @@ function showResult(data) {
 
   resultHeading.textContent = UI[currentLang].resultHeading;
   scoreDisplay.dataset.bucket = data.bucket;
-  scoreNumber.textContent = '0';
-  animateScore(data.score_percent);
+  showLevel(data.bucket);
 
   renderResultDetails();
   renderLowNote();
@@ -1253,7 +1251,7 @@ const caseData = {
   nivel_escolar: '',      // '' | basica | mediaFederal | local
   estado: '',
   fecha_incidente: '',    // yyyy-mm-dd
-  score_analisis: null,   // rounded %, null while there is no analysis
+  nivel_analisis: null,   // low, medium or high; null while there is no analysis
   fuente_analisis: 'ninguno',
 };
 const caseInputs = {
@@ -1275,7 +1273,7 @@ function clearCaseData() {
 }
 
 function setAnalysis(result) {
-  caseData.score_analisis = result ? Math.round(result.score_percent) : null;
+  caseData.nivel_analisis = result ? result.bucket : null;
   caseData.fuente_analisis = result ? (DETECTION_API_NAMES[result.source] || result.source || 'N/A') : 'ninguno';
 }
 
