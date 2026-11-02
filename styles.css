@@ -903,3 +903,10 @@ ol.plain-list { list-style: decimal; }
 /* /adultos page */
 .adults-page { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: var(--space-6); padding-bottom: var(--space-8); }
 .adults-section { display: flex; flex-direction: column; gap: var(--space-3); }
+
+.glossary { border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-3, 12px) var(--space-4, 16px); }
+.glossary summary { cursor: pointer; font-weight: 650; }
+.glossary-list { margin: var(--space-3, 12px) 0 0; display: grid; gap: var(--space-2, 8px); }
+.glossary-list dt { font-weight: 650; }
+.glossary-list dd { margin: 0; overflow-wrap: anywhere; }
+.accuracy-note { overflow-wrap: anywhere; }
