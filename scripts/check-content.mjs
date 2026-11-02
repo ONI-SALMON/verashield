@@ -61,6 +61,7 @@ function checkItem(where, item, { needsLink = false } = {}) {
   if (status === 'verified' && (!verifiedOn || !source)) fail(`${where}: verified items need verifiedOn and source`);
   if (status === 'partial' && !verifiedOn && !item.carried) fail(`${where}: partial items need verifiedOn (or carried: true)`);
   if (status === 'pending' && (url || number)) fail(`${where}: pending items must not carry a link or a number`);
+  if (item.email && status !== 'verified') fail(`${where}: only verified items can show an email`);
   if (needsLink && !url) fail(`${where}: missing url`);
 }
 
@@ -79,6 +80,11 @@ for (const id of COUNTRY_IDS) {
       else if (kind === 'helplines') { localized(`country ${id}.helplines.${item.id}.label`, item.label); localized(`country ${id}.helplines.${item.id}.note`, item.note); }
       else { localized(`country ${id}.authorities.${item.id}.name`, item.name); localized(`country ${id}.authorities.${item.id}.summary`, item.summary); }
     }
+  }
+  for (const m of c.materials || []) {
+    checkItem(`country ${id}.materials.${m.id}`, m, { needsLink: true });
+    if (!m.title || !m.year) fail(`country ${id}.materials.${m.id}: needs title and year`);
+    localized(`country ${id}.materials.${m.id}.audience`, m.audience);
   }
   localized(`country ${id}.removal.summary`, c.removal && c.removal.summary);
   checkItem(`country ${id}.removal`, c.removal || {});

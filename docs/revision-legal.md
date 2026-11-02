@@ -1,4 +1,4 @@
-# Revision legal de VeraShield (2026-11-02)
+# Revision legal de VeraShield (2026-11-02, actualizada)
 
 Este documento no es asesoria legal. Resume lo que se pudo contrastar con busqueda web (el acceso directo a sitios oficiales no estuvo disponible en la sesion) y lo que debe revisar una persona abogada en cada pais antes de publicar. Estados: confirmado (fuente secundaria coincidente), por verificar (falta texto oficial), pendiente (la app ya lo marca asi).
 
@@ -6,7 +6,7 @@ Este documento no es asesoria legal. Resume lo que se pudo contrastar con busque
 
 | Dato | En la app | Fuente consultada | Estado | Recomendacion |
 |---|---|---|---|---|
-| CPF art. 199 Octies (violacion a la intimidad sexual) | Cita general como "puede constituir" | Justia (reforma 07-06-2024): 3 a 6 anios y multa de 500 a 1000 UMA | Por verificar contra DOF | Media: no afirmar agravantes por minoria de edad (no confirmadas en este articulo); hay iniciativas para elevar penas e incluir IA, sin aprobacion confirmada |
+| CPF art. 199 Octies (violacion a la intimidad sexual) | Solo para personas adultas; ya no se cita en la carta de una adolescente | Texto aportado por la persona responsable (2026-11-02): "persona que tenga la mayoria de edad", 3 a 6 anios y multa de 500 a 1000 UMA | Confirmado (texto aportado) | Alta: para menores aplican los delitos sobre material sexual de menores (art. 202, por verificar) |
 | CPF art. 202 y 202 Bis (material con menores; almacenar) | Advertencia de no reenviar ni guardar la imagen | Decreto 2007 (1 a 5 anios por almacenar); fuentes se contradicen sobre el texto vigente | Por verificar | Alta: confirmar texto vigente en Camara de Diputados antes de citar pena alguna |
 | CNPP art. 222 (deber de denunciar) | No se cita | Existe con excepciones por parentesco; texto completo no confirmado | Por verificar | Baja: no afirmar que una menor tiene obligacion de denunciar |
 | LNSIJPA (adolescentes de 12 a menos de 18) | No se menciona | Camara de Diputados, CNDH | Confirmado | Alta: avisar en /adultos y en la carta que si quien agrede es adolescente rige justicia penal para adolescentes, sin nombrar a nadie |
@@ -47,3 +47,36 @@ Este documento no es asesoria legal. Resume lo que se pudo contrastar con busque
 6. Media: leer el texto de S.146 antes de citar penas.
 7. Media: cerrar la cita de Cultivando Genero y decidir sobre ODI.
 8. Abierta (no legal): correo de contacto real para /privacy, y corregir la afirmacion "en memoria" porque `api/detect.js` escribe temporales sin borrarlos.
+
+## Actualizacion: textos aportados y manuales de Cultivando Genero (2026-11-02)
+
+| Dato | En la app | Fuente | Estado | Recomendacion |
+|---|---|---|---|---|
+| CPF 199 Nonies (imagenes que no corresponden con la persona, como deepfakes): mismas sanciones que 199 Octies | /adultos (Ley Olimpia) | Texto aportado por la persona responsable | Confirmado (texto aportado) | Media: verificar contra el DOF antes de publicar |
+| CPF 199 Decies (aumento hasta una mitad: relacion de confianza, servidor publico, sin fin lucrativo, etc.) | /adultos | Texto aportado | Confirmado (texto aportado); no incluye la minoria de edad como agravante | Media |
+| LGAMVLV art. 20 Quater (violencia digital, imagenes reales o simuladas) | /adultos y paso 5 | Texto aportado | Confirmado (texto aportado) | Media: protege a mujeres y ninas; no afirmarlo para todas las personas |
+| LGAMVLV art. 20 Sexies (el MP o la jueza o juez ordena bloquear o eliminar; exige plataforma y URL exactos; resguardo licito; aviso a quien subio el contenido; audiencia en 5 dias) | Paso 5 y carta (conservar enlaces) | Texto aportado | Confirmado (texto aportado) | Alta: reafirma guardar enlaces y capturas |
+| CPF art. 202 (material sexual de personas menores) | Carta y PDF para menores, sin pena | Sin texto vigente | Por verificar | Alta: pegar el texto vigente de 202 y 202 Bis |
+| TAKE IT DOWN Act (resumen oficial del Congreso): menores, restitucion obligatoria, prision o multa, amenazas, retiro en 48 h | Verificado | congress.gov (resumen aportado) | Confirmado | Baja: sigue sin citarse cifra de pena |
+
+Hallazgos de los manuales de Cultivando Genero A.C. (CC BY-NC-SA 4.0), parafraseados en la app con atribucion:
+- No toda violencia digital es delito; hay que revisar el codigo penal de cada estado. El manual para profesionales del derecho (2024) analiza solo Aguascalientes; sus articulos y penas no se usan como si fueran nacionales.
+- Delitos por querella: solo la persona afectada denuncia y, si es menor, su representante legal. Hablar con alguien ya es una forma de denunciar.
+- Primeros auxilios digitales: calma, no responder a la presion, guardar capturas y enlaces, escucha activa. Revictimizacion institucional (no creer, culpar, mandar de oficina en oficina, condicionar la informacion a denunciar, suspender o reportar a la persona afectada "para protegerla").
+- Contacto publicado en todos sus PDF: cultivandogeneroac@gmail.com (talleres). No es una linea de emergencia.
+
+Materiales que faltan por compartir (relevantes): "Pistas legales para apropiarte de tu proceso de justicia en casos de violencia digital", Guia para instituciones, Decalogo del personal docente, Manual para acompanar el malestar emocional de las adolescencias, Fanzine Sexting Seguro, Diccionario digital 3a edicion, y la guia para madres y padres sobre sexualidad digital.
+
+Privacidad: `api/detect.js` ahora borra el archivo temporal al terminar (prueba local: 0 archivos nuevos en el directorio temporal). El texto de privacidad en es/en/hi lo dice.
+
+## Actualizacion 3 (2026-11-02): CPF 202 y 202 Bis, correo y manuales nuevos
+
+| Dato | En la app | Fuente | Estado | Recomendacion |
+|---|---|---|---|---|
+| CPF art. 202: pornografia de menores de 18; incluye fijar, grabar, fotografiar o describir actos reales o simulados, y reproducir, almacenar, distribuir, vender, comprar, exponer o transmitir el material; 7 a 12 anios y 800 a 2,000 dias multa | Carta y PDF para menores (sin cifras de pena) | Texto aportado por la persona responsable | Confirmado (texto aportado) | Alta: verificar contra el DOF; la carta no cita penas a proposito |
+| CPF art. 202 Bis: almacenar o comprar ese material sin fines de comercializacion; 1 a 5 anios, 100 a 500 dias multa y tratamiento psiquiatrico | Solo en este informe | Texto aportado | Confirmado (texto aportado) | Alta: la app ya dice no guardar ni reenviar la imagen; guardar el enlace, no el archivo |
+
+Tension a decidir con un abogado: los manuales de Cultivando Genero recomiendan capturas de pantalla como evidencia, pero capturar o conservar la imagen de una persona menor puede caer en los arts. 202 y 202 Bis. La app sigue recomendando guardar enlaces, fechas y nombres de usuario, y no la imagen. Pedir a una persona abogada que confirme que es la guia correcta para menores.
+
+Otros hallazgos de "Pistas legales para apropiarte de tu proceso de justicia" (Cultivando Genero 2024): no existen "denuncias por violencia digital" sino delitos concretos; no todo lo que dana es delito; no se necesita saber el delito ni citar articulos (corresponde al Ministerio Publico); pedir numero de carpeta; no es requisito llevar identificacion; derechos de la victima del art. 20 constitucional; no pedir a grupos que reporten; plataformas hasta 72 h y se puede apelar. Sus ejemplos de Fiscalia y contraloria son de Aguascalientes.
+Correo de contacto de VeraShield: hello@verashield.help (ya en /privacy).

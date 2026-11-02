@@ -1,5 +1,5 @@
 import { IncomingForm } from 'formidable';
-import { readFile } from 'fs/promises';
+import { readFile, unlink } from 'fs/promises';
 
 export const config = { api: { bodyParser: false } };
 
@@ -172,6 +172,8 @@ function parseForm(req) {
 }
 
 export default async function handler(req, res) {
+  // Temporary files written by formidable: always deleted when the request ends.
+  const tempPaths = [];
   try {
     if (req.method !== 'POST') {
       return res.status(405).json({ error: true, code: 'METHOD_NOT_ALLOWED', message: 'Only POST is supported.' });
@@ -180,6 +182,9 @@ export default async function handler(req, res) {
     let files;
     try {
       files = await parseForm(req);
+      for (const entry of Object.values(files || {})) {
+        for (const f of Array.isArray(entry) ? entry : [entry]) if (f && f.filepath) tempPaths.push(f.filepath);
+      }
     } catch (parseError) {
       return res
         .status(400)
@@ -247,5 +252,7 @@ export default async function handler(req, res) {
       fallback_attempted: true,
       message: 'Our detection service is temporarily unavailable. Try again in a few minutes.',
     });
+  } finally {
+    await Promise.all(tempPaths.map((path) => unlink(path).catch(() => {})));
   }
 }

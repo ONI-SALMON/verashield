@@ -2,9 +2,7 @@ import {
   AZURE_PRIVACY_URL, NCMEC_CYBERTIPLINE_URL, SIGHTENGINE_URL, TE_PROTEJO_URL,
 } from '/lib/privacyServices.js';
 
-// TODO: replace with VeraShield's real privacy contact. No address exists in the repo, so the page
-// shows a visible "to be confirmed" marker instead of inventing one.
-const CONTACT_EMAIL = null;
+const CONTACT_EMAIL = 'hello@verashield.help';
 
 const SERVICES = [
   { name: 'sightengine', url: SIGHTENGINE_URL },
