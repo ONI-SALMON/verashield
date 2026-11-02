@@ -68,3 +68,15 @@ Hallazgos de los manuales de Cultivando Genero A.C. (CC BY-NC-SA 4.0), parafrase
 Materiales que faltan por compartir (relevantes): "Pistas legales para apropiarte de tu proceso de justicia en casos de violencia digital", Guia para instituciones, Decalogo del personal docente, Manual para acompanar el malestar emocional de las adolescencias, Fanzine Sexting Seguro, Diccionario digital 3a edicion, y la guia para madres y padres sobre sexualidad digital.
 
 Privacidad: `api/detect.js` ahora borra el archivo temporal al terminar (prueba local: 0 archivos nuevos en el directorio temporal). El texto de privacidad en es/en/hi lo dice.
+
+## Actualizacion 3 (2026-11-02): CPF 202 y 202 Bis, correo y manuales nuevos
+
+| Dato | En la app | Fuente | Estado | Recomendacion |
+|---|---|---|---|---|
+| CPF art. 202: pornografia de menores de 18; incluye fijar, grabar, fotografiar o describir actos reales o simulados, y reproducir, almacenar, distribuir, vender, comprar, exponer o transmitir el material; 7 a 12 anios y 800 a 2,000 dias multa | Carta y PDF para menores (sin cifras de pena) | Texto aportado por la persona responsable | Confirmado (texto aportado) | Alta: verificar contra el DOF; la carta no cita penas a proposito |
+| CPF art. 202 Bis: almacenar o comprar ese material sin fines de comercializacion; 1 a 5 anios, 100 a 500 dias multa y tratamiento psiquiatrico | Solo en este informe | Texto aportado | Confirmado (texto aportado) | Alta: la app ya dice no guardar ni reenviar la imagen; guardar el enlace, no el archivo |
+
+Tension a decidir con un abogado: los manuales de Cultivando Genero recomiendan capturas de pantalla como evidencia, pero capturar o conservar la imagen de una persona menor puede caer en los arts. 202 y 202 Bis. La app sigue recomendando guardar enlaces, fechas y nombres de usuario, y no la imagen. Pedir a una persona abogada que confirme que es la guia correcta para menores.
+
+Otros hallazgos de "Pistas legales para apropiarte de tu proceso de justicia" (Cultivando Genero 2024): no existen "denuncias por violencia digital" sino delitos concretos; no todo lo que dana es delito; no se necesita saber el delito ni citar articulos (corresponde al Ministerio Publico); pedir numero de carpeta; no es requisito llevar identificacion; derechos de la victima del art. 20 constitucional; no pedir a grupos que reporten; plataformas hasta 72 h y se puede apelar. Sus ejemplos de Fiscalia y contraloria son de Aguascalientes.
+Correo de contacto de VeraShield: hello@verashield.help (ya en /privacy).
