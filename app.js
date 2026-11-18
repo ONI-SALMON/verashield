@@ -5,6 +5,7 @@ import { renderCurrent } from './lib/flow/router.js';
 import { getContent } from './lib/content/index.js';
 import { SITE_DOMAIN } from './lib/siteConfig.js';
 import { AZURE_PRIVACY_URL, SIGHTENGINE_URL } from './lib/privacyServices.js';
+import { checkImage as checkImageNsfw, warmUp as warmUpNsfw } from './lib/flow/nsfwGuard.js';
 
 const MAX_FILE_SIZE_BYTES       = 10 * 1024 * 1024; // final cap, matches api/detect.js
 const COMPRESSION_MIN_BYTES     = 800 * 1024;        // below this, skip compression
@@ -390,10 +391,42 @@ async function handleFile(file) {
   if (myToken !== handleFileToken) return; // a newer file was selected meanwhile; discard this result
 
   selectedFile = processed;
+  nsfwBlocked = false;
   uploadText.textContent = `${processed.name} (${formatFileSize(processed.size)})`;
-  uploadHint.textContent = UI[currentLang].changeImage;
   setPreview(processed);
-  analyzeBtn.disabled = false;
+  await runNsfwCheck(processed, myToken);
+}
+
+// Automatic on-device NSFW/nudity check, run on every newly selected photo (see nsfwGuard.js).
+// Fully replaces the old manual yes/no question: nothing here is interactive, it just reports
+// what the on-device check found, and blocks "Analizar con IA" rather than asking the user.
+let nsfwBlocked = false;
+
+async function runNsfwCheck(file, token) {
+  const c = getContent(currentLang).analysis;
+  hideBlockedNote();
+  analyzeBtn.disabled = true;
+  uploadHint.textContent = c.nsfwScanning;
+
+  try {
+    const { unsafe, confidence } = await checkImageNsfw(file);
+    if (token !== handleFileToken) return; // a newer file was selected meanwhile; discard this result
+    nsfwBlocked = unsafe;
+    uploadHint.textContent = UI[currentLang].changeImage;
+    if (unsafe) {
+      console.warn(`[VeraShield] Análisis bloqueado: el verificador de contenido en el dispositivo detectó posible desnudez/contenido sexual (confianza: ${confidence}). No se envió ningún archivo a APIs externas.`);
+      showBlockedNote(c.nsfwBlockedDetail);
+    } else {
+      analyzeBtn.disabled = false;
+    }
+  } catch (err) {
+    if (token !== handleFileToken) return;
+    // Block by precaution: a failed on-device check is never treated as "safe to proceed".
+    console.warn('[VeraShield] No se pudo completar la revisión de contenido en el dispositivo; se bloquea el análisis por precaución.', err);
+    nsfwBlocked = true;
+    uploadHint.textContent = UI[currentLang].changeImage;
+    showBlockedNote(c.nsfwCheckError);
+  }
   updateAnalyzeHint();
 }
 
@@ -410,6 +443,12 @@ uploadZone.addEventListener('drop', (e) => {
 });
 fileInput.addEventListener('change', () => {
   if (fileInput.files[0]) handleFile(fileInput.files[0]);
+});
+// Start loading the on-device NSFW checker as soon as the person shows intent to upload
+// (hover/touch/focus on the drop zone), so the automatic check on actual file selection is
+// faster. Harmless to call more than once; loadModel() caches the result.
+['mouseenter', 'touchstart', 'focus', 'dragenter'].forEach((evt) => {
+  uploadZone.addEventListener(evt, warmUpNsfw, { once: true, passive: true });
 });
 
 // Loading state
@@ -524,6 +563,7 @@ const PRIVACY_PANEL_STRINGS = {
       { name: 'Microsoft Azure AI Content Safety (solo si el servicio principal falla)', url: AZURE_PRIVACY_URL },
     ],
     after: 'Después del análisis, VeraShield no conserva ninguna copia.',
+    noIntimate: 'No subas imágenes o videos íntimos o de contenido sexual, ni propios ni de alguien más: para esos casos no necesitas analizar nada para pedir ayuda.',
     more: '¿Cómo funciona esto?',
   },
   en: {
@@ -536,6 +576,7 @@ const PRIVACY_PANEL_STRINGS = {
       { name: 'Microsoft Azure AI Content Safety (only if the main service fails)', url: AZURE_PRIVACY_URL },
     ],
     after: 'After analysis, VeraShield keeps no copy.',
+    noIntimate: "Don't upload intimate or sexual images or videos, whether yours or someone else's: for those cases you don't need to analyze anything to ask for help.",
     more: 'How does this work?',
   },
   hi: {
@@ -548,6 +589,7 @@ const PRIVACY_PANEL_STRINGS = {
       { name: 'Microsoft Azure AI Content Safety (केवल तब जब मुख्य सेवा विफल हो)', url: AZURE_PRIVACY_URL },
     ],
     after: 'विश्लेषण के बाद VeraShield इसकी कोई प्रति नहीं रखता।',
+    noIntimate: 'अंतरंग या यौन सामग्री वाली फ़ोटो या वीडियो न अपलोड करें, चाहे वह आपकी हो या किसी और की: ऐसे मामलों में मदद माँगने के लिए आपको कुछ भी विश्लेषण करने की ज़रूरत नहीं है।',
     more: 'यह कैसे काम करता है?',
   },
 };
@@ -578,7 +620,9 @@ function buildPrivacyPanel(open) {
   sent.appendChild(services);
 
   const list = el('ul');
-  list.append(el('li', s.memory), sent, el('li', s.after));
+  const noIntimate = el('li', s.noIntimate);
+  noIntimate.className = 'privacy-panel-emphasis';
+  list.append(el('li', s.memory), sent, el('li', s.after), noIntimate);
 
   const more = el('p');
   more.appendChild(link('/privacy?lang=' + currentLang, s.more + ' →'));
@@ -610,17 +654,17 @@ document.addEventListener('keydown', (e) => {
 // a third-party API is itself the offence. Nothing is logged externally; only console.warn.
 const CONTENT_GUARD_STRINGS = {
   es: {
-    question: 'Antes de continuar: ¿La imagen o video que vas a analizar muestra desnudez o contenido sexual de alguien menor de 18 años?',
+    question: 'Antes de continuar: ¿esta imagen o video muestra a alguien menor de 18 años desnudo, semidesnudo, en ropa interior, o en una situación sexual o íntima?',
     no: 'No, continuar',
     yes: 'Sí, detener el análisis',
   },
   en: {
-    question: "Before continuing: Does the image or video you're uploading contain nudity or sexual content of someone under 18?",
+    question: 'Before continuing: does this image or video show someone under 18 nude, partially nude, in underwear, or in a sexual or intimate situation?',
     no: 'No, continue',
     yes: 'Yes, stop the analysis',
   },
   hi: {
-    question: 'जारी रखने से पहले: क्या जिस फ़ोटो या वीडियो का आप विश्लेषण करने जा रहे हैं, उसमें 18 वर्ष से कम उम्र के किसी व्यक्ति की नग्नता या यौन सामग्री है?',
+    question: 'जारी रखने से पहले: क्या यह फ़ोटो या वीडियो 18 वर्ष से कम उम्र के किसी व्यक्ति को नग्न, अर्ध-नग्न, अंतः वस्त्रों में, या किसी यौन या अंतरंग स्थिति में दिखाता है?',
     no: 'नहीं, जारी रखें',
     yes: 'हाँ, विश्लेषण रोकें',
   },
@@ -675,21 +719,22 @@ document.addEventListener('keydown', (e) => {
 function blockAnalysis() {
   console.warn('[VeraShield] Análisis bloqueado: el usuario indicó posible desnudez/contenido sexual de un menor de 18 años. No se envió ningún archivo a APIs externas.');
   resetAnalysis();
-  showBlockedNote();
+  showBlockedNote(getContent(currentLang).analysis.blocked);
 }
 
 // Blocked note
-// Shown when the content guard stops the analysis. The person does not need the analysis to get
+// Shown when the video content guard, or the automatic on-device NSFW check (see nsfwGuard.js
+// and runNsfwCheck() above), stops the analysis. The person does not need the analysis to get
 // help, so the note only explains that nothing was sent and offers the next step.
 const altRouteEl = document.getElementById('alternative-route');
 
-function renderBlockedNote() {
+function renderBlockedNote(message) {
   const c = getContent(currentLang).analysis;
   altRouteEl.replaceChildren();
   const text = document.createElement('p');
   text.id = 'alt-route-title';
   text.tabIndex = -1;
-  text.textContent = c.blocked;
+  text.textContent = message;
   const next = document.createElement('button');
   next.type = 'button';
   next.className = 'primary-btn';
@@ -699,8 +744,8 @@ function renderBlockedNote() {
   altRouteEl.append(text, next);
 }
 
-function showBlockedNote() {
-  renderBlockedNote();
+function showBlockedNote(message) {
+  renderBlockedNote(message);
   altRouteEl.hidden = false;
   document.getElementById('alt-route-title').focus({ preventScroll: true });
 }
@@ -1056,6 +1101,7 @@ function resetAnalysis() {
   hideBlockedNote();
   handleFileToken++;
   selectedFile = null;
+  nsfwBlocked = false;
   contentGuardConfirmed = null;
   currentResult = null;
   setAnalysis(null);
@@ -1851,7 +1897,9 @@ analyzeBtn.addEventListener('click', async () => {
   if (inputMode === 'video') { analyzeVideo(); return; }
   if (!selectedFile) return;
   clearFormError();
-  if (!(await ensureContentGuard(selectedFile))) return;
+  // The automatic on-device check (runNsfwCheck, run on file selection) already decided this;
+  // the button is kept disabled while blocked, but this guard covers it defensively too.
+  if (nsfwBlocked) return;
   setLoading(true);
 
   const formData = new FormData();

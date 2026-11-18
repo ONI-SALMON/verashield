@@ -19,8 +19,8 @@ const STRINGS = {
     flow: [
       'Tú subes la imagen.',
       'VeraShield la recibe de forma temporal en su servidor, solo para enviarla al análisis.',
-      'Antes de enviarla, te preguntamos si muestra desnudez o contenido sexual de alguien menor de 18 años. Si respondes que sí, el análisis se detiene y la imagen no se envía a ningún servicio.',
-      'Si respondes que no, se envía a Sightengine para el análisis. Si Sightengine falla, puede usarse Azure AI Content Safety como respaldo.',
+      'Al elegir una foto, tu propio dispositivo la revisa para ver si parece mostrar desnudez o contenido íntimo o sexual. Esta revisión se hace en tu teléfono o computadora: la imagen no se envía a ningún servidor para ello. Si la revisión lo detecta, o no se puede completar, el análisis se bloquea y la imagen no se envía a ningún servicio. En los videos, en lugar de esa revisión automática, te preguntamos si muestran a alguien menor de 18 años desnudo o en una situación sexual o íntima; si respondes que sí, el análisis se detiene.',
+      'Si la revisión no encuentra nada, la imagen se envía a Sightengine para el análisis. Si Sightengine falla, puede usarse Azure AI Content Safety como respaldo.',
       'El resultado regresa a tu pantalla.',
       'Para evitar abusos, el servidor cuenta brevemente cuántos análisis se piden desde una misma conexión, con una huella que no permite recuperar la dirección, y lo olvida en pocos minutos.',
       'VeraShield no conserva tu imagen: no tiene ninguna base de datos de imágenes.',
@@ -57,8 +57,8 @@ const STRINGS = {
     flow: [
       'You upload the image.',
       'VeraShield receives it temporarily on its server, only to send it for analysis.',
-      'Before sending it, we ask whether it shows nudity or sexual content of someone under 18. If you answer yes, the analysis stops and the image is not sent to any service.',
-      'If you answer no, it is sent to Sightengine for analysis. If Sightengine fails, Azure AI Content Safety may be used as a backup.',
+      'When you choose a photo, your own device checks whether it seems to show nudity or intimate or sexual content. This check runs on your phone or computer: the image is not sent to any server for it. If the check detects it, or cannot be completed, the analysis is blocked and the image is not sent to any service. For videos, instead of that automatic check, we ask whether they show someone under 18 nude or in a sexual or intimate situation; if you answer yes, the analysis stops.',
+      'If the check finds nothing, the image is sent to Sightengine for analysis. If Sightengine fails, Azure AI Content Safety may be used as a backup.',
       'The result comes back to your screen.',
       'To prevent abuse, the server briefly counts how many analyses are requested from the same connection, using a fingerprint that cannot be turned back into the address, and forgets it within minutes.',
       'VeraShield does not keep your image: it has no image database.',
@@ -95,8 +95,8 @@ const STRINGS = {
     flow: [
       'आप इमेज अपलोड करते हैं।',
       'VeraShield इसे अस्थायी रूप से अपने सर्वर पर प्राप्त करता है, केवल विश्लेषण के लिए भेजने हेतु।',
-      'भेजने से पहले हम पूछते हैं कि क्या इसमें 18 वर्ष से कम उम्र के किसी व्यक्ति की नग्नता या यौन सामग्री है। अगर आप "हाँ" कहते हैं, तो विश्लेषण रुक जाता है और इमेज किसी सेवा को नहीं भेजी जाती।',
-      'अगर आप "नहीं" कहते हैं, तो इमेज विश्लेषण के लिए Sightengine को भेजी जाती है। Sightengine विफल हो तो बैकअप के रूप में Azure AI Content Safety इस्तेमाल हो सकता है।',
+      'अपनी तस्वीर चुनते ही आपका अपना डिवाइस जाँचता है कि क्या उसमें नग्नता या अंतरंग या यौन सामग्री लगती है। यह जाँच आपके फ़ोन या कंप्यूटर पर होती है: इसके लिए तस्वीर किसी सर्वर को नहीं भेजी जाती। अगर जाँच में ऐसा पता चलता है, या जाँच पूरी नहीं हो पाती, तो विश्लेषण रोक दिया जाता है और तस्वीर किसी सेवा को नहीं भेजी जाती। वीडियो के लिए इस स्वचालित जाँच की जगह हम पूछते हैं कि क्या वे 18 वर्ष से कम उम्र के किसी व्यक्ति को नग्न या किसी यौन या अंतरंग स्थिति में दिखाते हैं; हाँ कहने पर विश्लेषण रुक जाता है।',
+      'अगर जाँच में कुछ नहीं मिलता, तो तस्वीर विश्लेषण के लिए Sightengine को भेजी जाती है। Sightengine विफल हो तो बैकअप के रूप में Azure AI Content Safety का उपयोग हो सकता है।',
       'नतीजा आपकी स्क्रीन पर लौट आता है।',
       'दुरुपयोग रोकने के लिए सर्वर एक ही कनेक्शन से माँगी गई जाँचों को थोड़ी देर गिनता है, ऐसे फ़िंगरप्रिंट से जिससे पता वापस नहीं निकाला जा सकता, और कुछ मिनट में भूल जाता है।',
       'VeraShield आपकी इमेज नहीं रखता: उसके पास इमेज का कोई डेटाबेस नहीं है।',
