@@ -32,9 +32,6 @@ const langBtns        = document.querySelectorAll('.lang-btn');
 const downloadPdfBtn     = document.getElementById('download-pdf-btn');
 
 const analyzeHint    = document.getElementById('analyze-hint');
-const uploadPreview  = document.getElementById('upload-preview');
-const uploadPreviewImg = document.getElementById('upload-preview-img');
-const uploadIcon     = document.getElementById('upload-icon');
 const uploadHint     = document.getElementById('upload-hint');
 const resultHeading  = document.getElementById('result-heading');
 const scoreCaption   = document.getElementById('score-caption');
@@ -351,27 +348,29 @@ async function maybeCompressImage(file) {
 }
 
 let handleFileToken = 0;
-let previewUrl = null;
 
 function updateAnalyzeHint() {
   analyzeHint.textContent = inputMode === 'video' ? VIDEO_STRINGS[currentLang].analyzeHint : UI[currentLang].analyzeHint;
   analyzeHint.hidden = hasAnalyzeInput() || analyzeBtn.classList.contains('loading');
 }
 
-function setPreview(file) {
-  if (previewUrl) URL.revokeObjectURL(previewUrl);
-  previewUrl = file ? URL.createObjectURL(file) : null;
-  uploadPreview.hidden = !file;
-  uploadIcon.hidden = !!file;
-  uploadZone.classList.toggle('has-file', !!file);
-  if (file) uploadPreviewImg.src = previewUrl; else uploadPreviewImg.removeAttribute('src');
+// Photos are never shown on screen. The on-device check runs first, on the file the person chose,
+// and only the file name and size appear afterwards. If the check flags the image (or cannot
+// finish), the file is dropped at once: the input is emptied and nothing is kept in memory.
+function discardSelectedFile() {
+  selectedFile = null;
+  fileInput.value = '';
+  uploadText.textContent = T[currentLang].uploadPrompt;
+  analyzeBtn.disabled = true;
 }
 
 async function handleFile(file) {
   clearFormError();
   hideBlockedNote();
   const t = T[currentLang];
+  const c = getContent(currentLang).analysis;
   const myToken = ++handleFileToken;
+  nsfwBlocked = false;
 
   if (!file.type || !file.type.startsWith('image/')) {
     showFormError(t.errors.INVALID_FILE_TYPE);
@@ -384,51 +383,44 @@ async function handleFile(file) {
     return;
   }
 
+  selectedFile = null;
   analyzeBtn.disabled = true;
   uploadText.textContent = t.preparingImage;
-
-  const processed = await maybeCompressImage(file);
-  if (myToken !== handleFileToken) return; // a newer file was selected meanwhile; discard this result
-
-  selectedFile = processed;
-  nsfwBlocked = false;
-  uploadText.textContent = `${processed.name} (${formatFileSize(processed.size)})`;
-  setPreview(processed);
-  await runNsfwCheck(processed, myToken);
-}
-
-// Automatic on-device NSFW/nudity check, run on every newly selected photo (see nsfwGuard.js).
-// Fully replaces the old manual yes/no question: nothing here is interactive, it just reports
-// what the on-device check found, and blocks "Analizar con IA" rather than asking the user.
-let nsfwBlocked = false;
-
-async function runNsfwCheck(file, token) {
-  const c = getContent(currentLang).analysis;
-  hideBlockedNote();
-  analyzeBtn.disabled = true;
   uploadHint.textContent = c.nsfwScanning;
 
+  let unsafe = false;
+  let failed = false;
   try {
-    const { unsafe, confidence } = await checkImageNsfw(file);
-    if (token !== handleFileToken) return; // a newer file was selected meanwhile; discard this result
-    nsfwBlocked = unsafe;
-    uploadHint.textContent = UI[currentLang].changeImage;
-    if (unsafe) {
-      console.warn(`[VeraShield] Análisis bloqueado: el verificador de contenido en el dispositivo detectó posible desnudez/contenido sexual (confianza: ${confidence}). No se envió ningún archivo a APIs externas.`);
-      showBlockedNote(c.nsfwBlockedDetail);
-    } else {
-      analyzeBtn.disabled = false;
-    }
+    ({ unsafe } = await checkImageNsfw(file));
   } catch (err) {
-    if (token !== handleFileToken) return;
     // Block by precaution: a failed on-device check is never treated as "safe to proceed".
+    failed = true;
     console.warn('[VeraShield] No se pudo completar la revisión de contenido en el dispositivo; se bloquea el análisis por precaución.', err);
-    nsfwBlocked = true;
-    uploadHint.textContent = UI[currentLang].changeImage;
-    showBlockedNote(c.nsfwCheckError);
   }
+  if (myToken !== handleFileToken) return; // a newer file was selected meanwhile; discard this result
+
+  if (unsafe || failed) {
+    nsfwBlocked = true;
+    if (unsafe) console.warn('[VeraShield] Análisis bloqueado: el verificador de contenido en el dispositivo detectó posible desnudez/contenido sexual. La imagen se descartó y no se envió ningún archivo a APIs externas.');
+    discardSelectedFile();
+    uploadHint.textContent = UI[currentLang].uploadHint;
+    showBlockedNote(unsafe ? c.nsfwBlockedDetail : c.nsfwCheckError);
+    updateAnalyzeHint();
+    return;
+  }
+
+  const processed = await maybeCompressImage(file);
+  if (myToken !== handleFileToken) return;
+  selectedFile = processed;
+  uploadText.textContent = `${processed.name} (${formatFileSize(processed.size)})`;
+  uploadHint.textContent = UI[currentLang].changeImage;
+  analyzeBtn.disabled = false;
   updateAnalyzeHint();
 }
+
+// Automatic on-device NSFW/nudity check (see nsfwGuard.js and handleFile() above). Fully replaces
+// the old manual yes/no question for photos: nothing here is interactive.
+let nsfwBlocked = false;
 
 uploadZone.addEventListener('keydown', (e) => {
   if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); }
@@ -1107,7 +1099,6 @@ function resetAnalysis() {
   setAnalysis(null);
   fileInput.value = '';
   clearVideoInputs();
-  setPreview(null);
   uploadText.textContent = T[currentLang].uploadPrompt;
   uploadHint.textContent = UI[currentLang].uploadHint;
   analyzeBtn.disabled = true;

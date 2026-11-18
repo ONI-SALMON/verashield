@@ -125,3 +125,12 @@ Limitaciones a revisar:
 - Consecuencia a tener presente: el bloqueo automatico tambien afectara a un montaje con desnudo falso de la persona, que es el caso principal. Es el diseno pedido por ODI (enviarlo a un servicio externo seria transmitir el material); la persona ve que no necesita el analisis para recibir ayuda.
 - `/privacy` (es/en/hi) se actualizo: para fotos describe la revision automatica en el dispositivo; para video sigue la pregunta manual.
 - Lo senalado por ODI proviene de una sesion oral, no de un documento escrito; los cambios de "una adolescente puede denunciar sin adulto" y "los delitos sexuales se persiguen de oficio" siguen como `partial` y requieren confirmacion de una persona abogada.
+
+## Actualizacion 7 (2026-11-18): la foto ya no se muestra y hay aviso previo
+
+Origen: nota de ODI (sesion oral, 12/11/2026): el riesgo legal puede empezar desde que una imagen intima aparece en la vista previa, aunque no salga del dispositivo. Es una indicacion oral, no un texto legal verificado; falta confirmarla con una persona abogada.
+
+- La foto nunca se muestra en pantalla: se elimino la vista previa; solo se ven el nombre y el tamano despues de la revision. La revision en el dispositivo corre primero, sobre la foto elegida y antes de comprimirla.
+- Si la revision marca la imagen o no puede completarse: se vacia el selector de archivos, se descarta de la pagina y no se envia a ningun servicio. El mensaje dice que no se muestra, ni se guarda ni se envia, que no se comparta ni reenvie, y remite a la Procuraduria de Proteccion o a una persona abogada para saber que hacer con la copia del dispositivo. Deliberadamente NO dice que la borre ni que la conserve.
+- Aviso fijo antes de elegir un archivo (es/en/hi): no es para imagenes intimas o sexuales; manejar imagenes intimas de menores de 18 puede tener consecuencias legales aunque no salgan del dispositivo; como funciona la revision; la revision puede equivocarse; el video usa pregunta manual; no se necesita subir nada para recibir ayuda.
+- Limites que siguen: la pagina carga la imagen en memoria para revisarla (no se puede revisar sin decodificarla); la imagen sigue en el dispositivo de la persona (el selector del sistema la muestra antes de que VeraShield la reciba); los formatos que el navegador no decodifica (por ejemplo HEIC en algunos navegadores) quedan bloqueados por precaucion; los umbrales del filtro siguen sin validar con muestras reales.

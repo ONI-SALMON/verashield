@@ -333,15 +333,6 @@ summary:focus-visible,
 .upload-text,
 .video-upload-text { color: var(--color-text); font-size: var(--text-base); font-weight: 500; overflow-wrap: anywhere; }
 .upload-hint { color: var(--color-muted); font-size: var(--text-sm); }
-.upload-preview {
-  width: 112px;
-  height: 112px;
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  border: 1px solid var(--color-border-strong);
-  background: var(--color-surface-2);
-}
-.upload-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
 /* Photo / Video mode toggle (full-width segmented) */
 .mode-toggle {
@@ -911,3 +902,4 @@ ol.plain-list { list-style: decimal; }
 .glossary-list dt { font-weight: 650; }
 .glossary-list dd { margin: 0; overflow-wrap: anywhere; }
 .accuracy-note { overflow-wrap: anywhere; }
+.upload-notice { border-left: 4px solid var(--color-accent); overflow-wrap: anywhere; }
