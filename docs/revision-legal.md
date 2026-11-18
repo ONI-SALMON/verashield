@@ -80,3 +80,27 @@ Tension a decidir con un abogado: los manuales de Cultivando Genero recomiendan 
 
 Otros hallazgos de "Pistas legales para apropiarte de tu proceso de justicia" (Cultivando Genero 2024): no existen "denuncias por violencia digital" sino delitos concretos; no todo lo que dana es delito; no se necesita saber el delito ni citar articulos (corresponde al Ministerio Publico); pedir numero de carpeta; no es requisito llevar identificacion; derechos de la victima del art. 20 constitucional; no pedir a grupos que reporten; plataformas hasta 72 h y se puede apelar. Sus ejemplos de Fiscalia y contraloria son de Aguascalientes.
 Correo de contacto de VeraShield: hello@verashield.help (ya en /privacy).
+
+## Actualizacion 4 (2026-11-16): correcciones de la sesion de revision legal con ODI (12/11/2026)
+
+ODI (Oficina de Defensoria de los Derechos de la Infancia, A.C.) reviso la app en una sesion oral el 12 de noviembre de 2026 y senalo varios puntos que ya se implementaron en el codigo (ver commit de esta fecha). Fuente de todos los puntos de esta tabla: transcripcion de esa sesion, no un documento escrito de ODI.
+
+| Punto senalado por ODI | Cambio aplicado | Donde |
+|---|---|---|
+| Un adolescente SI puede denunciar sin un adulto; puede ir con cualquier adulto de confianza, no solo mama/papa/tutor | Se corrigio `adult.lead` y `adult.reportHow[0]` en es/en/hi; se agrego y reordeno la autoridad `ppnna` como primer recurso en `lib/countries/mx.js` | lib/content/*.js, lib/countries/mx.js |
+| Los delitos sexuales (incluido contenido con IA) se persiguen de oficio, no por querella | Se corrigio el mismo texto; se aclaro en `authorities.mp.summary` | lib/countries/mx.js |
+| Agregar el directorio Alumbra para ubicar la procuraduria mas cercana | Se agrego como autoridad `alumbra` (status: partial, el mapa de fondo es del gobierno federal y no se pudo verificar que tan seguido se actualiza) | lib/countries/mx.js |
+| Avisar a la escuela solo si el caso involucra a la comunidad escolar | Se reescribio `adult.schoolLead` | lib/content/*.js |
+| La escuela, al enterarse, esta obligada a notificar a las autoridades (no es opcional) | Nuevo campo `adult.schoolNotifyNote`, renderizado en el paso "Con un adulto" | lib/content/*.js, lib/flow/steps/withAdult.js |
+| La escuela no debe confrontar a la persona afectada con la persona senalada | Nuevo campo `adult.schoolNoConfront` | lib/content/*.js, lib/flow/steps/withAdult.js |
+| Ampliar la pregunta de contenido sexual antes de subir la imagen (desnudo, semidesnudo, ropa interior, situacion sexual o intima) | Se reescribio `CONTENT_GUARD_STRINGS.question` | app.js |
+| Repetir junto al botón de subida que no se deben subir imagenes intimas o sexuales | Nuevo campo `noIntimate` en el panel de privacidad de carga | app.js, styles.css |
+| Guardar enlace, perfil y conversacion (no solo "no guardes nada"), porque si el URL desaparece la fiscalia puede detener la investigacion | Nuevo item en `stop.evidenceItems` y texto reforzado en `stop.evidenceWarn` | lib/content/*.js |
+| El reporte/PDF de analisis no necesita imagen para ser valido; se puede denunciar ante el MP o la Procuraduria con o sin el | Nuevo campo `adult.evidenceReportNote` | lib/content/*.js, lib/flow/steps/withAdult.js |
+
+Pendiente, no incluido en este cambio (requiere mas trabajo de infraestructura, no solo de texto):
+- Deteccion automatica de desnudez/NSFW que bloquee la subida aunque el usuario responda "no" a la pregunta de contenido (ODI lo sugirio porque un adolescente puede no reconocer su propio contenido como sexual). Esto es el prefiltro +18 investigado por separado; falta decidir el proveedor y si corre en el cliente o en el servidor.
+- Revisar el aviso de privacidad de Bershio/VeraShield contra el estandar de derechos ARCO que senalo ODI (nombre del responsable, transferencias a Sightengine/Azure en otros paises, como ejercer derechos). Relacionado con el pendiente de "Transparencia en 3 capas" del 10 oct, aun sin hacer.
+- Matizar el compromiso de "no compartimos datos con autoridades" para aclarar que aplica salvo orden judicial (NCMEC esta obligado a entregar informacion si hay una orden judicial).
+- Revisar las citas de prensa (El Imparcial, SDP Noticias) en las definiciones y preferir normativa oficial (Diario Oficial) cuando exista.
+- Agregar Policia Cibernetica estatal y Comisiones de Atencion a Victimas (federal y estatal) como recursos adicionales.

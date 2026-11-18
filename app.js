@@ -524,6 +524,7 @@ const PRIVACY_PANEL_STRINGS = {
       { name: 'Microsoft Azure AI Content Safety (solo si el servicio principal falla)', url: AZURE_PRIVACY_URL },
     ],
     after: 'Después del análisis, VeraShield no conserva ninguna copia.',
+    noIntimate: 'No subas imágenes o videos íntimos o de contenido sexual, ni propios ni de alguien más: para esos casos no necesitas analizar nada para pedir ayuda.',
     more: '¿Cómo funciona esto?',
   },
   en: {
@@ -536,6 +537,7 @@ const PRIVACY_PANEL_STRINGS = {
       { name: 'Microsoft Azure AI Content Safety (only if the main service fails)', url: AZURE_PRIVACY_URL },
     ],
     after: 'After analysis, VeraShield keeps no copy.',
+    noIntimate: "Don't upload intimate or sexual images or videos, whether yours or someone else's: for those cases you don't need to analyze anything to ask for help.",
     more: 'How does this work?',
   },
   hi: {
@@ -548,6 +550,7 @@ const PRIVACY_PANEL_STRINGS = {
       { name: 'Microsoft Azure AI Content Safety (केवल तब जब मुख्य सेवा विफल हो)', url: AZURE_PRIVACY_URL },
     ],
     after: 'विश्लेषण के बाद VeraShield इसकी कोई प्रति नहीं रखता।',
+    noIntimate: 'अंतरंग या यौन सामग्री वाली फ़ोटो या वीडियो न अपलोड करें, चाहे वह आपकी हो या किसी और की: ऐसे मामलों में मदद माँगने के लिए आपको कुछ भी विश्लेषण करने की ज़रूरत नहीं है।',
     more: 'यह कैसे काम करता है?',
   },
 };
@@ -578,7 +581,9 @@ function buildPrivacyPanel(open) {
   sent.appendChild(services);
 
   const list = el('ul');
-  list.append(el('li', s.memory), sent, el('li', s.after));
+  const noIntimate = el('li', s.noIntimate);
+  noIntimate.className = 'privacy-panel-emphasis';
+  list.append(el('li', s.memory), sent, el('li', s.after), noIntimate);
 
   const more = el('p');
   more.appendChild(link('/privacy?lang=' + currentLang, s.more + ' →'));
@@ -610,17 +615,17 @@ document.addEventListener('keydown', (e) => {
 // a third-party API is itself the offence. Nothing is logged externally; only console.warn.
 const CONTENT_GUARD_STRINGS = {
   es: {
-    question: 'Antes de continuar: ¿La imagen o video que vas a analizar muestra desnudez o contenido sexual de alguien menor de 18 años?',
+    question: 'Antes de continuar: ¿esta imagen o video muestra a alguien menor de 18 años desnudo, semidesnudo, en ropa interior, o en una situación sexual o íntima?',
     no: 'No, continuar',
     yes: 'Sí, detener el análisis',
   },
   en: {
-    question: "Before continuing: Does the image or video you're uploading contain nudity or sexual content of someone under 18?",
+    question: 'Before continuing: does this image or video show someone under 18 nude, partially nude, in underwear, or in a sexual or intimate situation?',
     no: 'No, continue',
     yes: 'Yes, stop the analysis',
   },
   hi: {
-    question: 'जारी रखने से पहले: क्या जिस फ़ोटो या वीडियो का आप विश्लेषण करने जा रहे हैं, उसमें 18 वर्ष से कम उम्र के किसी व्यक्ति की नग्नता या यौन सामग्री है?',
+    question: 'जारी रखने से पहले: क्या यह फ़ोटो या वीडियो 18 वर्ष से कम उम्र के किसी व्यक्ति को नग्न, अर्ध-नग्न, अंतः वस्त्रों में, या किसी यौन या अंतरंग स्थिति में दिखाता है?',
     no: 'नहीं, जारी रखें',
     yes: 'हाँ, विश्लेषण रोकें',
   },
