@@ -99,8 +99,21 @@ ODI (Oficina de Defensoria de los Derechos de la Infancia, A.C.) reviso la app e
 | El reporte/PDF de analisis no necesita imagen para ser valido; se puede denunciar ante el MP o la Procuraduria con o sin el | Nuevo campo `adult.evidenceReportNote` | lib/content/*.js, lib/flow/steps/withAdult.js |
 
 Pendiente, no incluido en este cambio (requiere mas trabajo de infraestructura, no solo de texto):
-- Deteccion automatica de desnudez/NSFW que bloquee la subida aunque el usuario responda "no" a la pregunta de contenido (ODI lo sugirio porque un adolescente puede no reconocer su propio contenido como sexual). Esto es el prefiltro +18 investigado por separado; falta decidir el proveedor y si corre en el cliente o en el servidor.
+- ~~Deteccion automatica de desnudez/NSFW...~~ Implementado el 2026-11-16, ver Actualizacion 5 abajo.
 - Revisar el aviso de privacidad de Bershio/VeraShield contra el estandar de derechos ARCO que senalo ODI (nombre del responsable, transferencias a Sightengine/Azure en otros paises, como ejercer derechos). Relacionado con el pendiente de "Transparencia en 3 capas" del 10 oct, aun sin hacer.
 - Matizar el compromiso de "no compartimos datos con autoridades" para aclarar que aplica salvo orden judicial (NCMEC esta obligado a entregar informacion si hay una orden judicial).
 - Revisar las citas de prensa (El Imparcial, SDP Noticias) en las definiciones y preferir normativa oficial (Diario Oficial) cuando exista.
 - Agregar Policia Cibernetica estatal y Comisiones de Atencion a Victimas (federal y estatal) como recursos adicionales.
+
+## Actualizacion 5 (2026-11-16): prefiltro automatico de desnudez/NSFW (en el dispositivo)
+
+Reemplaza por completo la pregunta manual "si/no" de `CONTENT_GUARD_STRINGS` para fotos (el video sigue usando la pregunta manual por ahora; el alcance de este cambio es solo fotos). ODI senalo que un adolescente puede no reconocer su propio contenido como sexual, asi que depender de una respuesta manual no bastaba.
+
+Como funciona: al elegir una foto, el navegador la clasifica localmente con NSFWJS (TensorFlow.js) usando un modelo MobileNetV2 auto-hospedado en el repo (`lib/vendor/nsfw-model/mobilenet_v2/`) y el bundle de NSFWJS tambien auto-hospedado (`lib/vendor/nsfwjs/nsfwjs.min.js`, MIT). La imagen nunca sale del dispositivo para esta revision: no se sube a ningun servidor, ni siquiera a VeraShield. Si el resultado indica posible desnudez/contenido sexual (o si la revision falla por cualquier motivo), se bloquea por completo la opcion "Analizar con IA" para ese archivo y se explica en lenguaje llano por que, sin usar categorias tecnicas; la persona puede seguir pidiendo ayuda sin necesidad de analizar nada. Si el resultado es negativo, el boton de analizar se habilita como antes.
+
+Nuevo codigo: `lib/flow/nsfwGuard.js` (carga diferida del script/modelo, umbrales de clasificacion, `checkImage()`/`warmUp()`); `app.js` (`runNsfwCheck()`, reemplaza la llamada a `ensureContentGuard()` para fotos; se conserva para video); nuevos textos `analysis.nsfwScanning`, `analysis.nsfwBlockedDetail`, `analysis.nsfwCheckError` en `lib/content/{es,en,hi}.js`.
+
+Limitaciones a revisar:
+- Los umbrales de clasificacion (suma Porn+Hentai+Sexy >= 0.5, etc., ver comentarios en `nsfwGuard.js`) son un punto de partida razonable, no un valor validado con pruebas reales; conviene probarlos con imagenes de muestra (con consentimiento) antes de confiar en ellos para produccion.
+- No se pudo probar este flujo en un navegador real dentro de esta sesion (el entorno de esta sesion de Claude no permite levantar un servidor local para pruebas); falta probarlo en un deploy de vista previa de Vercel o localmente antes de confiar en que funciona end-to-end.
+- Alcance solo fotos; video sigue con la pregunta manual.

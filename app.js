@@ -5,6 +5,7 @@ import { renderCurrent } from './lib/flow/router.js';
 import { getContent } from './lib/content/index.js';
 import { SITE_DOMAIN } from './lib/siteConfig.js';
 import { AZURE_PRIVACY_URL, SIGHTENGINE_URL } from './lib/privacyServices.js';
+import { checkImage as checkImageNsfw, warmUp as warmUpNsfw } from './lib/flow/nsfwGuard.js';
 
 const MAX_FILE_SIZE_BYTES       = 10 * 1024 * 1024; // final cap, matches api/detect.js
 const COMPRESSION_MIN_BYTES     = 800 * 1024;        // below this, skip compression
@@ -390,10 +391,42 @@ async function handleFile(file) {
   if (myToken !== handleFileToken) return; // a newer file was selected meanwhile; discard this result
 
   selectedFile = processed;
+  nsfwBlocked = false;
   uploadText.textContent = `${processed.name} (${formatFileSize(processed.size)})`;
-  uploadHint.textContent = UI[currentLang].changeImage;
   setPreview(processed);
-  analyzeBtn.disabled = false;
+  await runNsfwCheck(processed, myToken);
+}
+
+// Automatic on-device NSFW/nudity check, run on every newly selected photo (see nsfwGuard.js).
+// Fully replaces the old manual yes/no question: nothing here is interactive, it just reports
+// what the on-device check found, and blocks "Analizar con IA" rather than asking the user.
+let nsfwBlocked = false;
+
+async function runNsfwCheck(file, token) {
+  const c = getContent(currentLang).analysis;
+  hideBlockedNote();
+  analyzeBtn.disabled = true;
+  uploadHint.textContent = c.nsfwScanning;
+
+  try {
+    const { unsafe, confidence } = await checkImageNsfw(file);
+    if (token !== handleFileToken) return; // a newer file was selected meanwhile; discard this result
+    nsfwBlocked = unsafe;
+    uploadHint.textContent = UI[currentLang].changeImage;
+    if (unsafe) {
+      console.warn(`[VeraShield] Análisis bloqueado: el verificador de contenido en el dispositivo detectó posible desnudez/contenido sexual (confianza: ${confidence}). No se envió ningún archivo a APIs externas.`);
+      showBlockedNote(c.nsfwBlockedDetail);
+    } else {
+      analyzeBtn.disabled = false;
+    }
+  } catch (err) {
+    if (token !== handleFileToken) return;
+    // Block by precaution: a failed on-device check is never treated as "safe to proceed".
+    console.warn('[VeraShield] No se pudo completar la revisión de contenido en el dispositivo; se bloquea el análisis por precaución.', err);
+    nsfwBlocked = true;
+    uploadHint.textContent = UI[currentLang].changeImage;
+    showBlockedNote(c.nsfwCheckError);
+  }
   updateAnalyzeHint();
 }
 
@@ -410,6 +443,12 @@ uploadZone.addEventListener('drop', (e) => {
 });
 fileInput.addEventListener('change', () => {
   if (fileInput.files[0]) handleFile(fileInput.files[0]);
+});
+// Start loading the on-device NSFW checker as soon as the person shows intent to upload
+// (hover/touch/focus on the drop zone), so the automatic check on actual file selection is
+// faster. Harmless to call more than once; loadModel() caches the result.
+['mouseenter', 'touchstart', 'focus', 'dragenter'].forEach((evt) => {
+  uploadZone.addEventListener(evt, warmUpNsfw, { once: true, passive: true });
 });
 
 // Loading state
@@ -680,21 +719,22 @@ document.addEventListener('keydown', (e) => {
 function blockAnalysis() {
   console.warn('[VeraShield] Análisis bloqueado: el usuario indicó posible desnudez/contenido sexual de un menor de 18 años. No se envió ningún archivo a APIs externas.');
   resetAnalysis();
-  showBlockedNote();
+  showBlockedNote(getContent(currentLang).analysis.blocked);
 }
 
 // Blocked note
-// Shown when the content guard stops the analysis. The person does not need the analysis to get
+// Shown when the video content guard, or the automatic on-device NSFW check (see nsfwGuard.js
+// and runNsfwCheck() above), stops the analysis. The person does not need the analysis to get
 // help, so the note only explains that nothing was sent and offers the next step.
 const altRouteEl = document.getElementById('alternative-route');
 
-function renderBlockedNote() {
+function renderBlockedNote(message) {
   const c = getContent(currentLang).analysis;
   altRouteEl.replaceChildren();
   const text = document.createElement('p');
   text.id = 'alt-route-title';
   text.tabIndex = -1;
-  text.textContent = c.blocked;
+  text.textContent = message;
   const next = document.createElement('button');
   next.type = 'button';
   next.className = 'primary-btn';
@@ -704,8 +744,8 @@ function renderBlockedNote() {
   altRouteEl.append(text, next);
 }
 
-function showBlockedNote() {
-  renderBlockedNote();
+function showBlockedNote(message) {
+  renderBlockedNote(message);
   altRouteEl.hidden = false;
   document.getElementById('alt-route-title').focus({ preventScroll: true });
 }
@@ -1061,6 +1101,7 @@ function resetAnalysis() {
   hideBlockedNote();
   handleFileToken++;
   selectedFile = null;
+  nsfwBlocked = false;
   contentGuardConfirmed = null;
   currentResult = null;
   setAnalysis(null);
@@ -1856,7 +1897,9 @@ analyzeBtn.addEventListener('click', async () => {
   if (inputMode === 'video') { analyzeVideo(); return; }
   if (!selectedFile) return;
   clearFormError();
-  if (!(await ensureContentGuard(selectedFile))) return;
+  // The automatic on-device check (runNsfwCheck, run on file selection) already decided this;
+  // the button is kept disabled while blocked, but this guard covers it defensively too.
+  if (nsfwBlocked) return;
   setLoading(true);
 
   const formData = new FormData();
