@@ -117,3 +117,11 @@ Limitaciones a revisar:
 - Los umbrales de clasificacion (suma Porn+Hentai+Sexy >= 0.5, etc., ver comentarios en `nsfwGuard.js`) son un punto de partida razonable, no un valor validado con pruebas reales; conviene probarlos con imagenes de muestra (con consentimiento) antes de confiar en ellos para produccion.
 - No se pudo probar este flujo en un navegador real dentro de esta sesion (el entorno de esta sesion de Claude no permite levantar un servidor local para pruebas); falta probarlo en un deploy de vista previa de Vercel o localmente antes de confiar en que funciona end-to-end.
 - Alcance solo fotos; video sigue con la pregunta manual.
+
+## Actualizacion 6 (2026-11-18): verificacion al aplicar los cambios de ODI y del filtro NSFW
+
+- Los archivos del filtro (`lib/vendor/nsfwjs/nsfwjs.min.js` y los pesos `lib/vendor/nsfw-model/mobilenet_v2/group1-shard1of1`) son identicos byte a byte a los del paquete npm `nsfwjs` 4.3.0 (MIT): sha256 `037a1db8...0821` y `8e7dddbb...5f13`. El `model.json` no se comparo.
+- Probado en un navegador sin interfaz (Chromium): una foto sin desnudez habilita el analisis en unos 3 segundos sin peticiones a servidores externos para el modelo; si el modelo no carga, el analisis queda bloqueado por precaucion. NO se probo con una imagen que muestre desnudez, asi que los umbrales siguen sin validar.
+- Consecuencia a tener presente: el bloqueo automatico tambien afectara a un montaje con desnudo falso de la persona, que es el caso principal. Es el diseno pedido por ODI (enviarlo a un servicio externo seria transmitir el material); la persona ve que no necesita el analisis para recibir ayuda.
+- `/privacy` (es/en/hi) se actualizo: para fotos describe la revision automatica en el dispositivo; para video sigue la pregunta manual.
+- Lo senalado por ODI proviene de una sesion oral, no de un documento escrito; los cambios de "una adolescente puede denunciar sin adulto" y "los delitos sexuales se persiguen de oficio" siguen como `partial` y requieren confirmacion de una persona abogada.
