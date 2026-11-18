@@ -58,6 +58,8 @@ for (const [name, tree] of Object.entries(sources)) {
 function checkItem(where, item, { needsLink = false } = {}) {
   const { status, verifiedOn, source, url, number } = item;
   if (!['verified', 'partial', 'pending'].includes(status)) fail(`${where}: bad status "${status}"`);
+  if (source !== undefined && !/^https?:\/\/\S+$/.test(source)) fail(`${where}: source must be a plain http(s) address (put any text in sourceNote)`);
+  if (item.sourceNote) for (const lang of LANGS) if (!item.sourceNote[lang]) fail(`${where}: sourceNote is missing ${lang}`);
   if (status === 'verified' && (!verifiedOn || !source)) fail(`${where}: verified items need verifiedOn and source`);
   if (status === 'partial' && !verifiedOn && !item.carried) fail(`${where}: partial items need verifiedOn (or carried: true)`);
   if (status === 'pending' && (url || number)) fail(`${where}: pending items must not carry a link or a number`);
