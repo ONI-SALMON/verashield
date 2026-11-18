@@ -138,3 +138,7 @@ Origen: nota de ODI (sesion oral, 12/11/2026): el riesgo legal puede empezar des
 ## Actualizacion 8 (2026-11-18): enlaces de "Fuente" rotos
 
 En tres fuentes (Procuraduria de Proteccion, Ministerio Publico y Alumbra) el campo `source` mezclaba texto y direccion ("Sesion de revision legal con ODI, 12/11/2026; https://..."), y la pagina lo usaba entero como enlace, que no abria. Ahora `source` es solo la direccion y el texto va en `sourceNote` (es/en/hi). Solo una direccion http(s) limpia se convierte en enlace, y `npm run check:content` falla si un `source` tiene texto. Los sitios de esas tres fuentes no se pudieron abrir desde la sesion de desarrollo: confirmar a mano que cargan.
+
+## Actualizacion 9 (2026-11-18): procuradurias enlazadas al mapa oficial del DIF
+
+A peticion de la persona responsable, la entrada de la Procuraduria de Proteccion (PPNNA) enlaza ahora al mapa oficial del DIF (https://portusderechos.dif.gob.mx/mapas/) como enlace visible y como fuente, en lugar de una nota de prensa. Se retiro la entrada de Alumbra por quedar duplicada con ese mapa. El contenido de la entrada (que una adolescente puede reportar sin adulto) sigue viniendo de la sesion oral con ODI y por eso permanece como `partial`. El mapa del DIF no se pudo abrir desde la sesion de desarrollo: confirmar a mano que carga.
