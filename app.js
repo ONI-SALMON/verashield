@@ -422,18 +422,21 @@ async function handleFile(file) {
 // the old manual yes/no question for photos: nothing here is interactive.
 let nsfwBlocked = false;
 
+// The zone never opens the picker by itself: every way in goes through the question first.
+uploadZone.addEventListener('click', (e) => { e.preventDefault(); requestPhotoPick(); });
 uploadZone.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); }
+  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); requestPhotoPick(); }
 });
 uploadZone.addEventListener('dragover',  (e) => { e.preventDefault(); uploadZone.classList.add('dragover'); });
 uploadZone.addEventListener('dragleave', ()  => uploadZone.classList.remove('dragover'));
 uploadZone.addEventListener('drop', (e) => {
   e.preventDefault();
   uploadZone.classList.remove('dragover');
-  const file = e.dataTransfer.files[0];
-  if (file) handleFile(file);
+  requestPhotoPick(); // the dropped file is not read: the question comes first, then the picker
 });
 fileInput.addEventListener('change', () => {
+  if (!pickAuthorized.photo) { fileInput.value = ''; requestPhotoPick(); return; }
+  pickAuthorized.photo = false;
   if (fileInput.files[0]) handleFile(fileInput.files[0]);
 });
 // Start loading the on-device NSFW checker as soon as the person shows intent to upload
@@ -641,77 +644,104 @@ document.addEventListener('keydown', (e) => {
 });
 
 // Content guard
-// Blocking question asked BEFORE any file leaves the browser (Sightengine, Azure).
-// Art. 202 CPF (MX) punishes "transmitting" sexual material involving minors, so sending it to
-// a third-party API is itself the offence. Nothing is logged externally; only console.warn.
-const CONTENT_GUARD_STRINGS = {
-  es: {
-    question: 'Antes de continuar: ¿esta imagen o video muestra a alguien menor de 18 años desnudo, semidesnudo, en ropa interior, o en una situación sexual o íntima?',
-    no: 'No, continuar',
-    yes: 'Sí, detener el análisis',
-  },
-  en: {
-    question: 'Before continuing: does this image or video show someone under 18 nude, partially nude, in underwear, or in a sexual or intimate situation?',
-    no: 'No, continue',
-    yes: 'Yes, stop the analysis',
-  },
-  hi: {
-    question: 'जारी रखने से पहले: क्या यह फ़ोटो या वीडियो 18 वर्ष से कम उम्र के किसी व्यक्ति को नग्न, अर्ध-नग्न, अंतः वस्त्रों में, या किसी यौन या अंतरंग स्थिति में दिखाता है?',
-    no: 'नहीं, जारी रखें',
-    yes: 'हाँ, विश्लेषण रोकें',
-  },
-};
-
-const contentGuardModal    = document.getElementById('content-guard-modal');
-const contentGuardQuestion = document.getElementById('content-guard-question');
-const contentGuardNo       = document.getElementById('content-guard-no');
-const contentGuardYes      = document.getElementById('content-guard-yes');
+// Blocking question asked BEFORE the file picker opens (photo, video and video link), so nothing
+// can be chosen until it is answered. Art. 202 CPF (MX) punishes "transmitting" sexual material
+// involving minors, so sending it to a third-party API is itself the offence. The automatic
+// on-device check (nsfwGuard.js) is a second layer on whatever is chosen after a "No".
+// Nothing is logged externally; only console.warn.
+const contentGuardModal       = document.getElementById('content-guard-modal');
+const contentGuardTitle       = document.getElementById('content-guard-title');
+const contentGuardQuestion    = document.getElementById('content-guard-question');
+const contentGuardList        = document.getElementById('content-guard-list');
+const contentGuardNote        = document.getElementById('content-guard-note');
+const contentGuardConsequence = document.getElementById('content-guard-consequence');
+const contentGuardNo          = document.getElementById('content-guard-no');
+const contentGuardYes         = document.getElementById('content-guard-yes');
+const contentGuardUnsure      = document.getElementById('content-guard-unsure');
 let contentGuardResolve   = null;  // pending answer while the modal is open
-let contentGuardConfirmed = null;  // File (or 'url:...' key) the user already answered "No" for
 let contentGuardLastFocus = null;
 
 function renderContentGuard() {
-  const s = CONTENT_GUARD_STRINGS[currentLang];
-  contentGuardQuestion.textContent = s.question;
-  contentGuardNo.textContent = s.no;
-  contentGuardYes.textContent = s.yes;
+  const g = getContent(currentLang).analysis.guard;
+  contentGuardTitle.textContent = g.title;
+  contentGuardQuestion.textContent = g.question;
+  contentGuardList.replaceChildren(...g.items.map((text) => { const li = document.createElement('li'); li.textContent = text; return li; }));
+  contentGuardNote.textContent = g.note;
+  contentGuardConsequence.textContent = g.consequence;
+  contentGuardNo.textContent = g.no;
+  contentGuardYes.textContent = g.yes;
+  contentGuardUnsure.textContent = g.unsure;
 }
 
+// Resolves 'no' | 'yes' | 'unsure'.
 function askContentGuard() {
-  if (contentGuardResolve) return Promise.resolve(false);
+  if (contentGuardResolve) return Promise.resolve('yes');
   contentGuardLastFocus = document.activeElement;
   renderContentGuard();
   contentGuardModal.hidden = false;
-  contentGuardYes.focus(); // safe default: stopping is the focused action
+  // Start at the top of the dialog: the title is focused (nothing is pre-selected) and the card is
+  // scrolled up, so the question and the examples are read before any answer.
+  contentGuardModal.querySelector('.privacy-modal-card').scrollTop = 0;
+  contentGuardTitle.focus({ preventScroll: true });
   return new Promise(resolve => { contentGuardResolve = resolve; });
 }
 
-function answerContentGuard(continueAnalysis) {
+function answerContentGuard(answer) {
   const resolve = contentGuardResolve;
   if (!resolve) return;
   contentGuardResolve = null;
   contentGuardModal.hidden = true;
   if (contentGuardLastFocus && contentGuardLastFocus.focus) contentGuardLastFocus.focus();
-  resolve(continueAnalysis);
+  resolve(answer);
 }
 
-contentGuardNo.addEventListener('click', () => answerContentGuard(true));
-contentGuardYes.addEventListener('click', () => answerContentGuard(false));
+contentGuardNo.addEventListener('click', () => answerContentGuard('no'));
+contentGuardYes.addEventListener('click', () => answerContentGuard('yes'));
+contentGuardUnsure.addEventListener('click', () => answerContentGuard('unsure'));
 // Blocking: Escape never dismisses it, and Tab stays inside the dialog.
 document.addEventListener('keydown', (e) => {
   if (contentGuardModal.hidden) return;
   if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); return; }
   if (e.key !== 'Tab') return;
-  const [first, last] = [contentGuardNo, contentGuardYes];
+  const buttons = [contentGuardNo, contentGuardYes, contentGuardUnsure];
+  const first = buttons[0];
+  const last = buttons[buttons.length - 1];
   if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
   else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
-  else if (document.activeElement !== first && document.activeElement !== last) { e.preventDefault(); last.focus(); }
+  else if (!buttons.includes(document.activeElement)) { e.preventDefault(); (e.shiftKey ? last : first).focus(); }
 }, true);
 
-function blockAnalysis() {
-  console.warn('[VeraShield] Análisis bloqueado: el usuario indicó posible desnudez/contenido sexual de un menor de 18 años. No se envió ningún archivo a APIs externas.');
+// "Yes" or "not sure": nothing is opened or analyzed, and anything chosen before is discarded.
+function blockAnalysis(answer) {
+  const c = getContent(currentLang).analysis;
+  console.warn('[VeraShield] Análisis bloqueado: la persona indicó posible desnudez o contenido íntimo o sexual de alguien menor de 18 años, o no está segura. No se abrió el selector ni se envió ningún archivo.');
   resetAnalysis();
-  showBlockedNote(getContent(currentLang).analysis.blocked);
+  showBlockedNote(answer === 'unsure' ? c.guardUnsure : c.blocked);
+}
+
+// What the person may do right now. Each choice needs its own "No": the picker only opens from
+// askBeforePicking(), and the change handlers refuse anything that did not come through it.
+const pickAuthorized = { photo: false, video: false, url: false };
+
+async function askBeforePicking(kind) {
+  pickAuthorized[kind] = false;
+  const answer = await askContentGuard();
+  if (answer === 'no') { pickAuthorized[kind] = true; return true; }
+  blockAnalysis(answer);
+  return false;
+}
+
+function requestPhotoPick() {
+  askBeforePicking('photo').then((ok) => { if (ok) { fileInput.value = ''; fileInput.click(); } });
+}
+
+function requestVideoPick() {
+  askBeforePicking('video').then((ok) => { if (ok) { videoInput.value = ''; videoInput.click(); } });
+}
+
+function lockVideoUrl() {
+  pickAuthorized.url = false;
+  videoUrlInput.readOnly = true;
 }
 
 // Blocked note
@@ -745,14 +775,6 @@ function showBlockedNote(message) {
 function hideBlockedNote() {
   altRouteEl.hidden = true;
   altRouteEl.replaceChildren();
-}
-
-// key: the File (photo) or 'url:...' string (video URL) about to be sent. Resolves true only when it is safe to send.
-async function ensureContentGuard(key) {
-  if (key && key === contentGuardConfirmed) return true;
-  if (await askContentGuard()) { contentGuardConfirmed = key; return true; }
-  blockAnalysis();
-  return false;
 }
 
 // Technical-analysis block shared by the evidence PDF and the school letter.
@@ -1094,7 +1116,8 @@ function resetAnalysis() {
   handleFileToken++;
   selectedFile = null;
   nsfwBlocked = false;
-  contentGuardConfirmed = null;
+  pickAuthorized.photo = false;
+  pickAuthorized.video = false;
   currentResult = null;
   setAnalysis(null);
   fileInput.value = '';
@@ -1629,6 +1652,7 @@ function clearVideoInputs() {
   videoPreparing = false;
   videoInput.value = '';
   videoUrlInput.value = '';
+  lockVideoUrl();
   renderVideoZone();
 }
 
@@ -1773,6 +1797,7 @@ async function handleVideoFile(file) {
 
   selectedVideo = null;
   videoUrlInput.value = '';
+  lockVideoUrl();
   analyzeBtn.disabled = true;
   videoPreparing = true;
   videoText.textContent = vs.preparing;
@@ -1800,22 +1825,31 @@ async function handleVideoFile(file) {
   }
 }
 
+videoZone.addEventListener('click', (e) => { e.preventDefault(); requestVideoPick(); });
 videoZone.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); videoInput.click(); }
+  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); requestVideoPick(); }
 });
 videoZone.addEventListener('dragover',  (e) => { e.preventDefault(); videoZone.classList.add('dragover'); });
 videoZone.addEventListener('dragleave', ()  => videoZone.classList.remove('dragover'));
 videoZone.addEventListener('drop', (e) => {
   e.preventDefault();
   videoZone.classList.remove('dragover');
-  const file = e.dataTransfer.files[0];
-  if (file) handleVideoFile(file);
+  requestVideoPick(); // the dropped file is not read: the question comes first
 });
 videoInput.addEventListener('change', () => {
+  if (!pickAuthorized.video) { videoInput.value = ''; requestVideoPick(); return; }
+  pickAuthorized.video = false;
   if (videoInput.files[0]) handleVideoFile(videoInput.files[0]);
+});
+// The link field stays read-only until the question is answered with "No".
+videoUrlInput.addEventListener('focus', () => {
+  if (!videoUrlInput.readOnly) return;
+  videoUrlInput.blur();
+  askBeforePicking('url').then((ok) => { if (ok) { videoUrlInput.readOnly = false; videoUrlInput.focus(); } });
 });
 videoUrlInput.addEventListener('input', () => {
   clearFormError();
+  if (videoUrlInput.value.trim() === '') lockVideoUrl(); // an emptied field asks again next time
   if (videoUrlInput.value.trim() !== '' && (selectedVideo || videoPreparing)) {
     videoToken++;
     selectedVideo = null;
@@ -1851,7 +1885,7 @@ async function analyzeVideo() {
     init = { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ videoUrl }) };
   }
 
-  if (!(await ensureContentGuard(selectedVideo || 'url:' + videoUrlInput.value.trim()))) return;
+  if (!selectedVideo && !pickAuthorized.url) return; // only reachable through the question
   setLoading(true);
   const controller = new AbortController();
   const timeoutId  = setTimeout(() => controller.abort(), VIDEO_REQUEST_TIMEOUT_MS);

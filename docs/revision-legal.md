@@ -142,3 +142,14 @@ En tres fuentes (Procuraduria de Proteccion, Ministerio Publico y Alumbra) el ca
 ## Actualizacion 9 (2026-11-18): procuradurias enlazadas al mapa oficial del DIF
 
 A peticion de la persona responsable, la entrada de la Procuraduria de Proteccion (PPNNA) enlaza ahora al mapa oficial del DIF (https://portusderechos.dif.gob.mx/mapas/) como enlace visible y como fuente, en lugar de una nota de prensa. Se retiro la entrada de Alumbra por quedar duplicada con ese mapa. El contenido de la entrada (que una adolescente puede reportar sin adulto) sigue viniendo de la sesion oral con ODI y por eso permanece como `partial`. El mapa del DIF no se pudo abrir desde la sesion de desarrollo: confirmar a mano que carga.
+
+## Actualizacion 10 (2026-11-24): la pregunta de contenido sexual vuelve, antes de elegir el archivo
+
+Cambio pedido por la persona responsable: la pregunta manual se restablece como primera capa y la revision automatica en el dispositivo (NSFW) queda como segunda capa.
+
+- La pregunta sale ANTES de abrir el selector de archivos (clic, teclado Enter o espacio, y arrastrar), cada vez que se quiere elegir una imagen o un video, y antes de poder escribir un enlace de video. Escape no la cierra y el foco queda dentro de la ventana.
+- Tres respuestas: "No, ninguna de estas" (abre el selector), "Si" y "No estoy segura o seguro" (no abren el selector, no analizan nada, descartan lo que hubiera elegido antes y muestran un mensaje distinto cada una). La duda cuenta como "si".
+- Redaccion: la pregunta nombra a alguien menor de 18 anos "o que podria serlo" y lista cinco situaciones en lenguaje simple: sin ropa o con poca ropa; situacion sexual o intima; tomada o grabada sin que la persona lo supiera; montaje o hecho con IA aunque sea falso; captura o foto de otra pantalla. Aclara que cuenta aunque sea falso, enviado por otra persona o ajeno.
+- Defensa en profundidad: si un archivo llega al campo sin pasar por la pregunta (por ejemplo, arrastrado o puesto por una extension), el campo se vacia y se vuelve a preguntar; un archivo arrastrado no se lee. El video esta oculto hoy como "proximamente", pero su codigo ya sigue la misma regla.
+- Segunda capa sin cambios: si la persona responde "No", la foto se revisa en el dispositivo; si parece intima o sexual, o la revision falla, se descarta y no se analiza.
+- Textos revisados en es/en/hi, incluido `/privacy` y el aviso fijo antes de subir. El hindi no esta revisado por una persona nativa. La redaccion de los ejemplos no esta validada por psicologia infantil ni por una persona abogada.

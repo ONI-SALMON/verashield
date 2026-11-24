@@ -59,7 +59,7 @@
 
       <div class="input-block" id="photo-input-block">
         <p class="step-label"><span class="step-num">1</span><span data-i18n="stepUpload"></span></p>
-        <label class="upload-zone" id="upload-zone" for="file-input" tabindex="0">
+        <label class="upload-zone" id="upload-zone" role="button" tabindex="0">
           <svg class="upload-icon" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M12 16V4m0 0 4 4m-4-4L8 8"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/>
           </svg>
@@ -72,7 +72,7 @@
 
       <div class="input-block" id="video-input-block" hidden>
         <p class="step-label"><span class="step-num">1</span><span data-vi18n="stepVideo"></span></p>
-        <label class="upload-zone" id="video-upload-zone" for="video-input" tabindex="0">
+        <label class="upload-zone" id="video-upload-zone" role="button" tabindex="0">
           <svg class="upload-icon" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <rect x="3" y="5" width="13" height="14" rx="2"/><path d="m16 10 5-3v10l-5-3"/>
           </svg>
@@ -84,7 +84,7 @@
         <div class="or-divider" role="separator"><span data-vi18n="or"></span></div>
 
         <label class="url-field"><span class="visually-hidden" data-vi18n="urlLabel"></span>
-          <input type="url" id="video-url" inputmode="url" autocomplete="off" spellcheck="false" maxlength="2048" data-vi18n-ph="urlPlaceholder">
+          <input type="url" id="video-url" readonly inputmode="url" autocomplete="off" spellcheck="false" maxlength="2048" data-vi18n-ph="urlPlaceholder">
         </label>
         <p class="url-note" id="video-url-note" data-vi18n="urlNote"></p>
       </div>
@@ -232,14 +232,19 @@
   </div>
 </div>
 
-<!-- Blocking content guard: asked before any file is sent to an external API. No close button, no Escape, no click-outside. -->
+<!-- Blocking content guard: asked BEFORE the file picker opens (photo, video and video link). No close button, no Escape, no click-outside. -->
 <div class="privacy-modal" id="content-guard-modal" hidden>
-  <div class="privacy-modal-card" role="alertdialog" aria-modal="true" aria-labelledby="content-guard-question">
-    <h2 id="content-guard-question"></h2>
+  <div class="privacy-modal-card" role="alertdialog" aria-modal="true" aria-labelledby="content-guard-title" aria-describedby="content-guard-question">
+    <h2 id="content-guard-title" tabindex="-1"></h2>
+    <p id="content-guard-question" class="content-guard-question"></p>
+    <ul id="content-guard-list" class="plain-list content-guard-list"></ul>
+    <p id="content-guard-note" class="content-guard-note"></p>
     <div class="content-guard-actions">
       <button type="button" class="secondary-btn" id="content-guard-no"></button>
       <button type="button" class="primary-btn" id="content-guard-yes"></button>
+      <button type="button" class="primary-btn" id="content-guard-unsure"></button>
     </div>
+    <p id="content-guard-consequence" class="content-guard-consequence"></p>
   </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" integrity="sha384-JcnsjUPPylna1s1fvi1u12X5qjY5OL56iySh75FdtrwhO/SWXgMjoVqcKyIIWOLk" crossorigin="anonymous"></script>
